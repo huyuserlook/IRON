@@ -77,6 +77,7 @@ const HomeHero = ({ resetTrigger }) => {
   useEffect(() => {
     if (resetTrigger == null) return;
     setIndex(0);
+    setPaused(false);
     setAnimKey((k) => k + 1);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [resetTrigger]);
