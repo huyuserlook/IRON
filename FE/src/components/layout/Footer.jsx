@@ -10,14 +10,14 @@ const Footer = () => {
   };
 
   return (
-    <footer className="border-t border-[#E8BCB6] bg-[#F8F6F4] text-[#5F5E5E]">
+    <footer className="border-t border-[#F1D98A] bg-[#FFF8DC] text-[#5F5E5E]">
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-20 px-6 py-20 md:px-12 lg:px-16">
         <div className="grid gap-12 xl:grid-cols-[1.5fr_1fr_1fr_1fr] xl:items-start">
           <div className="flex flex-col gap-6">
             <button
               type="button"
               onClick={resetHome}
-              className="inline-flex items-center justify-center rounded-[2rem] bg-[#F8F6F4] p-6 shadow-sm shadow-black/5 w-max animate-brand-in"
+              className="inline-flex items-center justify-center rounded-[2rem] bg-[#FFF8DC] p-6 shadow-sm shadow-black/5 w-max animate-brand-in"
               aria-label="Về trang chủ"
             >
               <IronLogo size="lg" className="animate-float" asLink={false} />
@@ -131,7 +131,7 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-[#E8BCB6] pt-12">
+        <div className="border-t border-[#F1D98A] pt-12">
           <div className="flex flex-col items-center justify-between gap-4 text-sm font-inter text-[#5F5E5E] sm:flex-row">
             <p className="text-center sm:text-left">
               © 2024 IRON MOTORCYCLES. ALL RIGHTS RESERVED.
