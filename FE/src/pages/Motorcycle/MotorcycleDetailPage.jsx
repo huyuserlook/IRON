@@ -25,10 +25,11 @@ const MotorcycleDetailPage = () => {
     motorcycleApi
       .getBySlug(slug)
       .then((res) => {
-        setMoto(res.data);
-        setSelectedImg(res.data?.thumbnailUrl);
-        if (res.data?.inventories?.length > 0)
-          setSelectedColor(res.data.inventories[0]);
+        const payload = res?.data ?? res;
+        setMoto(payload);
+        setSelectedImg(payload?.thumbnailUrl);
+        if (payload?.inventories?.length > 0)
+          setSelectedColor(payload.inventories[0]);
       })
       .finally(() => setLoading(false));
   }, [slug]);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-hot-toast";
 import Button from "../../components/common/Button";
@@ -25,6 +25,8 @@ const ForgotPasswordPage = () => {
     }
   };
 
+  const location = useLocation();
+
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
@@ -32,12 +34,16 @@ const ForgotPasswordPage = () => {
           <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100">
             <Mail className="h-8 w-8 text-green-600" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Kiểm tra email của bạn</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Kiểm tra email của bạn
+          </h2>
           <p className="text-gray-600">
-            Chúng tôi đã gửi hướng dẫn khôi phục mật khẩu đến <strong>{email}</strong>.
+            Chúng tôi đã gửi hướng dẫn khôi phục mật khẩu đến{" "}
+            <strong>{email}</strong>.
           </p>
           <Link
             to="/login"
+            state={{ from: location.state?.from ?? location }}
             className="inline-flex items-center text-orange-500 hover:text-orange-600 font-medium"
           >
             <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại đăng nhập
@@ -81,6 +87,7 @@ const ForgotPasswordPage = () => {
           <div className="text-center">
             <Link
               to="/login"
+              state={{ from: location.state?.from ?? location }}
               className="inline-flex items-center text-sm text-gray-500 hover:text-orange-500 transition-colors"
             >
               <ArrowLeft className="mr-2 h-4 w-4" /> Quay lại đăng nhập

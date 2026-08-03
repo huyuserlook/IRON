@@ -255,6 +255,7 @@ const Header = () => {
             <div className="hidden md:flex items-center gap-2 sm:gap-3">
               <Link
                 to="/login"
+                state={{ from: location }}
                 className={`select-none cursor-pointer bg-iron-yellow text-black ${LOGIN_PX} rounded-lg transition-[transform,box-shadow,filter] duration-250 ease-out font-teko ${LOGIN_TEXT} hover:brightness-110 hover:scale-[1.05] active:scale-[0.93] active:brightness-95 hover:shadow-[0_6px_20px_-4px_rgba(255,235,0,0.6)] whitespace-nowrap ${LOGIN_ICON}`}
               >
                 Đăng nhập
@@ -428,6 +429,7 @@ const Header = () => {
             >
               <Link
                 to="/login"
+                state={{ from: location }}
                 onClick={() => setMenuOpen(false)}
                 className="w-full text-center select-none cursor-pointer bg-iron-yellow text-black px-5 py-3 rounded-xl font-teko text-2xl transition-[transform,filter,box-shadow] duration-250 ease-out hover:brightness-110 active:scale-[0.97] active:brightness-95 active:translate-y-px hover:shadow-[0_6px_24px_-4px_rgba(255,235,0,0.55)]"
               >

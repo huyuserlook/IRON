@@ -31,8 +31,14 @@ const MotorcyclePage = () => {
   const debouncedKeyword = useDebounce(filters.keyword, 500);
 
   useEffect(() => {
-    brandApi.getAll().then((res) => setBrands(res.data || []));
-    categoryApi.getAll().then((res) => setCategories(res.data || []));
+    brandApi.getAll().then((res) => {
+      const payload = res?.data ?? res;
+      setBrands(payload || []);
+    });
+    categoryApi.getAll().then((res) => {
+      const payload = res?.data ?? res;
+      setCategories(payload || []);
+    });
   }, []);
 
   useEffect(() => {
@@ -51,7 +57,10 @@ const MotorcyclePage = () => {
     );
     motorcycleApi
       .search(params)
-      .then((res) => setData(res.data || { content: [], totalPages: 0 }))
+      .then((res) => {
+        const payload = res?.data ?? res;
+        setData(payload || { content: [], totalPages: 0, totalElements: 0 });
+      })
       .finally(() => setLoading(false));
   }, [
     debouncedKeyword,

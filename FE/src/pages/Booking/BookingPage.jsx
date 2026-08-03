@@ -20,7 +20,12 @@ const BookingPage = () => {
   });
 
   useEffect(() => {
-    motorcycleApi.getFeatured().then((res) => setMotorcycles(res.data || []));
+    motorcycleApi
+      .search({ page: 0, size: 100, sortBy: "createdAt", sortDir: "desc" })
+      .then((res) => {
+        const payload = res?.data ?? res;
+        setMotorcycles(Array.isArray(payload) ? payload : payload?.content || []);
+      });
   }, []);
 
   const handleSubmit = async (e) => {

@@ -7,8 +7,9 @@ export const login = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await authApi.login(data);
-      localStorage.setItem("token", res.data.accessToken);
-      return res.data;
+      const payload = res?.data ?? res;
+      localStorage.setItem("token", payload.accessToken);
+      return payload;
     } catch (err) {
       return rejectWithValue(err.message || "Đăng nhập thất bại");
     }
@@ -20,7 +21,8 @@ export const register = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await authApi.register(data);
-      return res.data;
+      const payload = res?.data ?? res;
+      return payload;
     } catch (err) {
       return rejectWithValue(err.message || "Đăng ký thất bại");
     }
@@ -32,8 +34,9 @@ export const socialLogin = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await authApi.socialLogin(data);
-      localStorage.setItem("token", res.data.accessToken);
-      return res.data;
+      const payload = res?.data ?? res;
+      localStorage.setItem("token", payload.accessToken);
+      return payload;
     } catch (err) {
       return rejectWithValue(err.message || "Đăng nhập xã hội thất bại");
     }

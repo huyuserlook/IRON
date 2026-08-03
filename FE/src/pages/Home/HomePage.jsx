@@ -19,13 +19,19 @@ const HomePage = () => {
   const [brands, setBrands] = useState([]);
 
   useEffect(() => {
-    motorcycleApi.getFeatured().then((res) => {
-      const items = Array.isArray(res) ? res : res || [];
-      setFeatured(items);
-    });
+    motorcycleApi
+      .search({ page: 0, size: 8, sortBy: "createdAt", sortDir: "desc" })
+      .then((res) => {
+        const payload = res?.data ?? res;
+        const items = Array.isArray(payload)
+          ? payload
+          : payload?.content || [];
+        setFeatured(items);
+      });
 
     brandApi.getAll().then((res) => {
-      const items = Array.isArray(res) ? res : res || [];
+      const payload = res?.data ?? res;
+      const items = Array.isArray(payload) ? payload : payload || [];
       setBrands(items);
     });
   }, []);
@@ -152,6 +158,11 @@ const HomePage = () => {
                 </div>
               </div>
             ))}
+            {featured.length === 0 && (
+              <div className="col-span-full py-16 text-center text-gray-400">
+                Chưa có sản phẩm để hiển thị
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 
 const RegisterPage = () => {
@@ -43,11 +43,15 @@ const RegisterPage = () => {
     },
   ];
 
+  const location = useLocation();
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center px-4 bg-gray-50 py-12">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Tạo tài khoản</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            Tạo tài khoản
+          </h2>
           <p className="text-gray-500">Đăng ký để trải nghiệm Iron Moto</p>
         </div>
 
@@ -85,6 +89,7 @@ const RegisterPage = () => {
           Đã có tài khoản?{" "}
           <Link
             to="/login"
+            state={{ from: location.state?.from ?? location }}
             className="text-orange-500 hover:text-orange-600 font-bold ml-1 transition-colors"
           >
             Đăng nhập ngay
