@@ -54,6 +54,7 @@ const HomeHero = ({ resetTrigger }) => {
   const [index, setIndex] = useState(0);
   const [animKey, setAnimKey] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const slide = SLIDES[index];
   const total = SLIDES.length;
 
@@ -73,6 +74,13 @@ const HomeHero = ({ resetTrigger }) => {
     const timer = setInterval(() => goTo(index + 1), 5000);
     return () => clearInterval(timer);
   }, [paused, goTo, index]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     if (resetTrigger == null) return;
@@ -107,6 +115,16 @@ const HomeHero = ({ resetTrigger }) => {
             rgba(0,0,0,0.35) 118px,
             rgba(0,0,0,0.35) 119px
           )`,
+        }}
+      />
+
+      <div
+        className={`pointer-events-none absolute inset-0 transition-opacity duration-700 ease-out ${
+          scrolled ? "opacity-100" : "opacity-0"
+        }`}
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.55) 100%)",
         }}
       />
 

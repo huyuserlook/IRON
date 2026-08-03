@@ -96,10 +96,13 @@ const Header = () => {
   const LOGIN_ICON = "mr-0.5";
 
   const headerPosition = isHome ? "fixed inset-x-0 top-0" : "sticky top-0";
+  const headerSurface = scrolled
+    ? "bg-black/30 backdrop-blur-xl border-b border-white/10 shadow-[0_10px_30px_-18px_rgba(0,0,0,0.75)]"
+    : "bg-transparent shadow-none border-b border-transparent";
 
   return (
     <header
-      className={`${headerPosition} z-50 transition-all duration-500 ${SCROLL_EASE} bg-transparent shadow-none`}
+      className={`${headerPosition} z-50 transition-all duration-500 ${SCROLL_EASE} ${headerSurface}`}
     >
       <div
         className={`max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between transition-all duration-500 ${SCROLL_EASE} ${
