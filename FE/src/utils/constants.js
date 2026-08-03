@@ -1,0 +1,36 @@
+export const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api";
+
+export const ORDER_STATUS = {
+  PENDING: { label: "Chờ xác nhận", color: "yellow" },
+  CONFIRMED: { label: "Đã xác nhận", color: "blue" },
+  PROCESSING: { label: "Đang xử lý", color: "purple" },
+  SHIPPING: { label: "Đang giao", color: "orange" },
+  DELIVERED: { label: "Đã giao", color: "green" },
+  CANCELLED: { label: "Đã hủy", color: "red" },
+  REFUNDED: { label: "Hoàn tiền", color: "gray" },
+};
+
+export const BOOKING_STATUS = {
+  PENDING: { label: "Chờ xác nhận", color: "yellow" },
+  CONFIRMED: { label: "Đã xác nhận", color: "blue" },
+  COMPLETED: { label: "Hoàn thành", color: "green" },
+  CANCELLED: { label: "Đã hủy", color: "red" },
+};
+
+export const MOTORCYCLE_STATUS = {
+  AVAILABLE: { label: "Còn hàng", color: "green" },
+  OUT_OF_STOCK: { label: "Hết hàng", color: "red" },
+  COMING_SOON: { label: "Sắp ra mắt", color: "blue" },
+  DISCONTINUED: { label: "Ngừng sản xuất", color: "gray" },
+};
+
+export const PAYMENT_METHOD = {
+  CASH: "Tiền mặt",
+  BANK_TRANSFER: "Chuyển khoản",
+  CREDIT_CARD: "Thẻ tín dụng",
+  MOMO: "MoMo",
+  VNPAY: "VNPay",
+};
+
+export const PAGE_SIZE = 12;
