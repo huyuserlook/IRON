@@ -1,17 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
-import {
-  Facebook,
-  Instagram,
-  ShoppingCart,
-  User,
-  LogOut,
-  X,
-  Menu,
-} from "lucide-react";
-import { useAuth } from "../../hooks/useAuth";
-import { useCart } from "../../hooks/useCart";
-import IronLogo from "../common/IronLogo";
+import { Link } from "react-router-dom";
+import { Facebook, Instagram } from "lucide-react";
 import ducatiImg from "../../assets/img/ducati.png";
 import z1000Img from "../../assets/img/z1000.png";
 import bmwImg from "../../assets/img/BMW.png";
@@ -61,24 +50,13 @@ const SLIDES = [
   },
 ];
 
-const NAV_ITEMS = [
-  { label: "Trang chủ", to: "/", end: true },
-  { label: "Dòng xe", to: "/motorcycles" },
-  { label: "Lái thử", to: "/booking" },
-];
-
-const HomeHero = () => {
+const HomeHero = ({ resetTrigger }) => {
   const [index, setIndex] = useState(0);
   const [animKey, setAnimKey] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const slide = SLIDES[index];
   const total = SLIDES.length;
 
-  const { user, isAuthenticated, isAdmin, handleLogout } = useAuth();
-  const { count } = useCart();
-
-  const navInk = slide.light ? "text-gray-900" : "text-white";
   const ink = slide.light ? "text-gray-900" : "text-white";
   const inkMuted = slide.light ? "text-gray-600" : "text-white/70";
 
@@ -95,6 +73,13 @@ const HomeHero = () => {
     const timer = setInterval(() => goTo(index + 1), 5000);
     return () => clearInterval(timer);
   }, [paused, goTo, index]);
+
+  useEffect(() => {
+    if (resetTrigger == null) return;
+    setIndex(0);
+    setAnimKey((k) => k + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [resetTrigger]);
 
   return (
     <section
@@ -124,176 +109,7 @@ const HomeHero = () => {
         }}
       />
 
-      <header className="relative z-30 px-4 sm:px-8 lg:px-14 pt-6 sm:pt-8">
-        <div className="flex items-center justify-between gap-4">
-          <IronLogo size="lg" className="shrink-0" />
-
-          <nav
-            className="hidden lg:flex items-end gap-8 xl:gap-12 animate-fade-up"
-            style={{ animationDelay: "160ms" }}
-          >
-            {NAV_ITEMS.map((item) => (
-              <NavLink
-                key={item.label}
-                to={item.to}
-                end={item.end}
-                className={({ isActive }) =>
-                  `font-teko text-3xl xl:text-[48px] uppercase leading-none tracking-wide transition-all duration-300 ${navInk} ${
-                    isActive
-                      ? "opacity-100"
-                      : "opacity-80 hover:opacity-100 hover:-translate-y-0.5"
-                  }`
-                }
-              >
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <Link
-              to="/cart"
-              className={`relative inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
-                slide.light
-                  ? "bg-black/10 hover:bg-black/20"
-                  : "bg-black/20 hover:bg-black/35"
-              } ${ink}`}
-              aria-label="Giỏ hàng"
-            >
-              <ShoppingCart size={18} />
-              {count > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-iron-yellow px-1 text-[10px] font-bold text-black">
-                  {count}
-                </span>
-              )}
-            </Link>
-
-            {isAuthenticated ? (
-              <div
-                className={`hidden sm:flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 border ${
-                  slide.light
-                    ? "bg-black/10 border-black/10"
-                    : "bg-black/25 border-white/10"
-                }`}
-              >
-                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-iron-yellow text-black">
-                  {user?.avatarUrl ? (
-                    <img
-                      src={user.avatarUrl}
-                      alt={user.fullName}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <User size={16} />
-                  )}
-                </div>
-                <div className={`leading-tight max-w-[110px] ${ink}`}>
-                  <p className="font-teko text-lg leading-none truncate">
-                    {user?.fullName?.split(" ").slice(-1)[0]}
-                  </p>
-                  <div
-                    className={`flex gap-2 text-[10px] uppercase tracking-wider ${inkMuted}`}
-                  >
-                    <Link to="/my-orders" className="hover:opacity-100 opacity-80">
-                      Profile
-                    </Link>
-                    {isAdmin && (
-                      <Link
-                        to="/admin/dashboard"
-                        className="hover:opacity-100 opacity-80"
-                      >
-                        Admin
-                      </Link>
-                    )}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className={`rounded-full p-1.5 transition-colors ${inkMuted} hover:opacity-100`}
-                  aria-label="Đăng xuất"
-                >
-                  <LogOut size={16} />
-                </button>
-              </div>
-            ) : (
-              <Link
-                to="/login"
-                className={`font-teko text-3xl xl:text-5xl uppercase leading-none tracking-wide transition-all duration-300 hover:-translate-y-0.5 ${ink}`}
-              >
-                Đăng nhập
-              </Link>
-            )}
-
-            <button
-              type="button"
-              className={`lg:hidden inline-flex h-10 w-10 items-center justify-center rounded-full ${
-                slide.light ? "bg-black/10" : "bg-black/25"
-              } ${ink}`}
-              onClick={() => setMenuOpen((v) => !v)}
-              aria-label="Menu"
-            >
-              {menuOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-          </div>
-        </div>
-
-        {menuOpen && (
-          <div
-            className={`lg:hidden mt-4 rounded-2xl backdrop-blur-md border p-4 flex flex-col gap-3 ${
-              slide.light
-                ? "bg-white/80 border-black/10 text-iron-dark"
-                : "bg-black/40 border-white/10 text-white"
-            }`}
-          >
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.label}
-                to={item.to}
-                onClick={() => setMenuOpen(false)}
-                className="font-teko text-3xl uppercase tracking-wide"
-              >
-                {item.label}
-              </Link>
-            ))}
-            {isAuthenticated ? (
-              <>
-                <Link to="/my-orders" onClick={() => setMenuOpen(false)}>
-                  Profile — {user?.fullName}
-                </Link>
-                {isAdmin && (
-                  <Link
-                    to="/admin/dashboard"
-                    onClick={() => setMenuOpen(false)}
-                  >
-                    Admin
-                  </Link>
-                )}
-                <button
-                  type="button"
-                  onClick={() => {
-                    handleLogout();
-                    setMenuOpen(false);
-                  }}
-                  className="text-left text-red-400"
-                >
-                  Đăng xuất
-                </button>
-              </>
-            ) : (
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="font-teko text-2xl text-iron-yellow"
-              >
-                Đăng nhập
-              </Link>
-            )}
-          </div>
-        )}
-      </header>
-
-      <div className="relative z-10 flex min-h-[calc(100vh-130px)] flex-col items-center justify-center px-4 pb-28 pt-4">
+      <div className="relative z-10 flex min-h-[calc(100vh-130px)] flex-col items-center justify-center px-4 pb-28 pt-24">
         <div
           key={`brand-${animKey}`}
           className="pointer-events-none absolute inset-x-0 top-[12%] sm:top-[10%] flex justify-center overflow-hidden select-none animate-brand-in"
@@ -395,7 +211,9 @@ const HomeHero = () => {
             >
               {String(index + 1).padStart(2, "0")}
             </span>
-            <span className={`text-2xl sm:text-[44px] leading-none ${inkMuted}`}>
+            <span
+              className={`text-2xl sm:text-[44px] leading-none ${inkMuted}`}
+            >
               /{String(total).padStart(2, "0")}
             </span>
           </span>

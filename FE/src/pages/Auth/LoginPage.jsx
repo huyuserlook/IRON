@@ -1,17 +1,20 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-hot-toast";
 
 const LoginPage = () => {
+  const location = useLocation();
   const { handleLogin, handleSocialLogin, loading, error } = useAuth();
   const [form, setForm] = useState({ email: "", password: "" });
 
+  const redirectTo = location.state?.from?.pathname || "/";
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleLogin(form);
+    await handleLogin(form, redirectTo);
   };
 
   const handleGoogleSuccess = async (credentialResponse) => {
@@ -24,7 +27,7 @@ const LoginPage = () => {
         providerId: decoded.sub,
         provider: "GOOGLE",
       };
-      await handleSocialLogin(socialData);
+      await handleSocialLogin(socialData, redirectTo);
       toast.success("Đăng nhập bằng Google thành công!");
     } catch (err) {
       console.error(err);

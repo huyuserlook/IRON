@@ -1,7 +1,13 @@
 import { Link } from "react-router-dom";
 import logoImg from "../../assets/img/LOGO.png";
 
-const IronLogo = ({ to = "/", size = "md", className = "", asLink = true }) => {
+const IronLogo = ({
+  to = "/",
+  size = "md",
+  className = "",
+  asLink = true,
+  ...props
+}) => {
   const sizes = {
     sm: {
       icon: "h-9 w-9 sm:h-10 sm:w-10",
@@ -40,13 +46,13 @@ const IronLogo = ({ to = "/", size = "md", className = "", asLink = true }) => {
   const classes = `inline-flex items-center ${s.gap} ${className}`;
   if (!asLink) {
     return (
-      <div className={classes} aria-label="Iron Moto">
+      <div className={classes} aria-label="Iron Moto" {...props}>
         {content}
       </div>
     );
   }
   return (
-    <Link to={to} className={classes} aria-label="Iron Moto">
+    <Link to={to} className={classes} aria-label="Iron Moto" {...props}>
       {content}
     </Link>
   );

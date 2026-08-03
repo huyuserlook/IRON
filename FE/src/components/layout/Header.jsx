@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { ShoppingCart, User, LogOut, X, Menu, Phone, Info } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
@@ -8,6 +8,7 @@ import IronLogo from "../common/IronLogo";
 const NAV_LINKS = [
   { to: "/", label: "Trang chủ", end: true },
   { to: "/motorcycles", label: "Dòng xe" },
+  { to: "/booking", label: "Lái thử" },
   { to: "/#about", label: "Giới thiệu", isAnchor: true },
   { to: "/#contact", label: "Liên hệ", isAnchor: true },
 ];
@@ -19,6 +20,7 @@ const Header = () => {
   const { user, isAuthenticated, isAdmin, handleLogout } = useAuth();
   const { count } = useCart();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -40,78 +42,79 @@ const Header = () => {
     };
   }, [menuOpen]);
 
+  const isHome = location.pathname === "/";
+
+  const handleHomeClick = () => {
+    setMenuOpen(false);
+    if (location.pathname === "/") {
+      navigate("/", { state: { reset: Date.now() } });
+      return;
+    }
+    navigate("/");
+  };
+
   const handleAnchorClick = (e, to) => {
     e.preventDefault();
     if (to.startsWith("/#")) {
       const hash = to.replace("/#", "");
-      if (window.location.pathname === "/") {
+      if (location.pathname === "/") {
         const el = document.getElementById(hash);
         if (el) {
           el.scrollIntoView({ behavior: "smooth", block: "start" });
-        } else {
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            behavior: "smooth",
-          });
+          setMenuOpen(false);
+          return;
         }
-      } else {
-        navigate("/");
-        setTimeout(() => {
-          const el = document.getElementById(hash);
-          if (el) {
-            el.scrollIntoView({ behavior: "smooth", block: "start" });
-          } else {
-            window.scrollTo({
-              top: document.body.scrollHeight,
-              behavior: "smooth",
-            });
-          }
-        }, 50);
       }
+      navigate({ pathname: "/", hash: `#${hash}` });
+      setMenuOpen(false);
+      return;
     }
     setMenuOpen(false);
+    navigate(to);
   };
 
+  const navTextColor = isHome && !scrolled ? "text-black" : "text-white";
+  const navHoverColor = "hover:text-iron-yellow";
+  const buttonBg = "bg-iron-yellow text-black";
+  const buttonOutline = "border-transparent";
+
   const NAV_GAP = scrolled
-    ? "gap-6 lg:gap-8 xl:gap-10"
-    : "gap-8 lg:gap-10 xl:gap-12";
+    ? "gap-3 lg:gap-4 xl:gap-5"
+    : "gap-4 lg:gap-5 xl:gap-6";
   const NAV_FONT = scrolled
-    ? "text-xl lg:text-[22px] xl:text-2xl"
-    : "text-2xl lg:text-[26px] xl:text-3xl";
-  const NAV_PY = scrolled ? "py-1" : "py-2";
-  const NAV_TRACK = scrolled ? "tracking-wide" : "tracking-[0.08em]";
+    ? "text-sm lg:text-sm xl:text-sm"
+    : "text-sm lg:text-base xl:text-base";
+  const NAV_PY = "py-1";
+  const NAV_TRACK = scrolled ? "tracking-[0.04em]" : "tracking-[0.05em]";
 
-  const BTN_SCALE = scrolled ? "scale-[0.94]" : "scale-100";
-  const ICON_SIZE = scrolled ? 20 : 22;
-  const AVATAR_SIZE = scrolled ? "h-7 w-7" : "h-8 w-8";
+  const BTN_SCALE = "scale-[0.96]";
+  const ICON_SIZE = 18;
+  const AVATAR_SIZE = "h-7 w-7";
 
-  const LOGIN_TEXT = scrolled ? "text-lg lg:text-xl" : "text-xl lg:text-2xl";
-  const LOGIN_PX = scrolled ? "px-3 sm:px-4 py-1.5" : "px-4 sm:px-5 py-2";
-  const LOGIN_ICON = scrolled ? "mr-1" : "";
+  const LOGIN_TEXT = "text-sm lg:text-base";
+  const LOGIN_PX = "px-2 sm:px-3 py-1.5";
+  const LOGIN_ICON = "mr-0.5";
+
+  const headerPosition = isHome ? "fixed inset-x-0 top-0" : "sticky top-0";
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-500 ${SCROLL_EASE} ${
-        scrolled
-          ? "bg-iron-red/92 backdrop-blur-xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] border-b border-white/10"
-          : "bg-iron-red shadow-lg"
-      }`}
+      className={`${headerPosition} z-50 transition-all duration-500 ${SCROLL_EASE} bg-transparent shadow-none`}
     >
       <div
         className={`max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between transition-all duration-500 ${SCROLL_EASE} ${
-          scrolled ? "h-12 sm:h-14" : "h-16 sm:h-[72px] md:h-20"
+          scrolled ? "h-10 sm:h-12" : "h-14 sm:h-16 md:h-[68px]"
         }`}
       >
         <div
           className={`select-none cursor-pointer transition-all duration-500 ${SCROLL_EASE} hover:scale-[1.04] active:scale-[0.93] origin-left ${
-            scrolled ? "scale-[0.86]" : "scale-100"
+            scrolled ? "scale-[0.82]" : "scale-[0.94]"
           }`}
         >
-          <IronLogo size={scrolled ? "sm" : "sm"} />
+          <IronLogo size="sm" onClick={handleHomeClick} />
         </div>
-
         <nav
-          className={`hidden md:flex items-center ${NAV_GAP} font-teko ${NAV_FONT} uppercase ${NAV_TRACK} text-white transition-all duration-500 ${SCROLL_EASE}`}
+          className={`hidden md:flex items-center ${NAV_GAP} font-teko ${NAV_FONT} uppercase ${NAV_TRACK} ${navTextColor} transition-all duration-500 ${SCROLL_EASE}`}
         >
           {NAV_LINKS.map((item) => {
             if (item.isAnchor) {
@@ -122,7 +125,7 @@ const Header = () => {
                   key={item.to}
                   href={item.to}
                   onClick={(e) => handleAnchorClick(e, item.to)}
-                  className={`group relative ${NAV_PY} select-none cursor-pointer transition-[transform,color,filter] duration-250 ${PRESS_EASE} active:scale-[0.94] text-white hover:text-iron-yellow`}
+                  className={`group relative ${NAV_PY} select-none cursor-pointer transition-[transform,color,filter] duration-250 ${PRESS_EASE} active:scale-[0.94] ${navTextColor} ${navHoverColor}`}
                 >
                   <span className="inline-block transition-transform duration-250 ease-out group-hover:-translate-y-0.5">
                     <IconComp
@@ -141,11 +144,17 @@ const Header = () => {
                 key={item.to}
                 to={item.to}
                 end={item.end}
+                onClick={(e) => {
+                  if (item.to === "/" && location.pathname === "/") {
+                    e.preventDefault();
+                    handleHomeClick();
+                  }
+                }}
                 className={({ isActive }) =>
                   `group relative ${NAV_PY} select-none cursor-pointer transition-[transform,color,filter] duration-250 ${PRESS_EASE} active:scale-[0.94] ${
                     isActive
                       ? "text-iron-yellow"
-                      : "text-white hover:text-iron-yellow"
+                      : `${navTextColor} ${navHoverColor}`
                   }`
                 }
               >
@@ -175,7 +184,7 @@ const Header = () => {
         >
           <Link
             to="/cart"
-            className={`relative group p-2 -m-1.5 select-none cursor-pointer rounded-xl text-white hover:text-iron-yellow transition-[transform,color,background-color] duration-250 ease-out hover:scale-[1.10] active:scale-[0.90] active:bg-white/10`}
+            className={`relative group p-2 -m-1.5 select-none cursor-pointer rounded-xl ${buttonBg} transition-[transform,color,background-color] duration-250 ease-out hover:scale-[1.10] active:scale-[0.90] ${buttonOutline}`}
             aria-label="Giỏ hàng"
           >
             <ShoppingCart
@@ -296,7 +305,7 @@ const Header = () => {
         }`}
       >
         <div
-          className={`px-4 pb-5 pt-2 flex flex-col gap-1 font-teko text-2xl uppercase bg-iron-accent/95 backdrop-blur-xl border-t border-white/10 transition-all duration-500 ${
+          className={`px-4 pb-5 pt-2 flex flex-col gap-2 font-teko text-lg uppercase bg-iron-accent/95 backdrop-blur-xl border-t border-white/10 transition-all duration-500 ${
             menuOpen ? "translate-y-0" : "-translate-y-4"
           }`}
         >

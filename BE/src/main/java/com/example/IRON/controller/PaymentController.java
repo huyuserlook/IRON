@@ -15,7 +15,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping("/order/{orderId}")
-    public ResponseEntity<ApiResponse<?>> getByOrderId(@PathVariable Long orderId) {
+    public ResponseEntity<ApiResponse<Payment>> getByOrderId(@PathVariable Long orderId) {
         return paymentService.getByOrderId(orderId)
                 .map(p -> ResponseEntity.ok(ApiResponse.success(p)))
                 .orElse(ResponseEntity.notFound().build());

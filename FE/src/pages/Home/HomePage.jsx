@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import motorcycleApi from "../../api/motorcycleApi";
 import brandApi from "../../api/brandApi";
 import { formatCurrency } from "../../utils/formatCurrency";
@@ -14,24 +14,40 @@ import {
 } from "lucide-react";
 
 const HomePage = () => {
+  const location = useLocation();
   const [featured, setFeatured] = useState([]);
   const [brands, setBrands] = useState([]);
 
   useEffect(() => {
     motorcycleApi.getFeatured().then((res) => {
-      const items = Array.isArray(res) ? res : res?.data || [];
+      const items = Array.isArray(res) ? res : res || [];
       setFeatured(items);
     });
 
     brandApi.getAll().then((res) => {
-      const items = Array.isArray(res) ? res : res?.data || [];
+      const items = Array.isArray(res) ? res : res || [];
       setBrands(items);
     });
   }, []);
 
+  useEffect(() => {
+    if (location.state?.reset) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [location.state?.reset]);
+
+  useEffect(() => {
+    if (!location.hash) return;
+    const hash = location.hash.replace("#", "");
+    const el = document.getElementById(hash);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.hash]);
+
   return (
     <div className="bg-white">
-      <HomeHero />
+      <HomeHero resetTrigger={location.state?.reset} />
       {/* Brands */}
       <section className="py-16 bg-gray-50 border-y border-gray-100">
         <div className="container mx-auto px-4">

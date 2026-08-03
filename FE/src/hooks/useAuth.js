@@ -8,11 +8,11 @@ export const useAuth = () => {
   const navigate = useNavigate();
   const { user, token, loading, error } = useSelector((state) => state.auth);
 
-  const handleLogin = async (data) => {
+  const handleLogin = async (data, redirectTo = "/") => {
     const result = await dispatch(login(data));
     if (login.fulfilled.match(result)) {
       const role = result.payload.role;
-      navigate(role === "ROLE_ADMIN" ? "/admin/dashboard" : "/");
+      navigate(role === "ROLE_ADMIN" ? "/admin/dashboard" : redirectTo);
       return true;
     }
     return false;
@@ -27,11 +27,11 @@ export const useAuth = () => {
     return false;
   };
 
-  const handleSocialLogin = async (data) => {
+  const handleSocialLogin = async (data, redirectTo = "/") => {
     const result = await dispatch(socialLogin(data));
     if (socialLogin.fulfilled.match(result)) {
       const role = result.payload.role;
-      navigate(role === "ROLE_ADMIN" ? "/admin/dashboard" : "/");
+      navigate(role === "ROLE_ADMIN" ? "/admin/dashboard" : redirectTo);
       return true;
     }
     return false;
