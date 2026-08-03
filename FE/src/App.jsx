@@ -5,10 +5,12 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import store from "./store";
 import AppRoutes from "./routes/AppRoutes";
 
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID";
+
 function App() {
   return (
     <Provider store={store}>
-      <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
+      <GoogleOAuthProvider clientId={googleClientId}>
         <BrowserRouter>
           <AppRoutes />
           <Toaster position="top-right" />
