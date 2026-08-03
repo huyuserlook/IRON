@@ -5,14 +5,7 @@ import brandApi from "../../api/brandApi";
 import { formatCurrency } from "../../utils/formatCurrency";
 import HomeHero from "../../components/home/HomeHero";
 import showImage from "../../assets/img/show.png";
-import {
-  ShieldCheck,
-  ChevronRight,
-  Zap,
-  Award,
-  Users,
-  ArrowRight,
-} from "lucide-react";
+import { ShieldCheck, Zap, Award, Users, ArrowRight } from "lucide-react";
 
 const HomePage = () => {
   const location = useLocation();
@@ -57,10 +50,10 @@ const HomePage = () => {
       <section className="py-16 bg-gray-50 border-y border-gray-100">
         <div className="container mx-auto px-4">
           <p className="text-center text-[#BC000A] text-sm font-bold uppercase tracking-[0.24em] mb-10">
-            Dòng xe
+            Hãng xe
           </p>
           <div className="flex flex-wrap justify-center gap-4 xl:gap-6">
-            {brands.slice(0, 6).map((brand, index) => (
+            {brands.map((brand, index) => (
               <Link
                 key={brand.id}
                 to={`/motorcycles?brandId=${brand.id}`}
@@ -71,7 +64,7 @@ const HomePage = () => {
                 }}
               >
                 <span className="text-lg font-semibold uppercase tracking-[0.2em] text-[#6B6B6B] transition-all duration-300 group-hover:text-[#BC000A]">
-                  {brand.name}
+                  {(brand.name || "").trim()}
                 </span>
               </Link>
             ))}

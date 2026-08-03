@@ -1,5 +1,3 @@
-import React from "react";
-
 const parseHexAlpha = (hex) => {
   // handles #RRGGBBAA
   if (!hex || typeof hex !== "string") return null;
