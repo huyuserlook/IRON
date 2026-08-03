@@ -31,11 +31,18 @@ const MotorcycleForm = () => {
   });
 
   useEffect(() => {
-    brandApi.getAllAdmin().then((res) => setBrands(res.data || []));
-    categoryApi.getAllAdmin().then((res) => setCategories(res.data || []));
+    brandApi.getAllAdmin().then((res) => {
+      const payload = res?.data ?? res;
+      setBrands(payload || []);
+    });
+    categoryApi.getAllAdmin().then((res) => {
+      const payload = res?.data ?? res;
+      setCategories(payload || []);
+    });
     if (isEdit) {
       motorcycleApi.getById(id).then((res) => {
-        const m = res.data;
+        const payload = res?.data ?? res;
+        const m = payload || {};
         setForm({
           name: m.name,
           brandId: m.brand?.id,

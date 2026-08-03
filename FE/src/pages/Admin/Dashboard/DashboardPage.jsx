@@ -9,7 +9,10 @@ const DashboardPage = () => {
   useEffect(() => {
     adminApi
       .getStatistics()
-      .then((res) => setStats(res.data))
+      .then((res) => {
+        const payload = res?.data ?? res;
+        setStats(payload || null);
+      })
       .catch(() => {});
   }, []);
 

@@ -8,10 +8,14 @@ const UserManagement = () => {
   const [data, setData] = useState({ content: [], totalPages: 0 });
   const [page] = useState(0);
 
-  const load = useCallback(() =>
-    userApi
-      .getAllAdmin({ page, size: 10 })
-      .then((res) => setData(res.data || {})), [page]);
+  const load = useCallback(
+    () =>
+      userApi.getAllAdmin({ page, size: 10 }).then((res) => {
+        const payload = res?.data ?? res;
+        setData(payload || { content: [], totalPages: 0 });
+      }),
+    [page],
+  );
 
   useEffect(() => {
     load();

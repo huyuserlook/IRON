@@ -8,9 +8,10 @@ import toast from "react-hot-toast";
 const OrderHistoryPage = () => {
   const [data, setData] = useState({ content: [] });
   const load = () =>
-    orderApi
-      .getMyOrders({ page: 0, size: 20 })
-      .then((res) => setData(res.data || {}));
+    orderApi.getMyOrders({ page: 0, size: 20 }).then((res) => {
+      const payload = res?.data ?? res;
+      setData(payload || { content: [] });
+    });
   useEffect(() => {
     load();
   }, []);

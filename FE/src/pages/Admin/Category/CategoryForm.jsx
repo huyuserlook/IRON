@@ -19,12 +19,13 @@ const CategoryForm = () => {
   useEffect(() => {
     if (isEdit) {
       categoryApi.getById(id).then((res) => {
-        const data = res.data;
+        const payload = res?.data ?? res;
+        const data = payload || {};
         setForm({
-          name: data.name,
+          name: data.name || "",
           imageUrl: data.imageUrl || "",
           description: data.description || "",
-          active: data.active,
+          active: data.active ?? true,
         });
       });
     }
@@ -74,9 +75,7 @@ const CategoryForm = () => {
           <input
             required
             value={form.name}
-            onChange={(event) =>
-              setForm({ ...form, name: event.target.value })
-            }
+            onChange={(event) => setForm({ ...form, name: event.target.value })}
             className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
           />
         </div>

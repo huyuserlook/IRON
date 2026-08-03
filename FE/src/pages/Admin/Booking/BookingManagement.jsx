@@ -9,10 +9,16 @@ const BookingManagement = () => {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(0);
 
-  const load = useCallback(() =>
-    bookingApi
-      .getAllAdmin({ status: status || undefined, page, size: 10 })
-      .then((res) => setData(res.data || {})), [page, status]);
+  const load = useCallback(
+    () =>
+      bookingApi
+        .getAllAdmin({ status: status || undefined, page, size: 10 })
+        .then((res) => {
+          const payload = res?.data ?? res;
+          setData(payload || { content: [], totalPages: 0 });
+        }),
+    [page, status],
+  );
 
   useEffect(() => {
     load();

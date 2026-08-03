@@ -10,6 +10,7 @@ import {
   XCircle,
   ChevronLeft,
 } from "lucide-react";
+import ColorSwatch from "../../components/common/ColorSwatch";
 import toast from "react-hot-toast";
 
 const MotorcycleDetailPage = () => {
@@ -158,10 +159,14 @@ const MotorcycleDetailPage = () => {
                   <button
                     key={inv.id}
                     onClick={() => setSelectedColor(inv)}
-                    className={`px-4 py-1.5 rounded-full text-sm border transition-colors
+                    className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm border transition-colors
                       ${selectedColor?.id === inv.id ? "border-orange-500 bg-orange-50 text-orange-700" : "border-gray-300 hover:border-orange-300"}`}
                   >
-                    {inv.colorName}
+                    <ColorSwatch
+                      color={inv.colorHex || inv.colorCode || null}
+                      size={16}
+                    />
+                    <span className="leading-none">{inv.colorName}</span>
                     {inv.quantity <= 0 && (
                       <span className="ml-1 text-xs text-red-400">(hết)</span>
                     )}

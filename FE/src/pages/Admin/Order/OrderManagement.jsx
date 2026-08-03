@@ -23,7 +23,10 @@ const OrderManagement = () => {
   const load = useCallback(() => {
     orderApi
       .getAllAdmin({ status: status || undefined, page, size: 10 })
-      .then((res) => setData(res.data || {}));
+      .then((res) => {
+        const payload = res?.data ?? res;
+        setData(payload || { content: [], totalPages: 0 });
+      });
   }, [page, status]);
 
   useEffect(() => {
