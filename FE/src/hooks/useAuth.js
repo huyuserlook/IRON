@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login, logout, register, socialLogin } from "../store/authSlice";
+import { clearCart } from "../store/cartSlice";
 import authApi from "../api/authApi";
 
 export const useAuth = () => {
@@ -39,6 +40,7 @@ export const useAuth = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(clearCart());
     navigate("/");
   };
 
