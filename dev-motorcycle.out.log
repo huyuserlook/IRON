@@ -7,3 +7,10 @@
   [32m[1mVITE[22m v8.0.14[39m  [2mready in [0m[1m1043[22m[2m[0m ms[22m
 
   [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4173[22m/[39m
+[2m2:04:23 AM[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m2:04:23 AM[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m2:04:24 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because vite config has changed
+[2m2:04:24 AM[22m [36m[1m[vite][22m[39m server restarted.
+[2m2:04:25 AM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+[2m2:04:27 AM[22m [36m[1m[vite][22m[39m [32m.env.local changed, restarting server...[39m
+[2m2:04:27 AM[22m [36m[1m[vite][22m[39m server restarted.

@@ -19,7 +19,9 @@ const loadFacebookSdk = (appId) => {
     facebookSdkPromise = new Promise((resolve, reject) => {
       const existing = document.getElementById("facebook-jssdk");
       if (existing) {
-        existing.addEventListener("load", () => resolve(window.FB), { once: true });
+        existing.addEventListener("load", () => resolve(window.FB), {
+          once: true,
+        });
         existing.addEventListener(
           "error",
           () => reject(new Error("Không tải được Facebook SDK")),
@@ -65,11 +67,14 @@ const loadFacebookSdk = (appId) => {
 };
 
 const fetchGoogleProfile = async (accessToken) => {
-  const response = await fetch("https://openidconnect.googleapis.com/v1/userinfo", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
+  const response = await fetch(
+    "https://openidconnect.googleapis.com/v1/userinfo",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
     },
-  });
+  );
 
   if (!response.ok) {
     throw new Error("Không lấy được thông tin Google");
@@ -82,6 +87,7 @@ export const useSocialAuth = (redirectTo = "/") => {
   const { handleSocialLogin } = useAuth();
   const [loadingProvider, setLoadingProvider] = useState(null);
   const facebookAppId = import.meta.env.VITE_FACEBOOK_APP_ID || "";
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
   const finishSocialLogin = useCallback(
     async (payload, successMessage) => {
@@ -126,6 +132,10 @@ export const useSocialAuth = (redirectTo = "/") => {
 
   const handleGoogleLogin = useCallback(() => {
     if (loadingProvider) {
+      return;
+    }
+    if (!googleClientId || googleClientId === "YOUR_GOOGLE_CLIENT_ID") {
+      toast.error("Thiếu VITE_GOOGLE_CLIENT_ID — cấu hình Google OAuth");
       return;
     }
     setLoadingProvider("google");
