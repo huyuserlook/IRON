@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import motorcycleApi from "../../../api/motorcycleApi";
 import { formatCurrency } from "../../../utils/formatCurrency";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Star, Trash2, Search } from "lucide-react";
 import toast from "react-hot-toast";
 
 const MotorcycleManagement = () => {
@@ -48,6 +48,19 @@ const MotorcycleManagement = () => {
     COMING_SOON: "Sắp ra mắt",
   };
 
+  const renderRatingStars = (rating) =>
+    Array.from({ length: 5 }, (_, index) => (
+      <Star
+        key={index}
+        size={14}
+        className={
+          index < Math.round(Number(rating) || 0)
+            ? "text-orange-500"
+            : "text-gray-200"
+        }
+      />
+    ));
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -89,6 +102,7 @@ const MotorcycleManagement = () => {
               <th className="px-4 py-3 text-left">Hãng / Dòng</th>
               <th className="px-4 py-3 text-right">Giá</th>
               <th className="px-4 py-3 text-center">Trạng thái</th>
+              <th className="px-4 py-3 text-center">Đánh giá</th>
               <th className="px-4 py-3 text-center">Thao tác</th>
             </tr>
           </thead>
@@ -98,7 +112,7 @@ const MotorcycleManagement = () => {
                   .fill(0)
                   .map((_, i) => (
                     <tr key={i}>
-                      <td colSpan={5} className="px-4 py-4">
+                      <td colSpan={6} className="px-4 py-4">
                         <div className="h-4 bg-gray-100 rounded animate-pulse" />
                       </td>
                     </tr>
@@ -141,6 +155,26 @@ const MotorcycleManagement = () => {
                       >
                         {statusLabel[moto.status] || moto.status}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {moto.averageRating || moto.rating ? (
+                        <div className="inline-flex items-center gap-2 justify-center">
+                          <div className="flex items-center gap-0.5">
+                            {renderRatingStars(
+                              moto.averageRating ?? moto.rating,
+                            )}
+                          </div>
+                          {moto.reviewCount ? (
+                            <span className="text-xs text-gray-500">
+                              ({moto.reviewCount})
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className="text-xs uppercase tracking-[0.14em] text-gray-400">
+                          Chưa
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2">

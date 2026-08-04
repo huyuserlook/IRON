@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import PrivateRoute from "./PrivateRoute";
@@ -29,6 +29,7 @@ import CategoryForm from "../pages/Admin/Category/CategoryForm";
 import OrderManagement from "../pages/Admin/Order/OrderManagement";
 import BookingManagement from "../pages/Admin/Booking/BookingManagement";
 import UserManagement from "../pages/Admin/User/UserManagement";
+import ReviewManagement from "../pages/Admin/Review/ReviewManagement";
 import StatisticsPage from "../pages/Admin/Statistics/StatisticsPage";
 
 const AppRoutes = () => {
@@ -83,6 +84,7 @@ const AppRoutes = () => {
           </PrivateRoute>
         }
       >
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="motorcycles" element={<MotorcycleManagement />} />
         <Route path="motorcycles/add" element={<MotorcycleForm />} />
@@ -96,6 +98,7 @@ const AppRoutes = () => {
         <Route path="orders" element={<OrderManagement />} />
         <Route path="bookings" element={<BookingManagement />} />
         <Route path="users" element={<UserManagement />} />
+        <Route path="reviews" element={<ReviewManagement />} />
         <Route path="statistics" element={<StatisticsPage />} />
       </Route>
     </Routes>

@@ -6,6 +6,7 @@ const IronLogo = ({
   size = "md",
   className = "",
   asLink = true,
+  hideText = false,
   ...props
 }) => {
   const sizes = {
@@ -32,15 +33,16 @@ const IronLogo = ({
     <>
       <img
         src={logoImg}
-        alt=""
-        aria-hidden
-        className={`${s.icon} object-contain mix-blend-screen select-none`}
+        alt="Iron logo"
+        className={`${s.icon} object-contain select-none`}
       />
-      <span
-        className={`font-teko font-semibold leading-none tracking-wide text-iron-yellow ${s.text}`}
-      >
-        IRON
-      </span>
+      {!hideText && (
+        <span
+          className={`font-teko font-semibold leading-none tracking-wide text-iron-yellow ${s.text}`}
+        >
+          IRON
+        </span>
+      )}
     </>
   );
   const classes = `inline-flex items-center ${s.gap} ${className}`;

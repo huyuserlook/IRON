@@ -1,5 +1,6 @@
 package com.example.IRON.dto.response;
 
+import com.example.IRON.dto.response.ReviewResponse;
 import com.example.IRON.entity.Motorcycle;
 import lombok.*;
 import java.math.BigDecimal;
@@ -25,6 +26,7 @@ public class MotorcycleDetailResponse {
     private Boolean featured;
     private List<ImageResponse> images;
     private List<InventoryResponse> inventories;
+    private List<ReviewResponse> reviews;
     private LocalDateTime createdAt;
 
     @Data @Builder @NoArgsConstructor @AllArgsConstructor

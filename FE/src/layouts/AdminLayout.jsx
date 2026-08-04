@@ -9,34 +9,42 @@ const AdminLayout = () => {
   const { user, handleLogout } = useAuth();
 
   return (
-    <div className="min-h-screen flex bg-gray-100">
+    <div className="min-h-screen flex bg-slate-100">
       <AdminSidebar open={sidebarOpen} />
       <div
-        className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? "ml-64" : "ml-16"}`}
+        className={`flex-1 flex flex-col transition-all duration-300 ${sidebarOpen ? "lg:ml-72 md:ml-64 sm:ml-20" : "lg:ml-20 md:ml-20 sm:ml-20"}`}
       >
         {/* Admin Header */}
-        <header className="bg-white shadow-sm h-14 flex items-center justify-between px-6 sticky top-0 z-10">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <Menu size={22} />
-          </button>
+        <header className="bg-white/95 backdrop-blur-md shadow-sm h-20 flex items-center justify-between px-6 sticky top-0 z-10 border-b border-slate-200">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-slate-600 hover:text-slate-900"
+            >
+              <Menu size={22} />
+            </button>
+          </div>
+
           <div className="flex items-center gap-3">
-            <User size={18} className="text-gray-500" />
-            <span className="text-sm font-medium text-gray-700">
-              {user?.fullName}
-            </span>
+            <div className="hidden sm:flex flex-col text-right">
+              <span className="text-sm font-medium text-slate-700">
+                {user?.fullName}
+              </span>
+              <span className="text-xs text-slate-500">Quản trị viên</span>
+            </div>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 text-sm text-red-500 hover:text-red-700 ml-2"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:bg-slate-50"
             >
               <LogOut size={16} /> Đăng xuất
             </button>
           </div>
         </header>
-        <main className="flex-1 p-6 overflow-auto">
-          <Outlet />
+
+        <main className="flex-1 overflow-auto py-6">
+          <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

@@ -9,13 +9,13 @@ import {
   Gauge,
   ShoppingCart,
   Sparkles,
+  Star,
   X,
   XCircle,
   Zap,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import motorcycleApi from "../../api/motorcycleApi";
-import ColorSwatch from "../../components/common/ColorSwatch";
 import { useCart } from "../../hooks/useCart";
 import { formatCurrency } from "../../utils/formatCurrency";
 
@@ -44,6 +44,32 @@ const STATUS_META = {
     ok: false,
     className: "bg-gray-100 text-gray-600 border-gray-200",
   },
+};
+
+const renderRatingStars = (rating) => {
+  const average = Math.min(Math.max(Number(rating) || 0, 0), 5);
+  return Array.from({ length: 5 }, (_, index) => (
+    <Star
+      key={`star-${index}`}
+      size={16}
+      className={
+        index < Math.round(average) ? "text-[#BC000A]" : "text-[#E3DEE6]"
+      }
+    />
+  ));
+};
+
+const formatReviewDate = (value) => {
+  if (!value) return "Gần đây";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return date.toLocaleDateString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
 };
 
 const resolveImageUrl = (url) => {
@@ -130,9 +156,42 @@ const MotorcycleDetailPage = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [imgAnimKey, setImgAnimKey] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [relatedMotorcycles, setRelatedMotorcycles] = useState([]);
+  const [relatedLoading, setRelatedLoading] = useState(false);
 
   const galleryImages = useMemo(() => buildGallery(moto), [moto]);
   const activeImage = galleryImages[selectedIndex] || null;
+
+  const reviewItems = useMemo(() => {
+    const reviews = Array.isArray(moto?.reviews) ? moto.reviews : [];
+
+    return reviews
+      .filter((review) => review?.status !== "REJECTED")
+      .map((review, index) => ({
+        id: review.id ?? `review-${index}`,
+        author:
+          review.customerName ||
+          review.author ||
+          review.userName ||
+          "Khách hàng",
+        rating: Number(review.rating ?? review.score ?? 0),
+        title:
+          review.title || review.comment?.slice(0, 40) || "Cảm nhận sản phẩm",
+        comment:
+          review.comment || review.content || "Sản phẩm đáp ứng tốt nhu cầu.",
+        date: formatReviewDate(review.createdAt || review.date),
+      }));
+  }, [moto]);
+
+  const averageRating = useMemo(() => {
+    if (!reviewItems.length) return 0;
+    return (
+      reviewItems.reduce((sum, item) => sum + Number(item.rating || 0), 0) /
+      reviewItems.length
+    );
+  }, [reviewItems]);
+
+  const totalReviews = reviewItems.length;
 
   const goToImage = useCallback(
     (index) => {
@@ -158,6 +217,42 @@ const MotorcycleDetailPage = () => {
       })
       .finally(() => setLoading(false));
   }, [slug]);
+
+  useEffect(() => {
+    if (!moto) return undefined;
+
+    setRelatedLoading(true);
+    const categoryId = moto.category?.id || moto.categoryId;
+    const brandId = moto.brand?.id || moto.brandId;
+
+    const params = {
+      page: 0,
+      size: 4,
+      sortBy: "createdAt",
+      sortDir: "desc",
+    };
+
+    if (categoryId) params.categoryId = categoryId;
+    if (brandId) params.brandId = brandId;
+
+    motorcycleApi
+      .search(params)
+      .then((res) => {
+        const payload = res?.data ?? res;
+        const list = Array.isArray(payload) ? payload : payload?.content || [];
+        setRelatedMotorcycles(
+          (list || [])
+            .filter((item) => item.slug !== moto.slug && item.id !== moto.id)
+            .slice(0, 4),
+        );
+      })
+      .catch(() => {
+        setRelatedMotorcycles([]);
+      })
+      .finally(() => setRelatedLoading(false));
+
+    return undefined;
+  }, [moto]);
 
   useEffect(() => {
     if (!lightboxOpen) return undefined;
@@ -195,14 +290,10 @@ const MotorcycleDetailPage = () => {
       colorName: null,
     };
 
-    // eslint-disable-next-line no-console
-    console.log("MotorcycleDetailPage: adding to cart (no color)", payload);
     try {
       addItem(payload);
       toast.success("Đã thêm vào giỏ hàng!");
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("Error adding to cart", err);
       toast.error("Không thể thêm vào giỏ hàng");
     }
   };
@@ -519,10 +610,77 @@ const MotorcycleDetailPage = () => {
           </section>
         ) : null}
 
+        <section
+          className="detail-rise mt-6 rounded-[24px] border border-[#E3DEE6] bg-[#FAF8FC] p-6 shadow-[0_20px_50px_-34px_rgba(0,0,0,0.14)] sm:p-8"
+          style={{ animationDelay: "300ms" }}
+        >
+          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="font-teko text-3xl font-bold tracking-[-0.02em]">
+                Đánh giá sản phẩm
+              </h2>
+              <p className="mt-2 text-sm text-[#5E3F3B]">
+                {totalReviews > 0
+                  ? `${totalReviews} nhận xét từ khách hàng thực tế.`
+                  : "Chưa có đánh giá nào cho sản phẩm này."}
+              </p>
+            </div>
+            <div className="inline-flex items-center gap-3 rounded-full border border-[#E3DEE6] bg-white px-4 py-3 shadow-sm">
+              <span className="text-3xl font-bold text-[#1A1B1F]">
+                {averageRating.toFixed(1)}
+              </span>
+              <span className="flex items-center gap-1 text-sm uppercase tracking-[0.12em] text-[#7A6E71]">
+                {renderRatingStars(averageRating)}
+                <span>{totalReviews} đánh giá</span>
+              </span>
+            </div>
+          </div>
+
+          {totalReviews === 0 ? (
+            <div className="rounded-[20px] border border-dashed border-[#E3DEE6] bg-white p-8 text-center text-[#7A6E71] shadow-[0_14px_32px_-28px_rgba(0,0,0,0.12)]">
+              <p className="text-sm font-semibold text-[#1A1B1F]">
+                Hiện chưa có bình luận nào.
+              </p>
+              <p className="mt-2 text-sm text-[#5E3F3B]">
+                Hãy là người đầu tiên đánh giá sản phẩm này.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {reviewItems.map((review) => (
+                <article
+                  key={review.id}
+                  className="rounded-[20px] border border-[#E3DEE6] bg-white p-5 shadow-[0_14px_32px_-28px_rgba(0,0,0,0.12)]"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[#1A1B1F]">
+                        {review.title}
+                      </p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#7A6E71]">
+                        {review.author}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {renderRatingStars(review.rating)}
+                    </div>
+                  </div>
+                  <p className="mt-4 text-sm leading-7 text-[#5E3F3B]">
+                    {review.comment}
+                  </p>
+                  <p className="mt-4 text-xs uppercase tracking-[0.18em] text-[#9A9196]">
+                    {review.date}
+                  </p>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+
         {moto.specifications ? (
           <section
             className="detail-rise mt-6 rounded-[24px] border border-[#E3DEE6] bg-[#FAF8FC] p-6 sm:p-8"
-            style={{ animationDelay: "300ms" }}
+            style={{ animationDelay: "360ms" }}
           >
             <h2 className="font-teko text-3xl font-bold tracking-[-0.02em]">
               Thông số kỹ thuật
@@ -532,6 +690,78 @@ const MotorcycleDetailPage = () => {
             </pre>
           </section>
         ) : null}
+
+        <section
+          className="detail-rise mt-6 rounded-[24px] border border-[#E3DEE6] bg-white p-6 shadow-[0_20px_50px_-34px_rgba(0,0,0,0.14)] sm:p-8"
+          style={{ animationDelay: "420ms" }}
+        >
+          <div className="mb-6 flex items-center justify-between gap-3">
+            <div>
+              <h2 className="font-teko text-3xl font-bold tracking-[-0.02em]">
+                Sản phẩm liên quan
+              </h2>
+              <p className="mt-2 text-sm text-[#5E3F3B]">
+                Những mẫu xe cùng dòng hoặc cùng hãng mà bạn có thể quan tâm.
+              </p>
+            </div>
+            <span className="rounded-full bg-[#FAF8FC] px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#7A6E71]">
+              {relatedMotorcycles.length} gợi ý
+            </span>
+          </div>
+
+          {relatedLoading ? (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div
+                  key={index}
+                  className="h-56 animate-pulse rounded-[20px] border border-[#E3DEE6] bg-[#F7F5FA]"
+                />
+              ))}
+            </div>
+          ) : relatedMotorcycles.length ? (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              {relatedMotorcycles.map((item) => (
+                <Link
+                  key={item.id}
+                  to={`/motorcycles/${item.slug}`}
+                  className="group overflow-hidden rounded-[20px] border border-[#E3DEE6] bg-[#FAF8FC] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.12)]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden bg-white">
+                    <img
+                      src={resolveImageUrl(
+                        item.thumbnailUrl ||
+                          item.imageUrl ||
+                          item.images?.[0]?.imageUrl,
+                      )}
+                      alt={item.name}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <p className="text-xs uppercase tracking-[0.16em] text-[#7A6E71]">
+                      {item.brand?.name || item.brandName}
+                    </p>
+                    <h3 className="mt-2 line-clamp-2 text-lg font-bold text-[#1A1B1F]">
+                      {item.name}
+                    </h3>
+                    <div className="mt-3 flex items-center justify-between gap-3">
+                      <p className="text-sm font-semibold text-[#BC000A]">
+                        {formatCurrency(item.price)}
+                      </p>
+                      <span className="rounded-full bg-[#F0EDF4] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#5F5E5E]">
+                        {item.category?.name || item.categoryName}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[20px] border border-dashed border-[#E3DEE6] bg-[#FAF8FC] p-8 text-center text-[#7A6E71]">
+              Không tìm thấy sản phẩm liên quan. Hãy thử xem thêm các mẫu khác.
+            </div>
+          )}
+        </section>
       </div>
 
       {/* Lightbox */}

@@ -5,15 +5,18 @@ import com.example.IRON.dto.response.BrandResponse;
 import com.example.IRON.dto.response.CategoryResponse;
 import com.example.IRON.dto.response.MotorcycleDetailResponse;
 import com.example.IRON.dto.response.MotorcycleResponse;
+import com.example.IRON.dto.response.ReviewResponse;
 import com.example.IRON.entity.Brand;
 import com.example.IRON.entity.Category;
 import com.example.IRON.entity.Motorcycle;
 import com.example.IRON.entity.MotorcycleImage;
 import com.example.IRON.entity.Inventory;
+import com.example.IRON.entity.Review;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.repository.BrandRepository;
 import com.example.IRON.repository.CategoryRepository;
 import com.example.IRON.repository.MotorcycleRepository;
+import com.example.IRON.repository.ReviewRepository;
 import com.example.IRON.service.interfaces.MotorcycleService;
 import com.example.IRON.utils.SlugUtils;
 import org.springframework.data.domain.Page;
@@ -31,13 +34,16 @@ public class MotorcycleServiceImpl implements MotorcycleService {
     private final MotorcycleRepository motorcycleRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
+    private final ReviewRepository reviewRepository;
 
     public MotorcycleServiceImpl(MotorcycleRepository motorcycleRepository,
                                  BrandRepository brandRepository,
-                                 CategoryRepository categoryRepository) {
+                                 CategoryRepository categoryRepository,
+                                 ReviewRepository reviewRepository) {
         this.motorcycleRepository = motorcycleRepository;
         this.brandRepository = brandRepository;
         this.categoryRepository = categoryRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @Override
@@ -152,6 +158,23 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         return res;
     }
 
+    private ReviewResponse toResponse(Review r) {
+        ReviewResponse rr = new ReviewResponse();
+        rr.setId(r.getId());
+        if (r.getMotorcycle() != null) {
+            rr.setMotorcycleId(r.getMotorcycle().getId());
+            rr.setMotorcycleName(r.getMotorcycle().getName());
+        }
+        rr.setCustomerName(r.getCustomerName());
+        rr.setCustomerEmail(r.getCustomerEmail());
+        rr.setTitle(r.getTitle());
+        rr.setRating(r.getRating());
+        rr.setComment(r.getComment());
+        rr.setStatus(r.getStatus());
+        rr.setCreatedAt(r.getCreatedAt());
+        return rr;
+    }
+
     private MotorcycleDetailResponse toDetailResponse(Motorcycle m) {
         List<MotorcycleDetailResponse.ImageResponse> images = new ArrayList<>();
         for (MotorcycleImage img : m.getImages()) {
@@ -202,6 +225,11 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         res.setFeatured(m.getFeatured());
         res.setImages(images);
         res.setInventories(inventories);
+        res.setReviews(reviewRepository
+                .findByMotorcycleIdAndStatusOrderByCreatedAtDesc(m.getId(), Review.ReviewStatus.APPROVED)
+                .stream()
+                .map(this::toResponse)
+                .toList());
         res.setCreatedAt(m.getCreatedAt());
         return res;
     }
