@@ -11,6 +11,8 @@ import CartPage from "../pages/Cart/CartPage";
 import CheckoutPage from "../pages/Order/CheckoutPage";
 import OrderHistoryPage from "../pages/Order/OrderHistoryPage";
 import BookingPage from "../pages/Booking/BookingPage";
+import ContactPage from "../pages/Contact/ContactPage";
+import AboutPage from "../pages/About/AboutPage";
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
 import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
@@ -37,6 +39,8 @@ const AppRoutes = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/motorcycles" element={<MotorcyclePage />} />
         <Route path="/motorcycles/:slug" element={<MotorcycleDetailPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />

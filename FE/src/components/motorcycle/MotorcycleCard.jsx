@@ -1,4 +1,4 @@
-import { ArrowRight, Bike, Heart, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, Bike, Calendar, Heart, ShieldCheck, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const MotorcycleCard = ({
@@ -95,17 +95,36 @@ const MotorcycleCard = ({
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between gap-3">
-          <p className="min-w-0 text-sm text-[#7A6E71]">
-            {moto.torque ? `Mô-men xoắn ${moto.torque} Nm` : " "}
-          </p>
-          <Link
-            to={getPagePath(moto)}
-            className="inline-flex shrink-0 items-center gap-2 rounded-[6px] border-2 border-[#1A1B1F] px-4 py-2.5 text-sm font-semibold text-[#1A1B1F] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1A1B1F] hover:text-white"
-          >
-            XEM CHI TIẾT
-            <ArrowRight size={14} />
-          </Link>
+        <div className="mt-auto border-t border-[#EEEAF1] pt-4">
+          <div className="flex flex-col gap-2.5">
+            <Link
+              to={getPagePath(moto)}
+              className="group/btn inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[8px] bg-[#1A1B1F] px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#2b2c31] hover:shadow-[0_14px_28px_-18px_rgba(26,27,31,0.55)]"
+            >
+              Xem chi tiết
+              <ArrowRight
+                size={15}
+                className="transition-transform duration-300 group-hover/btn:translate-x-0.5"
+              />
+            </Link>
+
+            <Link
+              to={`/booking?motorcycleId=${moto.id}`}
+              className="group/btn inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded-[8px] border border-[#BC000A]/20 bg-[#FFF5F5] px-4 py-2.5 text-sm font-semibold text-[#BC000A] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#BC000A] hover:bg-[#BC000A] hover:text-white hover:shadow-[0_14px_28px_-18px_rgba(188,0,10,0.45)]"
+            >
+              <Calendar
+                size={15}
+                className="transition-transform duration-300 group-hover/btn:scale-110"
+              />
+              Đặt lịch lái thử
+            </Link>
+          </div>
+
+          {moto.torque ? (
+            <p className="mt-3 text-center text-xs text-[#9A9196]">
+              Mô-men xoắn {moto.torque} Nm
+            </p>
+          ) : null}
         </div>
       </div>
     </article>

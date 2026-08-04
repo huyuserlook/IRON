@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
   CalendarDays,
-  Check,
   ChevronLeft,
   Clock3,
   MapPinned,
@@ -54,10 +53,9 @@ const BENEFITS = [
   },
 ];
 
-const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:8080/api").replace(
-  /\/api\/?$/,
-  "",
-);
+const API_ROOT = (
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+).replace(/\/api\/?$/, "");
 
 const normalizePayload = (res) => res?.data ?? res;
 
@@ -89,9 +87,8 @@ const BookingPage = () => {
   const [motorcycles, setMotorcycles] = useState([]);
   const [loadingMotorcycles, setLoadingMotorcycles] = useState(false);
   const [step, setStep] = useState(1);
-  const [selectedMotorcycleId, setSelectedMotorcycleId] = useState(
-    initialMotorcycleId,
-  );
+  const [selectedMotorcycleId, setSelectedMotorcycleId] =
+    useState(initialMotorcycleId);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     motorcycleId: initialMotorcycleId,
@@ -107,11 +104,13 @@ const BookingPage = () => {
     setLoadingMotorcycles(true);
 
     motorcycleApi
-      .search({ page: 0, size: 24, sortBy: "createdAt", sortDir: "desc" })
+      .search({ page: 0, size: 100, sortBy: "createdAt", sortDir: "desc" })
       .then((res) => {
         if (!alive) return;
         const payload = normalizePayload(res);
-        setMotorcycles(Array.isArray(payload) ? payload : payload?.content || []);
+        setMotorcycles(
+          Array.isArray(payload) ? payload : payload?.content || [],
+        );
       })
       .catch(() => {
         if (!alive) return;
@@ -127,47 +126,15 @@ const BookingPage = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (selectedMotorcycleId) {
-      setForm((prev) => ({ ...prev, motorcycleId: selectedMotorcycleId }));
-      return;
-    }
-
-    if (motorcycles.length > 0) {
-      const firstId = String(motorcycles[0].id);
-      setSelectedMotorcycleId(firstId);
-      setForm((prev) => ({ ...prev, motorcycleId: firstId }));
-    }
-  }, [motorcycles, selectedMotorcycleId]);
-
-  const displayCards = useMemo(() => {
-    return motorcycles.slice(0, 3).map((moto) => {
-      return {
-        id: String(moto.id),
-        title: moto.name || "Không có tên",
-        subtitle: moto.brand?.name || moto.category?.name || "IRON",
-        category: moto.category?.name || "DÒNG XE",
-        image: resolveImageUrl(
-          moto.thumbnailUrl || moto.imageUrl || moto.images?.[0]?.imageUrl,
-        ),
-      };
-    });
-  }, [motorcycles]);
-
   const selectedMotorcycle = useMemo(() => {
     return (
-      motorcycles.find((moto) => String(moto.id) === String(selectedMotorcycleId)) ||
-      motorcycles[0] ||
-      null
+      motorcycles.find(
+        (moto) => String(moto.id) === String(selectedMotorcycleId),
+      ) || null
     );
   }, [motorcycles, selectedMotorcycleId]);
 
   const today = new Date().toISOString().split("T")[0];
-
-  const handleSelectMotorcycle = (id) => {
-    setSelectedMotorcycleId(String(id));
-    setForm((prev) => ({ ...prev, motorcycleId: String(id) }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -191,8 +158,11 @@ const BookingPage = () => {
     setLoading(true);
     try {
       await bookingApi.create(form);
-      toast.success("Đặt lịch lái thử thành công! Chúng tôi sẽ liên hệ xác nhận.");
-      const nextMotorcycleId = initialMotorcycleId || "";
+      toast.success(
+        "Đặt lịch lái thử thành công! Chúng tôi sẽ liên hệ xác nhận.",
+      );
+      const nextMotorcycleId =
+        selectedMotorcycleId || initialMotorcycleId || "";
       setStep(1);
       setSelectedMotorcycleId(nextMotorcycleId);
       setForm({
@@ -204,7 +174,9 @@ const BookingPage = () => {
         note: "",
       });
     } catch (err) {
-      toast.error(err?.response?.data?.message || err.message || "Đặt lịch thất bại");
+      toast.error(
+        err?.response?.data?.message || err.message || "Đặt lịch thất bại",
+      );
     } finally {
       setLoading(false);
     }
@@ -249,7 +221,7 @@ const BookingPage = () => {
         }
       `}</style>
 
-      <section className="relative h-[540px] overflow-hidden">
+      <section className="relative -mt-14 h-[580px] overflow-hidden sm:-mt-16 sm:h-[620px] md:-mt-[68px]">
         <img
           src={loginHero}
           alt="Đăng ký lái thử"
@@ -275,15 +247,46 @@ const BookingPage = () => {
               className="booking-rise mt-5 max-w-[610px] text-sm leading-7 text-white/68 sm:text-[15px]"
               style={{ animationDelay: "180ms" }}
             >
-              Cảm nhận nhịp đập của động cơ, sự tinh tế trong thiết kế và khả năng
-              vận hành đỉnh cao. Hãy đặt lịch hẹn để trải nghiệm những cỗ máy tốc
-              độ tuyệt vời nhất của IRON.
+              Cảm nhận nhịp đập của động cơ, sự tinh tế trong thiết kế và khả
+              năng vận hành đỉnh cao. Hãy đặt lịch hẹn để trải nghiệm những cỗ
+              máy tốc độ tuyệt vời nhất của IRON.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="-mt-14 pb-16">
+      <section className="-mt-24 relative z-20 sm:-mt-28">
+        <div className="mx-auto max-w-[1184px] px-4 sm:px-6 lg:px-0">
+          <div className="flex flex-col gap-4 rounded-[10px] border border-white/70 bg-white/90 px-5 py-4 shadow-[0_20px_50px_-38px_rgba(0,0,0,0.35)] backdrop-blur sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <nav
+              aria-label="Điều hướng trang"
+              className="flex flex-wrap items-center gap-2 text-sm font-medium text-[#5E3F3B]"
+            >
+              <Link to="/" className="transition-colors hover:text-[#BC000A]">
+                Trang chủ
+              </Link>
+              <span>/</span>
+              <Link
+                to="/motorcycles"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Dòng xe
+              </Link>
+              <span>/</span>
+              <span className="font-semibold text-[#1A1B1F]">
+                Đăng ký lái thử
+              </span>
+            </nav>
+
+            <div className="inline-flex items-center gap-2 rounded-full bg-[#F7F4F6] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#BC000A]">
+              <span className="h-2 w-2 rounded-full bg-[#BC000A]" />
+              Bố cục đăng ký rõ ràng
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="pb-16 pt-6">
         <div className="mx-auto max-w-[1184px] px-4 sm:px-6 lg:px-0">
           <div className="overflow-hidden rounded-[8px] border border-white/70 bg-[#FAF9FE] shadow-[0_20px_60px_-38px_rgba(0,0,0,0.28)]">
             <div className="grid lg:grid-cols-[minmax(0,1fr)_360px]">
@@ -325,72 +328,115 @@ const BookingPage = () => {
                 <div className="mt-8">
                   {step === 1 && (
                     <div className={stepTransitionClass}>
-                      <h2 className="font-teko text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
-                        Bạn muốn lái thử dòng xe nào?
-                      </h2>
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#BC000A]">
+                            Bước 1
+                          </p>
+                          <h2 className="mt-2 font-teko text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
+                            Bạn muốn lái thử dòng xe nào?
+                          </h2>
+                          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5E3F3B]">
+                            Trang này đã được rút gọn để chỉ hiển thị mẫu xe bạn
+                            chọn trước đó, giúp bố cục dễ nhìn và thao tác nhanh
+                            hơn.
+                          </p>
+                        </div>
 
-                      {loadingMotorcycles ? (
-                        <div className="mt-6 grid gap-4 md:grid-cols-3">
-                          {Array.from({ length: 3 }).map((_, index) => (
-                            <div
-                              key={index}
-                              className="h-[290px] animate-pulse rounded-[8px] border border-[#E3E2E7] bg-white"
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="mt-6 grid gap-4 md:grid-cols-3">
-                          {displayCards.map((card) => {
-                            const selected = String(selectedMotorcycleId) === String(card.id);
-                            return (
-                              <button
-                                key={card.id}
-                                type="button"
-                                onClick={() => handleSelectMotorcycle(card.id)}
-                                className={`group flex h-full flex-col overflow-hidden rounded-[8px] border bg-[#FAF9FE] p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.2)] ${
-                                  selected
-                                    ? "border-[#BC000A] bg-white shadow-[0_16px_36px_-26px_rgba(188,0,10,0.2)]"
-                                    : "border-[#E3E2E7]"
-                                }`}
-                              >
-                                <div className="flex h-40 items-center justify-center overflow-hidden rounded-[6px] bg-white">
-                                  <img
-                                    src={card.image}
-                                    alt={card.title}
-                                    onError={(e) => {
-                                      if (card.fallbackImage && e.currentTarget.src !== card.fallbackImage) {
-                                        e.currentTarget.src = card.fallbackImage;
-                                      }
-                                    }}
-                                    className={`booking-float h-full w-full object-contain p-2 transition-transform duration-500 group-hover:scale-105 ${
-                                      card.category === "Adventure" ? "scale-[1.02]" : ""
-                                    }`}
-                                  />
-                                </div>
-                                <div className="mt-4 flex flex-1 flex-col">
-                                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5E3F3B]">
-                                    {card.category}
+                        <Link
+                          to="/motorcycles"
+                          className="inline-flex items-center gap-2 rounded-[6px] border border-[#E3E2E7] bg-white px-4 py-3 text-sm font-semibold text-[#1A1B1F] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#BC000A] hover:text-[#BC000A]"
+                        >
+                          Xem danh sách xe
+                          <ArrowRight size={16} />
+                        </Link>
+                      </div>
+
+                      <div className="mt-6">
+                        {loadingMotorcycles ? (
+                          <div className="h-[250px] animate-pulse rounded-[10px] border border-[#E3E2E7] bg-white" />
+                        ) : selectedMotorcycle ? (
+                          <div className="grid gap-5 rounded-[10px] border border-[#E3E2E7] bg-white p-5 md:grid-cols-[260px_minmax(0,1fr)] md:p-6">
+                            <div className="flex h-[220px] items-center justify-center overflow-hidden rounded-[10px] bg-[#F7F4F6]">
+                              <img
+                                src={resolveImageUrl(
+                                  selectedMotorcycle.thumbnailUrl ||
+                                    selectedMotorcycle.imageUrl ||
+                                    selectedMotorcycle.images?.[0]?.imageUrl,
+                                )}
+                                alt={selectedMotorcycle.name}
+                                className="booking-float h-full w-full object-contain p-4"
+                              />
+                            </div>
+
+                            <div className="flex flex-col justify-between gap-5">
+                              <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#5E3F3B]">
+                                  {selectedMotorcycle.category?.name ||
+                                    "Dòng xe"}
+                                </p>
+                                <h3 className="mt-2 font-teko text-4xl font-semibold leading-none text-[#1A1B1F]">
+                                  {selectedMotorcycle.name}
+                                </h3>
+                                <p className="mt-3 text-sm leading-6 text-[#5E3F3B]">
+                                  {selectedMotorcycle.brand?.name || "IRON"} ·
+                                  Xe đã sẵn sàng cho trải nghiệm lái thử theo
+                                  lịch bạn chọn.
+                                </p>
+                              </div>
+
+                              <div className="grid gap-3 sm:grid-cols-3">
+                                <div className="rounded-[8px] bg-[#F7F4F6] px-4 py-3">
+                                  <p className="text-xs uppercase tracking-[0.12em] text-[#7A6E71]">
+                                    Trạng thái
                                   </p>
-                                  <h3 className="mt-2 font-inter text-[13px] font-semibold leading-[18px] text-[#1A1B1F]">
-                                    {card.title}
-                                  </h3>
-                                  <p className="mt-1 text-sm leading-5 text-[#5E3F3B]">
-                                    {card.subtitle}
+                                  <p className="mt-1 font-semibold text-[#1A1B1F]">
+                                    Đã chọn
                                   </p>
                                 </div>
-                                <div
-                                  className={`mt-4 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.16em] ${
-                                    selected ? "text-[#BC000A]" : "text-[#7A6E71]"
-                                  }`}
-                                >
-                                  <span>{selected ? "Đang chọn" : "Chọn xe"}</span>
-                                  {selected && <Check size={14} />}
+                                <div className="rounded-[8px] bg-[#F7F4F6] px-4 py-3">
+                                  <p className="text-xs uppercase tracking-[0.12em] text-[#7A6E71]">
+                                    Dòng xe
+                                  </p>
+                                  <p className="mt-1 font-semibold text-[#1A1B1F]">
+                                    {selectedMotorcycle.category?.name ||
+                                      "Đang cập nhật"}
+                                  </p>
                                 </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      )}
+                                <div className="rounded-[8px] bg-[#F7F4F6] px-4 py-3">
+                                  <p className="text-xs uppercase tracking-[0.12em] text-[#7A6E71]">
+                                    Thương hiệu
+                                  </p>
+                                  <p className="mt-1 font-semibold text-[#1A1B1F]">
+                                    {selectedMotorcycle.brand?.name || "IRON"}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="rounded-[10px] border border-dashed border-[#D8CDD0] bg-white px-6 py-10 text-center">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#BC000A]">
+                              Chưa có mẫu xe
+                            </p>
+                            <h3 className="mt-3 font-teko text-3xl font-semibold text-[#1A1B1F]">
+                              Hãy chọn xe trước khi đặt lịch
+                            </h3>
+                            <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#5E3F3B]">
+                              Mình đã bỏ toàn bộ danh sách loại xe khỏi bước
+                              này. Bạn có thể quay lại trang dòng xe để chọn
+                              đúng mẫu cần lái thử, sau đó tiếp tục đặt lịch.
+                            </p>
+                            <Link
+                              to="/motorcycles"
+                              className="mt-6 inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-inter text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)]"
+                            >
+                              Chọn xe ngay
+                              <ArrowRight size={16} />
+                            </Link>
+                          </div>
+                        )}
+                      </div>
 
                       <div className="mt-6 flex justify-end">
                         <button
@@ -419,8 +465,8 @@ const BookingPage = () => {
                             Chọn thời gian bạn mong muốn
                           </h2>
                           <p className="mt-2 max-w-xl text-sm leading-6 text-[#5E3F3B]">
-                            Chúng tôi sẽ chuẩn bị xe, bảo hộ và đội ngũ hỗ trợ theo khung
-                            giờ bạn chọn.
+                            Chúng tôi sẽ chuẩn bị xe, bảo hộ và đội ngũ hỗ trợ
+                            theo khung giờ bạn chọn.
                           </p>
                         </div>
                         <button
@@ -436,7 +482,10 @@ const BookingPage = () => {
                       <div className="mt-6 grid gap-5 lg:grid-cols-2">
                         <div className="rounded-[8px] border border-[#E3E2E7] bg-white p-5">
                           <div className="flex items-center gap-2">
-                            <CalendarDays size={16} className="text-[#BC000A]" />
+                            <CalendarDays
+                              size={16}
+                              className="text-[#BC000A]"
+                            />
                             <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#5E3F3B]">
                               Chọn ngày
                             </p>
@@ -446,7 +495,10 @@ const BookingPage = () => {
                             min={today}
                             value={form.bookingDate}
                             onChange={(e) =>
-                              setForm((prev) => ({ ...prev, bookingDate: e.target.value }))
+                              setForm((prev) => ({
+                                ...prev,
+                                bookingDate: e.target.value,
+                              }))
                             }
                             className="mt-4 w-full rounded-[8px] border border-[#E3E2E7] bg-[#FAF9FE] px-4 py-3 text-sm outline-none transition-colors focus:border-[#BC000A]"
                           />
@@ -470,7 +522,10 @@ const BookingPage = () => {
                                   key={time}
                                   type="button"
                                   onClick={() =>
-                                    setForm((prev) => ({ ...prev, bookingTime: time }))
+                                    setForm((prev) => ({
+                                      ...prev,
+                                      bookingTime: time,
+                                    }))
                                   }
                                   className={`rounded-[6px] border px-3 py-2 text-sm font-semibold transition-all duration-300 ${
                                     selected
@@ -526,15 +581,18 @@ const BookingPage = () => {
                   )}
 
                   {step === 3 && (
-                    <form className={stepTransitionClass} onSubmit={handleSubmit}>
+                    <form
+                      className={stepTransitionClass}
+                      onSubmit={handleSubmit}
+                    >
                       <div className="flex items-start justify-between gap-4">
                         <div>
                           <h2 className="font-teko text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
                             Nhập thông tin liên hệ
                           </h2>
                           <p className="mt-2 max-w-xl text-sm leading-6 text-[#5E3F3B]">
-                            Chúng tôi sẽ gọi xác nhận lịch hẹn và chuẩn bị đầy đủ trước khi
-                            bạn tới showroom.
+                            Chúng tôi sẽ gọi xác nhận lịch hẹn và chuẩn bị đầy
+                            đủ trước khi bạn tới showroom.
                           </p>
                         </div>
                         <button
@@ -556,7 +614,10 @@ const BookingPage = () => {
                             required
                             value={form.customerName}
                             onChange={(e) =>
-                              setForm((prev) => ({ ...prev, customerName: e.target.value }))
+                              setForm((prev) => ({
+                                ...prev,
+                                customerName: e.target.value,
+                              }))
                             }
                             className="w-full rounded-[8px] border border-[#E3E2E7] bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-[#BC000A]"
                             placeholder="Nhập họ tên"
@@ -572,7 +633,10 @@ const BookingPage = () => {
                             type="tel"
                             value={form.customerPhone}
                             onChange={(e) =>
-                              setForm((prev) => ({ ...prev, customerPhone: e.target.value }))
+                              setForm((prev) => ({
+                                ...prev,
+                                customerPhone: e.target.value,
+                              }))
                             }
                             className="w-full rounded-[8px] border border-[#E3E2E7] bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-[#BC000A]"
                             placeholder="Nhập số điện thoại"
@@ -588,7 +652,10 @@ const BookingPage = () => {
                           rows={4}
                           value={form.note}
                           onChange={(e) =>
-                            setForm((prev) => ({ ...prev, note: e.target.value }))
+                            setForm((prev) => ({
+                              ...prev,
+                              note: e.target.value,
+                            }))
                           }
                           className="w-full resize-none rounded-[8px] border border-[#E3E2E7] bg-white px-4 py-3 text-sm outline-none transition-colors focus:border-[#BC000A]"
                           placeholder="Ví dụ: Tôi muốn chạy thử buổi sáng cuối tuần."
@@ -681,8 +748,8 @@ const BookingPage = () => {
                     </p>
                   </div>
                   <p className="mt-3 text-sm leading-6 text-[#5E3F3B]">
-                    Đội ngũ tư vấn sẽ xác nhận lịch và hỗ trợ chuẩn bị trước khi bạn
-                    đến showroom.
+                    Đội ngũ tư vấn sẽ xác nhận lịch và hỗ trợ chuẩn bị trước khi
+                    bạn đến showroom.
                   </p>
                 </div>
               </aside>

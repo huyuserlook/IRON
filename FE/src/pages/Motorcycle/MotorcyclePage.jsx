@@ -6,6 +6,9 @@ import motorcycleApi from "../../api/motorcycleApi";
 import { useDebounce } from "../../hooks/useDebounce";
 import MotorcycleFilter from "../../components/motorcycle/MotorcycleFilter";
 import MotorcycleGrid from "../../components/motorcycle/MotorcycleGrid";
+import bmwImage from "../../assets/img/BMW.png";
+import cbrImage from "../../assets/img/cbr.png";
+import ducatiImage from "../../assets/img/ducati.png";
 
 const PAGE_SIZE = 6;
 
@@ -369,20 +372,59 @@ const MotorcyclePage = () => {
         }
       `}</style>
 
-      <section className="border-b border-[#E8E3EC] bg-white">
+      <section className="border-b border-[#E8E3EC] bg-white overflow-hidden">
         <div className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
-          <div className="max-w-3xl">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#BC000A]">
-              BỘ SƯU TẬP
-            </p>
-            <h1 className="mt-3 font-teko text-[clamp(3.2rem,7vw,5.4rem)] font-bold leading-[0.88] tracking-[-0.04em] text-[#1A1B1F]">
-              DÒNG XE IRON
-            </h1>
-            <p className="mt-4 max-w-[760px] text-sm leading-7 text-[#7A6E71] sm:text-[15px]">
-              Khám phá các mẫu superbike, cruiser và adventure theo đúng nhu cầu
-              sử dụng. Bộ lọc bên trái cho phép thu hẹp theo hãng xe, mức giá và
-              dung tích để so sánh nhanh hơn.
-            </p>
+          <div className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_460px] xl:grid-cols-[minmax(0,1fr)_520px]">
+            <div className="max-w-3xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#BC000A]">
+                BỘ SƯU TẬP
+              </p>
+              <h1 className="mt-3 font-teko text-[clamp(3.2rem,7vw,5.4rem)] font-bold leading-[0.88] tracking-[-0.04em] text-[#1A1B1F]">
+                DÒNG XE IRON
+              </h1>
+              <p className="mt-4 max-w-[760px] text-sm leading-7 text-[#7A6E71] sm:text-[15px]">
+                Khám phá các mẫu superbike, cruiser và adventure theo đúng nhu cầu
+                sử dụng. Bộ lọc bên trái cho phép thu hẹp theo hãng xe, mức giá và
+                dung tích để so sánh nhanh hơn.
+              </p>
+            </div>
+
+            <div className="moto-fade relative hidden h-[300px] lg:block" style={{ animationDelay: "120ms" }}>
+              <div className="absolute right-8 top-2 h-40 w-40 rounded-full bg-[#F9D7D7] blur-3xl opacity-80" />
+              <div className="absolute bottom-0 left-6 h-36 w-36 rounded-full bg-[#EAE5F3] blur-3xl opacity-90" />
+
+              <div className="relative h-full">
+                <div className="moto-float absolute left-0 top-12 flex h-[180px] w-[250px] items-center justify-center rounded-[28px] border border-[#EEE7EB] bg-[#FAF8FC] p-4 shadow-[0_22px_50px_-36px_rgba(0,0,0,0.22)]">
+                  <img
+                    src={ducatiImage}
+                    alt="Ducati"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+
+                <div
+                  className="moto-float absolute right-0 top-0 flex h-[190px] w-[280px] items-center justify-center rounded-[32px] border border-[#F0E6E8] bg-white p-4 shadow-[0_28px_60px_-34px_rgba(0,0,0,0.2)]"
+                  style={{ animationDelay: "900ms" }}
+                >
+                  <img
+                    src={bmwImage}
+                    alt="BMW"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+
+                <div
+                  className="moto-float absolute bottom-0 right-14 flex h-[170px] w-[240px] items-center justify-center rounded-[28px] border border-[#EEE7EB] bg-[#FFF7F7] p-4 shadow-[0_24px_55px_-34px_rgba(188,0,10,0.25)]"
+                  style={{ animationDelay: "1600ms" }}
+                >
+                  <img
+                    src={cbrImage}
+                    alt="Honda CBR"
+                    className="h-full w-full object-contain"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

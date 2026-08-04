@@ -9,8 +9,8 @@ const NAV_LINKS = [
   { to: "/", label: "Trang chủ", end: true },
   { to: "/motorcycles", label: "Dòng xe" },
   { to: "/booking", label: "Lái thử" },
-  { to: "/#about", label: "Giới thiệu", isAnchor: true },
-  { to: "/#contact", label: "Liên hệ", isAnchor: true },
+  { to: "/about", label: "Giới thiệu" },
+  { to: "/contact", label: "Liên hệ" },
 ];
 
 const PRESS_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
