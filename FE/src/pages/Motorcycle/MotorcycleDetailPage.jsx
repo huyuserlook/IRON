@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,9 +13,11 @@ import {
   X,
   XCircle,
   Zap,
+  Camera,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import motorcycleApi from "../../api/motorcycleApi";
+import reviewApi from "../../api/reviewApi";
 import { useCart } from "../../hooks/useCart";
 import { formatCurrency } from "../../utils/formatCurrency";
 
@@ -157,6 +159,13 @@ const MotorcycleDetailPage = () => {
   const [imgAnimKey, setImgAnimKey] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [relatedMotorcycles, setRelatedMotorcycles] = useState([]);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    rating: 5,
+    comment: "",
+  });
+  const [reviewImage, setReviewImage] = useState(null);
+  const fileInputRef = useRef(null);
   const [relatedLoading, setRelatedLoading] = useState(false);
 
   const galleryImages = useMemo(() => buildGallery(moto), [moto]);
@@ -179,6 +188,9 @@ const MotorcycleDetailPage = () => {
           review.title || review.comment?.slice(0, 40) || "Cảm nhận sản phẩm",
         comment:
           review.comment || review.content || "Sản phẩm đáp ứng tốt nhu cầu.",
+        image: resolveImageUrl(
+          review.imageBase64 ?? review.imageUrl ?? review.image,
+        ),
         date: formatReviewDate(review.createdAt || review.date),
       }));
   }, [moto]);
@@ -295,6 +307,67 @@ const MotorcycleDetailPage = () => {
       toast.success("Đã thêm vào giỏ hàng!");
     } catch (err) {
       toast.error("Không thể thêm vào giỏ hàng");
+    }
+  };
+
+  const handleReviewChange = (field) => (e) => {
+    const value = e?.target ? e.target.value : e;
+    setReviewForm((s) => ({ ...s, [field]: value }));
+  };
+
+  const readFileAsDataUrl = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleFileSelect = async (e) => {
+    const file = e?.target?.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setReviewImage({ name: file.name, dataUrl });
+    } catch (err) {
+      toast.error("Không thể đọc ảnh");
+    }
+  };
+
+  const submitReview = async (e) => {
+    e?.preventDefault();
+    if (!moto) return;
+    setSubmittingReview(true);
+    try {
+      const payload = {
+        motorcycleId: moto.id,
+        // anonymous submission: do not send name/email
+        rating: Number(reviewForm.rating) || 5,
+        comment: reviewForm.comment,
+        imageBase64: reviewImage?.dataUrl || null,
+      };
+      await reviewApi.create(payload);
+      // Optimistically append the new review with PENDING status
+      const newReview = {
+        id: `temp-${Date.now()}`,
+        motorcycleId: moto.id,
+        customerName: "Khách hàng",
+        rating: payload.rating,
+        comment: payload.comment,
+        status: "PENDING",
+        imageBase64: payload.imageBase64,
+        createdAt: new Date().toISOString(),
+      };
+      setMoto((m) => ({ ...m, reviews: [newReview, ...(m.reviews || [])] }));
+      setReviewForm({ rating: 5, comment: "" });
+      setReviewImage(null);
+      toast.success("Cảm ơn! Đánh giá của bạn sẽ được duyệt.");
+    } catch (err) {
+      const msg =
+        err?.message || (err?.message ? err.message : "Lỗi khi gửi đánh giá");
+      toast.error(msg);
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -666,6 +739,13 @@ const MotorcycleDetailPage = () => {
                     </div>
                   </div>
                   <p className="mt-4 text-sm leading-7 text-[#5E3F3B]">
+                    {review.image ? (
+                      <img
+                        src={review.image}
+                        alt="review"
+                        className="mb-3 max-h-56 w-full rounded object-cover"
+                      />
+                    ) : null}
                     {review.comment}
                   </p>
                   <p className="mt-4 text-xs uppercase tracking-[0.18em] text-[#9A9196]">
@@ -675,6 +755,83 @@ const MotorcycleDetailPage = () => {
               ))}
             </div>
           )}
+          {/* Review submission form */}
+          <form
+            onSubmit={submitReview}
+            className="mt-6 rounded-[20px] border border-[#E3DEE6] bg-white p-6 shadow-[0_10px_30px_-20px_rgba(0,0,0,0.08)]"
+          >
+            <h3 className="text-lg font-semibold text-[#1A1B1F]">
+              Viết đánh giá
+            </h3>
+            <div className="mt-3 grid gap-3 sm:grid-cols-1">
+              <select
+                value={reviewForm.rating}
+                onChange={handleReviewChange("rating")}
+                className="w-28 rounded border border-[#E3DEE6] px-3 py-2 text-sm"
+              >
+                <option value={5}>5 sao</option>
+                <option value={4}>4 sao</option>
+                <option value={3}>3 sao</option>
+                <option value={2}>2 sao</option>
+                <option value={1}>1 sao</option>
+              </select>
+            </div>
+            <textarea
+              value={reviewForm.comment}
+              onChange={handleReviewChange("comment")}
+              placeholder="Viết đánh giá của bạn..."
+              required
+              className="mt-3 h-28 w-full rounded border border-[#E3DEE6] px-3 py-2 text-sm"
+            />
+            <div className="mt-3 flex items-start gap-3">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  fileInputRef.current && fileInputRef.current.click()
+                }
+                className="inline-flex items-center gap-2 rounded border border-[#E3DEE6] px-3 py-2 text-sm"
+                aria-label="Thêm ảnh đánh giá"
+              >
+                <Camera size={16} />
+                Thêm ảnh
+              </button>
+              {reviewImage ? (
+                <div className="ml-2 inline-flex items-center gap-2">
+                  <img
+                    src={reviewImage.dataUrl}
+                    alt={reviewImage.name}
+                    className="h-16 w-16 rounded object-cover"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setReviewImage(null)}
+                    className="text-sm text-[#7A6E71]"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              ) : null}
+            </div>
+            <div className="mt-4 flex items-center gap-3">
+              <button
+                type="submit"
+                disabled={submittingReview}
+                className="inline-flex items-center gap-2 rounded bg-[#BC000A] px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+              >
+                Gửi đánh giá
+              </button>
+              <span className="text-sm text-[#7A6E71]">
+                Đánh giá sẽ được duyệt trước khi hiển thị nổi bật.
+              </span>
+            </div>
+          </form>
         </section>
 
         {moto.specifications ? (
