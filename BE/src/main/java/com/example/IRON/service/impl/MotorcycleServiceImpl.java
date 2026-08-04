@@ -8,9 +8,9 @@ import com.example.IRON.dto.response.MotorcycleResponse;
 import com.example.IRON.dto.response.ReviewResponse;
 import com.example.IRON.entity.Brand;
 import com.example.IRON.entity.Category;
+import com.example.IRON.entity.Inventory;
 import com.example.IRON.entity.Motorcycle;
 import com.example.IRON.entity.MotorcycleImage;
-import com.example.IRON.entity.Inventory;
 import com.example.IRON.entity.Review;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.repository.BrandRepository;
@@ -102,6 +102,9 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         motorcycle.setStatus(request.getStatus() != null ? request.getStatus() : Motorcycle.MotorcycleStatus.AVAILABLE);
         motorcycle.setFeatured(request.getFeatured() != null ? request.getFeatured() : Boolean.FALSE);
 
+        attachImages(motorcycle, request);
+        attachInventories(motorcycle, request);
+
         return toDetailResponse(motorcycleRepository.save(motorcycle));
     }
 
@@ -129,6 +132,12 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         if (request.getStatus() != null) motorcycle.setStatus(request.getStatus());
         if (request.getFeatured() != null) motorcycle.setFeatured(request.getFeatured());
 
+        // Cập nhật lại danh sách ảnh & tồn kho
+        motorcycle.getImages().clear();
+        motorcycle.getInventories().clear();
+        attachImages(motorcycle, request);
+        attachInventories(motorcycle, request);
+
         return toDetailResponse(motorcycleRepository.save(motorcycle));
     }
 
@@ -136,6 +145,57 @@ public class MotorcycleServiceImpl implements MotorcycleService {
     @Transactional
     public void delete(Long id) {
         motorcycleRepository.delete(findById(id));
+    }
+
+    /**
+     * Gắn danh sách ảnh cho xe.
+     * Ảnh đầu tiên sẽ là ảnh chính (isPrimary = true).
+     * Nếu xe chưa có thumbnail thì tự lấy ảnh đầu tiên làm thumbnail.
+     */
+    private void attachImages(Motorcycle motorcycle, MotorcycleRequest request) {
+        List<String> rawImages = request.getImages();
+        if (rawImages == null || rawImages.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < rawImages.size(); i++) {
+            String url = rawImages.get(i);
+            if (url == null || url.isBlank()) {
+                continue;
+            }
+            MotorcycleImage image = new MotorcycleImage();
+            image.setMotorcycle(motorcycle);
+            image.setImageUrl(url.trim());
+            image.setSortOrder(i);
+            image.setIsPrimary(i == 0);
+            motorcycle.getImages().add(image);
+        }
+
+        if (motorcycle.getThumbnailUrl() == null || motorcycle.getThumbnailUrl().isBlank()) {
+            motorcycle.setThumbnailUrl(rawImages.get(0).trim());
+        }
+    }
+
+    /**
+     * Gắn danh sách tồn kho theo màu cho xe.
+     */
+    private void attachInventories(Motorcycle motorcycle, MotorcycleRequest request) {
+        List<MotorcycleRequest.InventoryItem> items = request.getInventories();
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        for (MotorcycleRequest.InventoryItem item : items) {
+            if (item.getColorName() == null || item.getColorName().isBlank()) {
+                continue;
+            }
+            Inventory inventory = new Inventory();
+            inventory.setMotorcycle(motorcycle);
+            inventory.setColorName(item.getColorName().trim());
+            inventory.setColorCode(item.getColorCode() != null ? item.getColorCode().trim() : null);
+            inventory.setQuantity(item.getQuantity() != null ? item.getQuantity() : 0);
+            motorcycle.getInventories().add(inventory);
+        }
     }
 
     private Motorcycle findById(Long id) {
@@ -155,6 +215,11 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         res.setThumbnailUrl(m.getThumbnailUrl());
         res.setStatus(m.getStatus());
         res.setFeatured(m.getFeatured());
+        int total = 0;
+        for (Inventory inv : m.getInventories()) {
+            total += (inv.getQuantity() != null ? inv.getQuantity() : 0);
+        }
+        res.setTotalInventory(total);
         return res;
     }
 

@@ -43,7 +43,7 @@ public class Motorcycle {
     @Column(name = "year_model")
     private Integer yearModel;
 
-    @Column(name = "thumbnail_url")
+    @Column(name = "thumbnail_url", columnDefinition = "TEXT")
     private String thumbnailUrl;
 
     @Column(columnDefinition = "TEXT")
@@ -62,7 +62,7 @@ public class Motorcycle {
     @OneToMany(mappedBy = "motorcycle", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MotorcycleImage> images = new ArrayList<>();
 
-    @OneToMany(mappedBy = "motorcycle", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "motorcycle", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inventory> inventories = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)

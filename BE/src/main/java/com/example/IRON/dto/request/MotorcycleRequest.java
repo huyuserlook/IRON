@@ -5,6 +5,8 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class MotorcycleRequest {
@@ -29,4 +31,17 @@ public class MotorcycleRequest {
     private String specifications;
     private Motorcycle.MotorcycleStatus status;
     private Boolean featured;
+
+    /** Danh sách ảnh (base64/data-url hoặc URL) */
+    private List<String> images = new ArrayList<>();
+
+    /** Danh sách tồn kho theo màu */
+    private List<InventoryItem> inventories = new ArrayList<>();
+
+    @Data
+    public static class InventoryItem {
+        private String colorName;
+        private String colorCode;
+        private Integer quantity;
+    }
 }

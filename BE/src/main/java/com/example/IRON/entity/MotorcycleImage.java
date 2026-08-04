@@ -14,7 +14,7 @@ public class MotorcycleImage {
     @JoinColumn(name = "motorcycle_id", nullable = false)
     private Motorcycle motorcycle;
 
-    @Column(name = "image_url", nullable = false)
+    @Column(name = "image_url", nullable = false, columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(name = "color_name", length = 50)
