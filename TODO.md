@@ -1,36 +1,27 @@
-# TODO - Thêm tính năng Quản lý liên hệ (Contact Management)
+# TODO - Hệ thống thông báo Admin
 
-## Mục tiêu
+## Backend (BE)
 
-Tạo tính năng quản lý liên hệ khách hàng cho showroom IRON: gửi yêu cầu từ trang Liên hệ (public) và quản lý các yêu cầu trong trang Admin.
+- [x] 1. Tạo `dto/response/NotificationResponse.java`
+- [x] 2. Tạo `service/interfaces/NotificationService.java`
+- [x] 3. Tạo `service/impl/NotificationServiceImpl.java`
+- [x] 4. Tạo `controller/admin/AdminNotificationController.java`
+- [x] 5. Thêm truy vấn vào `OrderRepository`
+- [x] 6. Thêm truy vấn vào `BookingRepository`
+- [x] 7. Thêm truy vấn vào `ContactRepository`
+- [x] 8. Thêm truy vấn vào `UserRepository`
 
-## Trạng thái: HOÀN THÀNH
+## Frontend (FE)
 
-## Các bước đã thực hiện
+- [x] 9. Tạo `FE/src/api/notificationApi.js`
+- [x] 10. Cập nhật `AdminLayout.jsx` - thay logic thông báo chỉ-đánh-giá bằng nguồn thông báo hợp nhất
 
-- [x] **B1. Backend - Entity & Column mapping**
-  - `Contact.java`: `name` map sang cột `full_name` (khớp schema DB).
-  - Thêm field `subject` (nullable).
-  - `message` bắt buộc (NOT NULL), default `""` khi null.
-  - `status` enum khớp DB: `NEW, IN_PROGRESS, RESOLVED, SPAM`.
+## Kiểm thử
 
-- [x] **B2. Backend - DTO, Service, Repository, Controller**
-  - `ContactRequest`: thêm `subject`.
-  - `ContactResponse`: thêm `subject`.
-  - `ContactServiceImpl`: set `subject`, default message `""`.
-  - `ContactRepository`, `ContactService`, `ContactController`, `AdminContactController` đã có.
+- [x] 11. Rebuild backend & khởi động lại
+- [x] 12. Kiểm tra `/api/admin/notifications` và chuông thông báo admin
 
-- [x] **B3. Frontend - API & Pages**
-  - `contactApi.js`: các hàm gọi API.
-  - `ContactPage.jsx`: form gửi liên hệ.
-  - `ContactManagement.jsx`: quản lý liên hệ (status options cập nhật theo enum DB).
-  - `Sidebar.jsx`, `AppRoutes.jsx`: thêm route `/admin/contacts`.
+## Biểu đồ thống kê
 
-- [x] **B4. Build & Kiểm tra**
-  - Backend: `mvnw clean compile` → BUILD SUCCESS (110 files).
-  - Frontend: `npm run build` → built in 1.83s.
-
-## Ghi chú
-
-- Đã khắc phục lỗi `Field 'full_name' doesn't have a default value` bằng cách map `name` → `full_name`.
-- Đồng bộ enum `status` với DB (`IN_PROGRESS`, `SPAM` thay `CONTACTED`, `CLOSED`).
+- [x] 13. Tạo `FE/src/components/admin/StatisticChart.jsx` (biểu đồ cột bán hàng)
+- [x] 14. Cập nhật `StatisticsPage.jsx` - dùng `StatisticChart` thay biểu đồ inline

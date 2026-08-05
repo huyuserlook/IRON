@@ -1,22 +1,10 @@
 import { useEffect, useState } from "react";
 import adminApi from "../../../api/adminApi";
+import StatisticChart from "../../../components/admin/StatisticChart";
 import { formatCurrency } from "../../../utils/formatCurrency";
-import {
-  AreaChart,
-  Area,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-} from "recharts";
 import {
   FileSpreadsheet,
   FileText,
-  Download,
   Loader2,
   AlertTriangle,
 } from "lucide-react";
@@ -24,17 +12,6 @@ import * as XLSX from "xlsx";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import toast from "react-hot-toast";
-
-// Wrapper để đảm bảo recharts v3 có kích thước container ổn định trước khi vẽ
-const ChartContainer = ({ height = 360, children }) => {
-  return (
-    <div style={{ width: "100%", height }} className="relative">
-      <ResponsiveContainer width="100%" height="100%">
-        {children}
-      </ResponsiveContainer>
-    </div>
-  );
-};
 
 const exportExcel = (chartData, topMotorcycles, summary) => {
   try {
@@ -162,14 +139,6 @@ const StatisticsPage = () => {
       orderCount: m.orderCount,
     })) || [];
 
-  const yearlyData =
-    stats?.yearlyRevenues?.map((y) => ({
-      name: `Năm ${y.year}`,
-      year: y.year,
-      revenue: Number(y.revenue) || 0,
-      orderCount: y.orderCount,
-    })) || [];
-
   const topMotorcycles = stats?.topMotorcycles || [];
   const summary = {
     totalRevenue: formatCurrency(stats?.totalRevenue || 0),
@@ -276,136 +245,8 @@ const StatisticsPage = () => {
             ))}
           </div>
 
-          {/* Line chart - monthly revenue */}
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Download size={16} className="text-orange-500" />
-              <h2 className="font-semibold text-gray-700">
-                Biểu đồ đường doanh thu theo tháng
-              </h2>
-            </div>
-            {chartData.length === 0 ? (
-              <div className="flex h-72 items-center justify-center rounded-lg border border-dashed border-gray-200 text-sm text-gray-400">
-                Chưa có dữ liệu doanh thu
-              </div>
-            ) : (
-              <ChartContainer height={360}>
-                <LineChart
-                  data={chartData}
-                  margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 13, fill: "#374151" }}
-                    axisLine={{ stroke: "#d1d5db" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={70}
-                    tickFormatter={(v) => (v / 1e6).toFixed(0) + "M"}
-                  />
-                  <Tooltip
-                    formatter={(v) => formatCurrency(v)}
-                    contentStyle={{
-                      borderRadius: 10,
-                      border: "1px solid #f0f0f0",
-                      boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-                    }}
-                  />
-                  <Legend wrapperStyle={{ paddingTop: 8 }} />
-                  <Line
-                    type="monotone"
-                    dataKey="revenue"
-                    name="Doanh thu"
-                    stroke="#f97316"
-                    strokeWidth={3}
-                    dot={{ r: 5, fill: "#f97316", strokeWidth: 2 }}
-                    activeDot={{ r: 7, fill: "#ea580c" }}
-                  />
-                </LineChart>
-              </ChartContainer>
-            )}
-          </div>
-
-          {/* Area chart - yearly revenue */}
-          <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Download size={16} className="text-blue-500" />
-              <h2 className="font-semibold text-gray-700">
-                Biểu đồ miền doanh thu theo năm
-              </h2>
-            </div>
-            {yearlyData.length === 0 ? (
-              <div className="flex h-72 items-center justify-center rounded-lg border border-dashed border-gray-200 text-sm text-gray-400">
-                Chưa có dữ liệu doanh thu theo năm
-              </div>
-            ) : (
-              <ChartContainer height={360}>
-                <AreaChart
-                  data={yearlyData}
-                  margin={{ top: 10, right: 30, left: 10, bottom: 5 }}
-                >
-                  <defs>
-                    <linearGradient
-                      id="yearlyGradient"
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="0%"
-                        stopColor="#3b82f6"
-                        stopOpacity={0.45}
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor="#3b82f6"
-                        stopOpacity={0.02}
-                      />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 13, fill: "#374151" }}
-                    axisLine={{ stroke: "#d1d5db" }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12, fill: "#6b7280" }}
-                    axisLine={false}
-                    tickLine={false}
-                    width={70}
-                    tickFormatter={(v) => (v / 1e6).toFixed(0) + "M"}
-                  />
-                  <Tooltip
-                    formatter={(v) => formatCurrency(v)}
-                    contentStyle={{
-                      borderRadius: 10,
-                      border: "1px solid #f0f0f0",
-                      boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
-                    }}
-                  />
-                  <Legend wrapperStyle={{ paddingTop: 8 }} />
-                  <Area
-                    type="monotone"
-                    dataKey="revenue"
-                    name="Doanh thu"
-                    stroke="#3b82f6"
-                    strokeWidth={3}
-                    fill="url(#yearlyGradient)"
-                    dot={{ r: 5, fill: "#3b82f6", strokeWidth: 2 }}
-                    activeDot={{ r: 7, fill: "#2563eb" }}
-                  />
-                </AreaChart>
-              </ChartContainer>
-            )}
-          </div>
+          {/* Charts */}
+          <StatisticChart stats={stats} type="all" />
 
           {/* Top motorcycles + monthly table */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

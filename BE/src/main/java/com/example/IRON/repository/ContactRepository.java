@@ -8,6 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Repository
 public interface ContactRepository extends JpaRepository<Contact, Long> {
 
@@ -27,4 +30,10 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
     );
 
     long countByStatus(Contact.ContactStatus status);
+
+    @Query("SELECT COUNT(c) FROM Contact c WHERE c.createdAt >= :since")
+    long countNewContacts(@Param("since") LocalDateTime since);
+
+    @Query("SELECT c FROM Contact c WHERE c.createdAt >= :since ORDER BY c.createdAt DESC")
+    List<Contact> findNewContacts(@Param("since") LocalDateTime since, Pageable pageable);
 }
