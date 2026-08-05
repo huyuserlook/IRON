@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import adminApi from "../../../api/adminApi";
 import { formatCurrency } from "../../../utils/formatCurrency";
-import {
-  Bike,
-  ShoppingBag,
-  Users,
-  TrendingUp,
-  ChevronRight,
-  Plus,
-} from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 const DashboardPage = () => {
   const [stats, setStats] = useState(null);
@@ -104,9 +97,6 @@ const DashboardPage = () => {
               hàng một cách dễ dàng.
             </p>
           </div>
-          <button className="inline-flex items-center gap-2 rounded-3xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600">
-            <Plus size={16} /> Thêm sản phẩm mới
-          </button>
         </div>
       </div>
 
@@ -151,7 +141,7 @@ const DashboardPage = () => {
             </div>
 
             <div className="divide-y">
-              {inventory.map((item, idx) => (
+              {inventory.map((item) => (
                 <div key={item.id} className="py-3 flex items-center gap-4">
                   <div className="w-16 h-12 bg-gray-100 rounded-md flex items-center justify-center text-gray-400">
                     IMG

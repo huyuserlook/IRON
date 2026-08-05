@@ -15,6 +15,10 @@ public class Review {
     @JoinColumn(name = "motorcycle_id", nullable = false)
     private Motorcycle motorcycle;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(name = "customer_name", length = 100)
     private String customerName;
 
@@ -29,6 +33,9 @@ public class Review {
 
     @Column(columnDefinition = "TEXT")
     private String comment;
+
+    @Column(name = "image_url", columnDefinition = "LONGTEXT")
+    private String imageUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -75,6 +82,14 @@ public class Review {
         this.motorcycle = motorcycle;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public String getCustomerName() {
         return customerName;
     }
@@ -113,6 +128,14 @@ public class Review {
 
     public void setComment(String comment) {
         this.comment = comment;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public ReviewStatus getStatus() {

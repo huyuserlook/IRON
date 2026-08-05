@@ -11,15 +11,25 @@ public class StatisticsResponse {
     private long totalCustomers;
     private long totalMotorcycles;
 
-    // Doanh thu theo tháng
+// Doanh thu theo tháng
     private List<MonthlyRevenue> monthlyRevenues;
+
+    // Doanh thu theo năm
+    private List<YearlyRevenue> yearlyRevenues;
 
     // Top xe bán chạy
     private List<TopMotorcycle> topMotorcycles;
 
-    @Data @Builder @NoArgsConstructor @AllArgsConstructor
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
     public static class MonthlyRevenue {
         private int month;
+        private int year;
+        private BigDecimal revenue;
+        private long orderCount;
+    }
+
+    @Data @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class YearlyRevenue {
         private int year;
         private BigDecimal revenue;
         private long orderCount;

@@ -10,9 +10,12 @@ import {
   Users,
   BarChart2,
   Star,
+  Home,
+  MessageSquare,
 } from "lucide-react";
 
 const navItems = [
+  { path: "/", label: "Trang chủ", icon: Home, exact: true },
   { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/admin/motorcycles", label: "Quản lý xe", icon: Bike },
   { path: "/admin/brands", label: "Hãng xe", icon: Tag },
@@ -21,6 +24,7 @@ const navItems = [
   { path: "/admin/bookings", label: "Lịch lái thử", icon: Calendar },
   { path: "/admin/users", label: "Người dùng", icon: Users },
   { path: "/admin/reviews", label: "Đánh giá", icon: Star },
+  { path: "/admin/contacts", label: "Liên hệ", icon: MessageSquare },
   { path: "/admin/statistics", label: "Thống kê", icon: BarChart2 },
 ];
 
@@ -53,8 +57,8 @@ const AdminSidebar = ({ open }) => {
 
       {/* Nav */}
       <nav className="mt-4 flex flex-col gap-2 px-2">
-        {navItems.map(({ path, label, icon: Icon }) => {
-          const active = pathname.startsWith(path);
+        {navItems.map(({ path, label, icon: Icon, exact }) => {
+          const active = exact ? pathname === path : pathname.startsWith(path);
           return (
             <Link
               key={path}

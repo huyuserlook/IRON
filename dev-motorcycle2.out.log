@@ -1,0 +1,2828 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------------< com.example:IRON >--------------------------
+[INFO] Building IRON 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.0:run (default-cli) > test-compile @ IRON >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ IRON ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ IRON ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ IRON ---
+[INFO] skip non existing resourceDirectory D:\IRON\BE\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ IRON ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 1 source file with javac [debug parameters release 25] to target\test-classes
+[INFO] 
+[INFO] <<< spring-boot:3.5.0:run (default-cli) < test-compile @ IRON <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.0:run (default-cli) @ IRON ---
+[INFO] Attaching agents: []
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.0)
+
+2026-08-05T08:26:10.408+07:00  INFO 30908 --- [IRON] [  restartedMain] com.example.IRON.IronApplication         : Starting IronApplication using Java 25.0.2 with PID 30908 (D:\IRON\BE\target\classes started by ASUS in D:\IRON\BE)
+2026-08-05T08:26:10.410+07:00  INFO 30908 --- [IRON] [  restartedMain] com.example.IRON.IronApplication         : No active profile set, falling back to 1 default profile: "default"
+2026-08-05T08:26:10.459+07:00  INFO 30908 --- [IRON] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-08-05T08:26:10.459+07:00  INFO 30908 --- [IRON] [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-08-05T08:26:11.321+07:00  INFO 30908 --- [IRON] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-08-05T08:26:11.413+07:00  INFO 30908 --- [IRON] [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 84 ms. Found 12 JPA repository interfaces.
+2026-08-05T08:26:12.027+07:00  INFO 30908 --- [IRON] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-08-05T08:26:12.043+07:00  INFO 30908 --- [IRON] [  restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-08-05T08:26:12.043+07:00  INFO 30908 --- [IRON] [  restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.41]
+2026-08-05T08:26:12.092+07:00  INFO 30908 --- [IRON] [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-08-05T08:26:12.094+07:00  INFO 30908 --- [IRON] [  restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1632 ms
+Standard Commons Logging discovery in action with spring-jcl: please remove commons-logging.jar from classpath in order to avoid potential conflicts
+2026-08-05T08:26:12.225+07:00  INFO 30908 --- [IRON] [  restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-08-05T08:26:12.294+07:00  INFO 30908 --- [IRON] [  restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.15.Final
+2026-08-05T08:26:12.342+07:00  INFO 30908 --- [IRON] [  restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-08-05T08:26:12.856+07:00  INFO 30908 --- [IRON] [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-08-05T08:26:12.887+07:00  INFO 30908 --- [IRON] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-08-05T08:26:13.058+07:00  INFO 30908 --- [IRON] [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@177466e6
+2026-08-05T08:26:13.060+07:00  INFO 30908 --- [IRON] [  restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-08-05T08:26:13.120+07:00  WARN 30908 --- [IRON] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-08-05T08:26:13.121+07:00  WARN 30908 --- [IRON] [  restartedMain] org.hibernate.orm.deprecation            : HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2026-08-05T08:26:13.141+07:00  INFO 30908 --- [IRON] [  restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 8.0
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-08-05T08:26:14.370+07:00  INFO 30908 --- [IRON] [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-08-05T08:26:14.495+07:00  INFO 30908 --- [IRON] [  restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-08-05T08:26:14.909+07:00  INFO 30908 --- [IRON] [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-08-05T08:26:17.383+07:00  INFO 30908 --- [IRON] [  restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name customUserDetailsService
+2026-08-05T08:26:17.585+07:00  WARN 30908 --- [IRON] [  restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-08-05T08:26:18.332+07:00  INFO 30908 --- [IRON] [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-08-05T08:26:18.367+07:00  INFO 30908 --- [IRON] [  restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-08-05T08:26:18.374+07:00  INFO 30908 --- [IRON] [  restartedMain] com.example.IRON.IronApplication         : Started IronApplication in 8.354 seconds (process running for 8.755)
+2026-08-05T08:36:27.947+07:00  INFO 30908 --- [IRON] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-08-05T08:36:27.950+07:00  INFO 30908 --- [IRON] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-08-05T08:36:27.960+07:00  INFO 30908 --- [IRON] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 7 ms
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    insert 
+    into
+        contacts
+        (created_at, email, full_name, message, name, phone, status, subject, updated_at) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.active
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        (
+            ? is null 
+            or m1_0.brand_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price>=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price<=?
+        ) 
+        and (
+            ? is null 
+            or lower(m1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+        ) 
+        and (
+            ? is null 
+            or m1_0.status=?
+        ) 
+    order by
+        m1_0.created_at desc 
+    limit
+        ?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.active
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    where
+        (
+            ? is null 
+            or m1_0.brand_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price>=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price<=?
+        ) 
+        and (
+            ? is null 
+            or lower(m1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+        ) 
+        and (
+            ? is null 
+            or m1_0.status=?
+        )
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+2026-08-05T08:36:33.903+07:00  WARN 30908 --- [IRON] [nio-8080-exec-9] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        (
+            ? is null 
+            or m1_0.brand_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price>=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price<=?
+        ) 
+        and (
+            ? is null 
+            or lower(m1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+        ) 
+        and (
+            ? is null 
+            or m1_0.status=?
+        ) 
+    order by
+        m1_0.created_at desc 
+    limit
+        ?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    where
+        (
+            ? is null 
+            or m1_0.brand_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price>=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price<=?
+        ) 
+        and (
+            ? is null 
+            or lower(m1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+        ) 
+        and (
+            ? is null 
+            or m1_0.status=?
+        )
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.active
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        (
+            ? is null 
+            or m1_0.brand_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price>=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price<=?
+        ) 
+        and (
+            ? is null 
+            or lower(m1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+        ) 
+        and (
+            ? is null 
+            or m1_0.status=?
+        ) 
+    order by
+        m1_0.created_at desc 
+    limit
+        ?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    where
+        (
+            ? is null 
+            or m1_0.brand_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price>=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price<=?
+        ) 
+        and (
+            ? is null 
+            or lower(m1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+        ) 
+        and (
+            ? is null 
+            or m1_0.status=?
+        )
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.active
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    left join
+        brands b1_0 
+            on b1_0.id=m1_0.brand_id 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        (
+            ? is null 
+            or m1_0.brand_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price>=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price<=?
+        ) 
+        and (
+            ? is null 
+            or lower(m1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+        ) 
+        and (
+            ? is null 
+            or m1_0.status=?
+        ) 
+    order by
+        m1_0.created_at desc 
+    limit
+        ?
+Hibernate: 
+    select
+        count(m1_0.id) 
+    from
+        motorcycles m1_0 
+    where
+        (
+            ? is null 
+            or m1_0.brand_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.category_id=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price>=?
+        ) 
+        and (
+            ? is null 
+            or m1_0.price<=?
+        ) 
+        and (
+            ? is null 
+            or lower(m1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+        ) 
+        and (
+            ? is null 
+            or m1_0.status=?
+        )
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.active,
+        c1_0.description,
+        c1_0.image_url,
+        c1_0.name,
+        c1_0.slug 
+    from
+        categories c1_0 
+    where
+        c1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        b1_0.id,
+        b1_0.active,
+        b1_0.description,
+        b1_0.logo_url,
+        b1_0.name,
+        b1_0.slug 
+    from
+        brands b1_0 
+    where
+        b1_0.id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        i1_0.motorcycle_id,
+        i1_0.id,
+        i1_0.color_code,
+        i1_0.color_name,
+        i1_0.quantity,
+        i1_0.updated_at 
+    from
+        inventories i1_0 
+    where
+        i1_0.motorcycle_id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(r1_0.id) 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=?
+Hibernate: 
+    select
+        o1_0.id,
+        o1_0.admin_note,
+        o1_0.created_at,
+        o1_0.customer_note,
+        o1_0.order_code,
+        o1_0.shipping_address,
+        o1_0.status,
+        o1_0.total_amount,
+        o1_0.updated_at,
+        o1_0.user_id 
+    from
+        orders o1_0
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.amount,
+        p1_0.created_at,
+        p1_0.order_id,
+        p1_0.paid_at,
+        p1_0.payment_method,
+        p1_0.status,
+        p1_0.transaction_id 
+    from
+        payments p1_0 
+    where
+        p1_0.order_id=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(r1_0.id) 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=?
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.amount,
+        p1_0.created_at,
+        p1_0.order_id,
+        p1_0.paid_at,
+        p1_0.payment_method,
+        p1_0.status,
+        p1_0.transaction_id 
+    from
+        payments p1_0 
+    where
+        p1_0.order_id=?
+Hibernate: 
+    select
+        od1_0.id,
+        od1_0.color_name,
+        od1_0.motorcycle_id,
+        od1_0.motorcycle_name,
+        od1_0.order_id,
+        od1_0.quantity,
+        od1_0.subtotal,
+        od1_0.unit_price 
+    from
+        order_details od1_0
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        m1_0.id=?
+Hibernate: 
+    select
+        count(*) 
+    from
+        orders o1_0
+Hibernate: 
+    select
+        count(*) 
+    from
+        users u1_0
+Hibernate: 
+    select
+        count(*) 
+    from
+        motorcycles m1_0
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        o1_0.id,
+        o1_0.admin_note,
+        o1_0.created_at,
+        o1_0.customer_note,
+        o1_0.order_code,
+        o1_0.shipping_address,
+        o1_0.status,
+        o1_0.total_amount,
+        o1_0.updated_at,
+        o1_0.user_id 
+    from
+        orders o1_0
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.amount,
+        p1_0.created_at,
+        p1_0.order_id,
+        p1_0.paid_at,
+        p1_0.payment_method,
+        p1_0.status,
+        p1_0.transaction_id 
+    from
+        payments p1_0 
+    where
+        p1_0.order_id=?
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.amount,
+        p1_0.created_at,
+        p1_0.order_id,
+        p1_0.paid_at,
+        p1_0.payment_method,
+        p1_0.status,
+        p1_0.transaction_id 
+    from
+        payments p1_0 
+    where
+        p1_0.order_id=?
+Hibernate: 
+    select
+        od1_0.id,
+        od1_0.color_name,
+        od1_0.motorcycle_id,
+        od1_0.motorcycle_name,
+        od1_0.order_id,
+        od1_0.quantity,
+        od1_0.subtotal,
+        od1_0.unit_price 
+    from
+        order_details od1_0
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        m1_0.id=?
+Hibernate: 
+    select
+        count(*) 
+    from
+        orders o1_0
+Hibernate: 
+    select
+        count(*) 
+    from
+        users u1_0
+Hibernate: 
+    select
+        count(*) 
+    from
+        motorcycles m1_0
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        o1_0.id,
+        o1_0.admin_note,
+        o1_0.created_at,
+        o1_0.customer_note,
+        o1_0.order_code,
+        o1_0.shipping_address,
+        o1_0.status,
+        o1_0.total_amount,
+        o1_0.updated_at,
+        o1_0.user_id 
+    from
+        orders o1_0
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.amount,
+        p1_0.created_at,
+        p1_0.order_id,
+        p1_0.paid_at,
+        p1_0.payment_method,
+        p1_0.status,
+        p1_0.transaction_id 
+    from
+        payments p1_0 
+    where
+        p1_0.order_id=?
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.amount,
+        p1_0.created_at,
+        p1_0.order_id,
+        p1_0.paid_at,
+        p1_0.payment_method,
+        p1_0.status,
+        p1_0.transaction_id 
+    from
+        payments p1_0 
+    where
+        p1_0.order_id=?
+Hibernate: 
+    select
+        od1_0.id,
+        od1_0.color_name,
+        od1_0.motorcycle_id,
+        od1_0.motorcycle_name,
+        od1_0.order_id,
+        od1_0.quantity,
+        od1_0.subtotal,
+        od1_0.unit_price 
+    from
+        order_details od1_0
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        m1_0.id=?
+Hibernate: 
+    select
+        count(*) 
+    from
+        orders o1_0
+Hibernate: 
+    select
+        count(*) 
+    from
+        users u1_0
+Hibernate: 
+    select
+        count(*) 
+    from
+        motorcycles m1_0
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        o1_0.id,
+        o1_0.admin_note,
+        o1_0.created_at,
+        o1_0.customer_note,
+        o1_0.order_code,
+        o1_0.shipping_address,
+        o1_0.status,
+        o1_0.total_amount,
+        o1_0.updated_at,
+        o1_0.user_id 
+    from
+        orders o1_0
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.amount,
+        p1_0.created_at,
+        p1_0.order_id,
+        p1_0.paid_at,
+        p1_0.payment_method,
+        p1_0.status,
+        p1_0.transaction_id 
+    from
+        payments p1_0 
+    where
+        p1_0.order_id=?
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.amount,
+        p1_0.created_at,
+        p1_0.order_id,
+        p1_0.paid_at,
+        p1_0.payment_method,
+        p1_0.status,
+        p1_0.transaction_id 
+    from
+        payments p1_0 
+    where
+        p1_0.order_id=?
+Hibernate: 
+    select
+        od1_0.id,
+        od1_0.color_name,
+        od1_0.motorcycle_id,
+        od1_0.motorcycle_name,
+        od1_0.order_id,
+        od1_0.quantity,
+        od1_0.subtotal,
+        od1_0.unit_price 
+    from
+        order_details od1_0
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        m1_0.id=?
+Hibernate: 
+    select
+        count(*) 
+    from
+        orders o1_0
+Hibernate: 
+    select
+        count(*) 
+    from
+        users u1_0
+Hibernate: 
+    select
+        count(*) 
+    from
+        motorcycles m1_0
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(c1_0.id) 
+    from
+        contacts c1_0 
+    where
+        c1_0.status=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.created_at,
+        c1_0.email,
+        c1_0.full_name,
+        c1_0.message,
+        c1_0.name,
+        c1_0.phone,
+        c1_0.status,
+        c1_0.subject,
+        c1_0.updated_at 
+    from
+        contacts c1_0 
+    where
+        (
+            ? is null 
+            or c1_0.status=?
+        ) 
+        and (
+            ? is null 
+            or (
+                lower(c1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\') 
+                or lower(c1_0.email) like replace(lower(concat('%', ?, '%')), '\\', '\\\\') 
+                or lower(c1_0.phone) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+            )
+        ) 
+    order by
+        c1_0.created_at desc 
+    limit
+        ?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        count(c1_0.id) 
+    from
+        contacts c1_0 
+    where
+        c1_0.status=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        c1_0.id,
+        c1_0.created_at,
+        c1_0.email,
+        c1_0.full_name,
+        c1_0.message,
+        c1_0.name,
+        c1_0.phone,
+        c1_0.status,
+        c1_0.subject,
+        c1_0.updated_at 
+    from
+        contacts c1_0 
+    where
+        (
+            ? is null 
+            or c1_0.status=?
+        ) 
+        and (
+            ? is null 
+            or (
+                lower(c1_0.name) like replace(lower(concat('%', ?, '%')), '\\', '\\\\') 
+                or lower(c1_0.email) like replace(lower(concat('%', ?, '%')), '\\', '\\\\') 
+                or lower(c1_0.phone) like replace(lower(concat('%', ?, '%')), '\\', '\\\\')
+            )
+        ) 
+    order by
+        c1_0.created_at desc 
+    limit
+        ?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(r1_0.id) 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(r1_0.id) 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=?
+Hibernate: 
+    select
+        r1_0.id,
+        r1_0.comment,
+        r1_0.created_at,
+        r1_0.customer_email,
+        r1_0.customer_name,
+        r1_0.image_url,
+        r1_0.motorcycle_id,
+        r1_0.rating,
+        r1_0.status,
+        r1_0.title,
+        r1_0.updated_at,
+        r1_0.user_id 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=? 
+    order by
+        r1_0.created_at desc 
+    limit
+        ?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(r1_0.id) 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=?
+Hibernate: 
+    select
+        m1_0.id,
+        m1_0.brand_id,
+        m1_0.category_id,
+        m1_0.created_at,
+        m1_0.description,
+        m1_0.engine_cc,
+        m1_0.featured,
+        m1_0.horsepower,
+        m1_0.name,
+        m1_0.price,
+        m1_0.slug,
+        m1_0.specifications,
+        m1_0.status,
+        m1_0.thumbnail_url,
+        m1_0.torque,
+        m1_0.updated_at,
+        m1_0.year_model 
+    from
+        motorcycles m1_0 
+    where
+        m1_0.id=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(r1_0.id) 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(r1_0.id) 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=?
+Hibernate: 
+    select
+        u1_0.id,
+        u1_0.address,
+        u1_0.avatar_url,
+        u1_0.created_at,
+        u1_0.email,
+        u1_0.enabled,
+        u1_0.full_name,
+        u1_0.password,
+        u1_0.phone,
+        u1_0.provider,
+        u1_0.provider_id,
+        u1_0.reset_token,
+        u1_0.reset_token_expiry,
+        u1_0.updated_at 
+    from
+        users u1_0 
+    where
+        u1_0.email=?
+Hibernate: 
+    select
+        r1_0.user_id,
+        r1_1.id,
+        r1_1.name 
+    from
+        user_roles r1_0 
+    join
+        roles r1_1 
+            on r1_1.id=r1_0.role_id 
+    where
+        r1_0.user_id=?
+Hibernate: 
+    select
+        count(r1_0.id) 
+    from
+        reviews r1_0 
+    where
+        r1_0.created_at>=?

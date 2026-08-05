@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   Calendar,
@@ -18,6 +18,7 @@ import {
 import toast from "react-hot-toast";
 import motorcycleApi from "../../api/motorcycleApi";
 import reviewApi from "../../api/reviewApi";
+import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { formatCurrency } from "../../utils/formatCurrency";
 
@@ -152,6 +153,8 @@ const DetailSkeleton = () => (
 
 const MotorcycleDetailPage = () => {
   const { slug } = useParams();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const { addItem } = useCart();
   const [moto, setMoto] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -165,6 +168,7 @@ const MotorcycleDetailPage = () => {
     comment: "",
   });
   const [reviewImage, setReviewImage] = useState(null);
+  const [previewReviewImage, setPreviewReviewImage] = useState(null);
   const fileInputRef = useRef(null);
   const [relatedLoading, setRelatedLoading] = useState(false);
 
@@ -305,7 +309,7 @@ const MotorcycleDetailPage = () => {
     try {
       addItem(payload);
       toast.success("Đã thêm vào giỏ hàng!");
-    } catch (err) {
+    } catch {
       toast.error("Không thể thêm vào giỏ hàng");
     }
   };
@@ -329,7 +333,7 @@ const MotorcycleDetailPage = () => {
     try {
       const dataUrl = await readFileAsDataUrl(file);
       setReviewImage({ name: file.name, dataUrl });
-    } catch (err) {
+    } catch {
       toast.error("Không thể đọc ảnh");
     }
   };
@@ -337,11 +341,15 @@ const MotorcycleDetailPage = () => {
   const submitReview = async (e) => {
     e?.preventDefault();
     if (!moto) return;
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để gửi đánh giá");
+      navigate("/login");
+      return;
+    }
     setSubmittingReview(true);
     try {
       const payload = {
         motorcycleId: moto.id,
-        // anonymous submission: do not send name/email
         rating: Number(reviewForm.rating) || 5,
         comment: reviewForm.comment,
         imageBase64: reviewImage?.dataUrl || null,
@@ -351,11 +359,11 @@ const MotorcycleDetailPage = () => {
       const newReview = {
         id: `temp-${Date.now()}`,
         motorcycleId: moto.id,
-        customerName: "Khách hàng",
+        customerName: user?.fullName || user?.name || "Khách hàng",
         rating: payload.rating,
         comment: payload.comment,
+        image: payload.imageBase64,
         status: "PENDING",
-        imageBase64: payload.imageBase64,
         createdAt: new Date().toISOString(),
       };
       setMoto((m) => ({ ...m, reviews: [newReview, ...(m.reviews || [])] }));
@@ -709,52 +717,6 @@ const MotorcycleDetailPage = () => {
             </div>
           </div>
 
-          {totalReviews === 0 ? (
-            <div className="rounded-[20px] border border-dashed border-[#E3DEE6] bg-white p-8 text-center text-[#7A6E71] shadow-[0_14px_32px_-28px_rgba(0,0,0,0.12)]">
-              <p className="text-sm font-semibold text-[#1A1B1F]">
-                Hiện chưa có bình luận nào.
-              </p>
-              <p className="mt-2 text-sm text-[#5E3F3B]">
-                Hãy là người đầu tiên đánh giá sản phẩm này.
-              </p>
-            </div>
-          ) : (
-            <div className="grid gap-4 md:grid-cols-2">
-              {reviewItems.map((review) => (
-                <article
-                  key={review.id}
-                  className="rounded-[20px] border border-[#E3DEE6] bg-white p-5 shadow-[0_14px_32px_-28px_rgba(0,0,0,0.12)]"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[#1A1B1F]">
-                        {review.title}
-                      </p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#7A6E71]">
-                        {review.author}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      {renderRatingStars(review.rating)}
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm leading-7 text-[#5E3F3B]">
-                    {review.image ? (
-                      <img
-                        src={review.image}
-                        alt="review"
-                        className="mb-3 max-h-56 w-full rounded object-cover"
-                      />
-                    ) : null}
-                    {review.comment}
-                  </p>
-                  <p className="mt-4 text-xs uppercase tracking-[0.18em] text-[#9A9196]">
-                    {review.date}
-                  </p>
-                </article>
-              ))}
-            </div>
-          )}
           {/* Review submission form */}
           <form
             onSubmit={submitReview}
@@ -832,6 +794,66 @@ const MotorcycleDetailPage = () => {
               </span>
             </div>
           </form>
+
+          <div className="mt-8">
+            <h3 className="text-lg font-semibold text-[#1A1B1F]">
+              Nhận xét từ khách hàng thực tế
+            </h3>
+          </div>
+
+          {totalReviews === 0 ? (
+            <div className="mt-3 rounded-[20px] border border-dashed border-[#E3DEE6] bg-white p-8 text-center text-[#7A6E71] shadow-[0_14px_32px_-28px_rgba(0,0,0,0.12)]">
+              <p className="text-sm font-semibold text-[#1A1B1F]">
+                Hiện chưa có bình luận nào.
+              </p>
+              <p className="mt-2 text-sm text-[#5E3F3B]">
+                Hãy là người đầu tiên đánh giá sản phẩm này.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {reviewItems.map((review) => (
+                <article
+                  key={review.id}
+                  className="rounded-[20px] border border-[#E3DEE6] bg-white p-5 shadow-[0_14px_32px_-28px_rgba(0,0,0,0.12)]"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-[#1A1B1F]">
+                        {review.title}
+                      </p>
+                      <p className="mt-1 text-xs uppercase tracking-[0.16em] text-[#7A6E71]">
+                        {review.author}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {renderRatingStars(review.rating)}
+                    </div>
+                  </div>
+                  {review.image ? (
+                    <button
+                      type="button"
+                      onClick={() => setPreviewReviewImage(review.image)}
+                      className="mb-3 block cursor-zoom-in"
+                      aria-label="Phóng to ảnh đánh giá"
+                    >
+                      <img
+                        src={review.image}
+                        alt="review"
+                        className="h-24 w-24 rounded-lg border border-[#E3DEE6] object-cover transition-transform duration-300 hover:scale-105"
+                      />
+                    </button>
+                  ) : null}
+                  <p className="text-sm leading-7 text-[#5E3F3B]">
+                    {review.comment}
+                  </p>
+                  <p className="mt-4 text-xs uppercase tracking-[0.18em] text-[#9A9196]">
+                    {review.date}
+                  </p>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
 
         {moto.specifications ? (
@@ -977,6 +999,32 @@ const MotorcycleDetailPage = () => {
           <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-sm font-medium text-white/80">
             {selectedIndex + 1} / {galleryImages.length}
           </p>
+        </div>
+      ) : null}
+
+      {/* Review image preview lightbox */}
+      {previewReviewImage ? (
+        <div
+          className="detail-lightbox-enter fixed inset-0 z-[110] flex items-center justify-center bg-[#1A1B1F]/92 p-4 backdrop-blur-sm"
+          onClick={() => setPreviewReviewImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Xem ảnh đánh giá phóng to"
+        >
+          <button
+            type="button"
+            onClick={() => setPreviewReviewImage(null)}
+            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:right-6 sm:top-6"
+            aria-label="Đóng"
+          >
+            <X size={22} />
+          </button>
+          <img
+            src={previewReviewImage}
+            alt="review"
+            className="detail-img-enter max-h-[85vh] max-w-[92vw] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </div>
       ) : null}
     </div>

@@ -30,6 +30,7 @@ import OrderManagement from "../pages/Admin/Order/OrderManagement";
 import BookingManagement from "../pages/Admin/Booking/BookingManagement";
 import UserManagement from "../pages/Admin/User/UserManagement";
 import ReviewManagement from "../pages/Admin/Review/ReviewManagement";
+import ContactManagement from "../pages/Admin/Contact/ContactManagement";
 import StatisticsPage from "../pages/Admin/Statistics/StatisticsPage";
 
 const AppRoutes = () => {
@@ -99,6 +100,7 @@ const AppRoutes = () => {
         <Route path="bookings" element={<BookingManagement />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="reviews" element={<ReviewManagement />} />
+        <Route path="contacts" element={<ContactManagement />} />
         <Route path="statistics" element={<StatisticsPage />} />
       </Route>
     </Routes>

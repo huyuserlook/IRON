@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ReviewResponse {
     private Long id;
+    private Long userId;
     private Long motorcycleId;
     private String motorcycleName;
     private String customerName;
@@ -21,6 +22,7 @@ public class ReviewResponse {
     private String title;
     private Integer rating;
     private String comment;
+    private String imageUrl;
     private Review.ReviewStatus status;
     private LocalDateTime createdAt;
 }

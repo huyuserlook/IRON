@@ -2,6 +2,7 @@ package com.example.IRON.repository;
 
 import com.example.IRON.entity.Review;
 import com.example.IRON.entity.Review.ReviewStatus;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,4 +30,14 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     );
 
     List<Review> findByMotorcycleIdAndStatusOrderByCreatedAtDesc(Long motorcycleId, ReviewStatus status);
+
+    @Query("SELECT COUNT(r) FROM Review r WHERE r.createdAt >= :since")
+    long countNewReviews(@Param("since") LocalDateTime since);
+
+    @Query("""
+        SELECT r FROM Review r
+        WHERE r.createdAt >= :since
+        ORDER BY r.createdAt DESC
+    """)
+    List<Review> findNewReviews(@Param("since") LocalDateTime since, Pageable pageable);
 }

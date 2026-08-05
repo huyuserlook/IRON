@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { HelpCircle, Mail, MapPin, PhoneCall, Send } from "lucide-react";
+import {
+  HelpCircle,
+  Mail,
+  MapPin,
+  PhoneCall,
+  Send,
+  Loader2,
+} from "lucide-react";
 import toast from "react-hot-toast";
+import contactApi from "../../api/contactApi";
 import contactImage from "../../assets/img/contact.png";
 
 const SHOWROOMS = [
@@ -26,12 +34,13 @@ const ContactPage = () => {
     email: "",
     message: "",
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (field) => (event) => {
     setForm((prev) => ({ ...prev, [field]: event.target.value }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (!form.name.trim() || !form.phone.trim() || !form.email.trim()) {
@@ -39,13 +48,28 @@ const ContactPage = () => {
       return;
     }
 
-    toast.success("Yêu cầu của bạn đã được ghi nhận. IRON sẽ liên hệ sớm.");
-    setForm({
-      name: "",
-      phone: "",
-      email: "",
-      message: "",
-    });
+    setSubmitting(true);
+    try {
+      await contactApi.create({
+        name: form.name.trim(),
+        phone: form.phone.trim(),
+        email: form.email.trim(),
+        message: form.message.trim(),
+      });
+      toast.success("Yêu cầu của bạn đã được ghi nhận. IRON sẽ liên hệ sớm.");
+      setForm({
+        name: "",
+        phone: "",
+        email: "",
+        message: "",
+      });
+    } catch (err) {
+      toast.error(
+        err?.message || "Không thể gửi liên hệ. Vui lòng thử lại sau.",
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -189,10 +213,15 @@ const ContactPage = () => {
 
               <button
                 type="submit"
-                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#BC000A] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-[0_20px_40px_-24px_rgba(188,0,10,0.65)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110"
+                disabled={submitting}
+                className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-[12px] bg-[#BC000A] px-6 py-4 text-sm font-semibold uppercase tracking-[0.16em] text-white shadow-[0_20px_40px_-24px_rgba(188,0,10,0.65)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
-                Gửi yêu cầu
-                <Send size={16} />
+                {submitting ? (
+                  <Loader2 size={16} className="animate-spin" />
+                ) : (
+                  <Send size={16} />
+                )}
+                {submitting ? "Đang gửi..." : "Gửi yêu cầu"}
               </button>
             </form>
 

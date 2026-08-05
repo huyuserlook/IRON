@@ -1,7 +1,24 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Star, Search, Trash2, Check } from "lucide-react";
+import { Star, Search, X, Trash2 } from "lucide-react";
 import reviewApi from "../../../api/reviewApi";
 import toast from "react-hot-toast";
+
+const API_ROOT = (
+  import.meta.env.VITE_API_URL || "http://localhost:8080/api"
+).replace(/\/api\/?$/, "");
+
+const resolveImageUrl = (url) => {
+  if (!url) return "";
+  if (
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("data:")
+  ) {
+    return url;
+  }
+  if (url.startsWith("/")) return `${API_ROOT}${url}`;
+  return `${API_ROOT}/${url}`;
+};
 
 const statusOptions = [
   { value: "", label: "Tất cả" },
@@ -27,7 +44,8 @@ const ReviewManagement = () => {
   const [status, setStatus] = useState("");
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
+  const [previewImage, setPreviewImage] = useState("");
 
   const loadReviews = useCallback(() => {
     setLoading(true);
@@ -54,30 +72,22 @@ const ReviewManagement = () => {
     ).toFixed(1);
   }, [reviews]);
 
-  const handleStatusChange = async (id, newStatus) => {
-    setActionLoading(true);
+  const handleDelete = async (review) => {
+    if (
+      !window.confirm(
+        `Xóa đánh giá của ${review.customerName || "khách hàng"}?`,
+      )
+    )
+      return;
+    setDeletingId(review.id);
     try {
-      await reviewApi.updateStatus(id, newStatus);
-      toast.success("Cập nhật trạng thái thành công");
+      await reviewApi.delete(review.id);
+      toast.success("Đã xóa đánh giá thành công");
       loadReviews();
-    } catch {
-      toast.error("Cập nhật trạng thái thất bại");
+    } catch (err) {
+      toast.error(err?.message || "Không thể xóa đánh giá");
     } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!confirm("Xác nhận xóa đánh giá này?")) return;
-    setActionLoading(true);
-    try {
-      await reviewApi.delete(id);
-      toast.success("Xóa đánh giá thành công");
-      loadReviews();
-    } catch {
-      toast.error("Xóa thất bại");
-    } finally {
-      setActionLoading(false);
+      setDeletingId(null);
     }
   };
 
@@ -198,6 +208,16 @@ const ReviewManagement = () => {
                     <span>
                       {new Date(review.createdAt).toLocaleDateString("vi-VN")}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(review)}
+                      disabled={deletingId === review.id}
+                      className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-50 disabled:opacity-50"
+                      title="Xóa đánh giá"
+                    >
+                      <Trash2 size={14} />
+                      {deletingId === review.id ? "Đang xóa..." : "Xóa"}
+                    </button>
                   </div>
                 </div>
 
@@ -205,29 +225,22 @@ const ReviewManagement = () => {
                   {review.comment}
                 </p>
 
-                <div className="mt-5 flex flex-wrap items-center gap-3">
+                {review.imageUrl ? (
                   <button
-                    onClick={() => handleStatusChange(review.id, "APPROVED")}
-                    disabled={actionLoading || review.status === "APPROVED"}
-                    className="inline-flex items-center gap-2 rounded-full bg-green-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-green-200"
+                    type="button"
+                    onClick={() =>
+                      setPreviewImage(resolveImageUrl(review.imageUrl))
+                    }
+                    className="mt-4 block overflow-hidden rounded-xl border border-slate-200"
+                    aria-label="Xem ảnh đánh giá"
                   >
-                    <Check size={16} /> Duyệt
+                    <img
+                      src={resolveImageUrl(review.imageUrl)}
+                      alt="Ảnh đánh giá"
+                      className="h-40 w-56 object-cover transition hover:opacity-90"
+                    />
                   </button>
-                  <button
-                    onClick={() => handleStatusChange(review.id, "REJECTED")}
-                    disabled={actionLoading || review.status === "REJECTED"}
-                    className="inline-flex items-center gap-2 rounded-full bg-yellow-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-yellow-600 disabled:cursor-not-allowed disabled:bg-yellow-200"
-                  >
-                    Từ chối
-                  </button>
-                  <button
-                    onClick={() => handleDelete(review.id)}
-                    disabled={actionLoading}
-                    className="inline-flex items-center gap-2 rounded-full bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-red-200"
-                  >
-                    <Trash2 size={16} /> Xóa
-                  </button>
-                </div>
+                ) : null}
               </div>
             ))
           )}
@@ -251,6 +264,31 @@ const ReviewManagement = () => {
           </div>
         )}
       </div>
+
+      {previewImage ? (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
+          onClick={() => setPreviewImage("")}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Xem ảnh đánh giá"
+        >
+          <button
+            type="button"
+            onClick={() => setPreviewImage("")}
+            className="absolute right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white transition hover:bg-white/20"
+            aria-label="Đóng"
+          >
+            <X size={22} />
+          </button>
+          <img
+            src={previewImage}
+            alt="Ảnh đánh giá phóng to"
+            className="max-h-[85vh] max-w-[92vw] rounded-xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };

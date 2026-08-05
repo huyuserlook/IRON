@@ -210,3 +210,33 @@ CREATE TABLE reviews (
 
 -- Index hỗ trợ truy vấn thống kê rating theo xe
 CREATE INDEX idx_reviews_motorcycle ON reviews(motorcycle_id, status);
+
+-- 15. Bảng Review_Images (Ảnh đính kèm đánh giá)
+CREATE TABLE review_images (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    review_id BIGINT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    sort_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 16. Bảng Contacts (Liên hệ khách hàng)
+CREATE TABLE contacts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT,                        -- NULL nếu khách chưa đăng nhập vẫn gửi được liên hệ
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(15),
+    subject VARCHAR(200),
+    message TEXT NOT NULL,
+    status ENUM('NEW', 'IN_PROGRESS', 'RESOLVED', 'SPAM') DEFAULT 'NEW' NOT NULL,
+    admin_reply TEXT,
+    replied_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Index hỗ trợ admin lọc theo trạng thái, sắp xếp theo thời gian
+CREATE INDEX idx_contacts_status ON contacts(status, created_at);

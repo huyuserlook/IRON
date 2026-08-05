@@ -1,22 +1,36 @@
-# TODO - Tính năng "Thêm xe mới" nhiều ảnh + số lượng tồn kho
+# TODO - Thêm tính năng Quản lý liên hệ (Contact Management)
 
-## Backend
+## Mục tiêu
 
-- [x] 1. `MotorcycleRequest.java`: Thêm `List<String> images` và `List<InventoryItem>` (colorName, colorCode, quantity)
-- [x] 2. `MotorcycleImage.java`: Đổi cột `image_url` sang TEXT (chứa base64)
-- [x] 3. `Motorcycle.java`: Đổi cột `thumbnail_url` sang TEXT + thêm orphanRemoval vào inventories
-- [x] 4. `MotorcycleServiceImpl.java`: Lưu danh sách ảnh (ảnh đầu = ảnh chính / thumbnail) + danh sách tồn kho trong create/update
-- [x] 5. `MotorcycleResponse.java`: Thêm `totalInventory` (hiển thị tổng tồn kho)
+Tạo tính năng quản lý liên hệ khách hàng cho showroom IRON: gửi yêu cầu từ trang Liên hệ (public) và quản lý các yêu cầu trong trang Admin.
 
-## Frontend
+## Trạng thái: HOÀN THÀNH
 
-- [x] 6. `MotorcycleForm.jsx`: Thay ô URL đơn bằng uploader nhiều ảnh (file, nén bằng canvas, preview, xóa từng ảnh) + bảng tồn kho động (màu, mã màu, số lượng) + nút thêm/xóa dòng + load lại khi sửa
-- [ ] 7. `MotorcycleManagement.jsx`: Thêm cột "Tồn kho"
+## Các bước đã thực hiện
 
-## Database
+- [x] **B1. Backend - Entity & Column mapping**
+  - `Contact.java`: `name` map sang cột `full_name` (khớp schema DB).
+  - Thêm field `subject` (nullable).
+  - `message` bắt buộc (NOT NULL), default `""` khi null.
+  - `status` enum khớp DB: `NEW, IN_PROGRESS, RESOLVED, SPAM`.
 
-- [x] 8. ALTER TABLE `motorcycle_images.image_url` và `motorcycles.thumbnail_url` sang `LONGTEXT` (fix lỗi "Data too long for column 'image_url'")
+- [x] **B2. Backend - DTO, Service, Repository, Controller**
+  - `ContactRequest`: thêm `subject`.
+  - `ContactResponse`: thêm `subject`.
+  - `ContactServiceImpl`: set `subject`, default message `""`.
+  - `ContactRepository`, `ContactService`, `ContactController`, `AdminContactController` đã có.
 
-## Kiểm thử
+- [x] **B3. Frontend - API & Pages**
+  - `contactApi.js`: các hàm gọi API.
+  - `ContactPage.jsx`: form gửi liên hệ.
+  - `ContactManagement.jsx`: quản lý liên hệ (status options cập nhật theo enum DB).
+  - `Sidebar.jsx`, `AppRoutes.jsx`: thêm route `/admin/contacts`.
 
-- [ ] 9. Build backend & chạy thử, xác nhận thêm xe nhiều ảnh + số lượng hoạt động
+- [x] **B4. Build & Kiểm tra**
+  - Backend: `mvnw clean compile` → BUILD SUCCESS (110 files).
+  - Frontend: `npm run build` → built in 1.83s.
+
+## Ghi chú
+
+- Đã khắc phục lỗi `Field 'full_name' doesn't have a default value` bằng cách map `name` → `full_name`.
+- Đồng bộ enum `status` với DB (`IN_PROGRESS`, `SPAM` thay `CONTACTED`, `CLOSED`).

@@ -26,4 +26,6 @@ public class ReviewRequest {
     @NotNull(message = "Nội dung đánh giá không được để trống")
     @Size(max = 1000, message = "Nội dung đánh giá không quá 1000 ký tự")
     private String comment;
+
+    private String imageBase64;
 }

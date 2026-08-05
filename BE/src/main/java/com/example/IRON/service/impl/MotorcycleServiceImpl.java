@@ -235,6 +235,7 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         rr.setTitle(r.getTitle());
         rr.setRating(r.getRating());
         rr.setComment(r.getComment());
+        rr.setImageUrl(r.getImageUrl());
         rr.setStatus(r.getStatus());
         rr.setCreatedAt(r.getCreatedAt());
         return rr;

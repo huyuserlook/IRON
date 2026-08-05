@@ -1,10 +1,8 @@
 package com.example.IRON.controller.admin;
 
-import com.example.IRON.dto.request.ReviewRequest;
-import com.example.IRON.dto.request.ReviewStatusRequest;
+import com.example.IRON.dto.request.ContactStatusRequest;
 import com.example.IRON.dto.response.ApiResponse;
-import com.example.IRON.dto.response.ReviewResponse;
-import com.example.IRON.service.interfaces.ReviewService;
+import com.example.IRON.service.interfaces.ContactService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -13,24 +11,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+
 @RestController
-@RequestMapping("/api/admin/reviews")
+@RequestMapping("/api/admin/contacts")
 @PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
-public class AdminReviewController {
+public class AdminContactController {
 
-private final ReviewService reviewService;
+    private final ContactService contactService;
 
-    @GetMapping("/new-count")
-    public ResponseEntity<ApiResponse<?>> getNewCount() {
-        return ResponseEntity.ok(ApiResponse.success(reviewService.countNewReviews()));
-    }
-
-    @GetMapping("/new")
-    public ResponseEntity<ApiResponse<?>> getNewReviews(
-            @RequestParam(defaultValue = "10") int limit
-    ) {
-        return ResponseEntity.ok(ApiResponse.success(reviewService.getNewReviews(limit)));
+    @GetMapping("/count-new")
+    public ResponseEntity<ApiResponse<?>> countNew() {
+        return ResponseEntity.ok(ApiResponse.success(contactService.countNew()));
     }
 
     @GetMapping
@@ -44,20 +36,21 @@ private final ReviewService reviewService;
     ) {
         Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         return ResponseEntity.ok(ApiResponse.success(
-                reviewService.search(keyword, status, PageRequest.of(page, size, sort))));
+                contactService.search(keyword, status, PageRequest.of(page, size, sort))));
     }
 
     @PutMapping("/{id}/status")
     public ResponseEntity<ApiResponse<?>> updateStatus(
             @PathVariable Long id,
-            @RequestBody @Valid ReviewStatusRequest request
+            @RequestBody @Valid ContactStatusRequest request
     ) {
-        return ResponseEntity.ok(ApiResponse.success(reviewService.approve(id, request), "Cập nhật trạng thái đánh giá thành công"));
+        return ResponseEntity.ok(ApiResponse.success(
+                contactService.updateStatus(id, request), "Cập nhật trạng thái liên hệ thành công"));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<?>> delete(@PathVariable Long id) {
-        reviewService.delete(id);
-        return ResponseEntity.ok(ApiResponse.success(null, "Xóa đánh giá thành công"));
+        contactService.delete(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Xóa liên hệ thành công"));
     }
 }

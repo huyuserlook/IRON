@@ -55,6 +55,27 @@ public class StatisticsServiceImpl implements StatisticsService {
                         .thenComparingInt(StatisticsResponse.MonthlyRevenue::getMonth))
                 .toList();
 
+List<StatisticsResponse.YearlyRevenue> yearlyRevenues = monthlyRevenues.stream()
+                .collect(Collectors.groupingBy(
+                        StatisticsResponse.MonthlyRevenue::getYear,
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ))
+                .entrySet()
+                .stream()
+                .map(entry -> StatisticsResponse.YearlyRevenue.builder()
+                        .year(entry.getKey())
+                        .revenue(entry.getValue().stream()
+                                .map(StatisticsResponse.MonthlyRevenue::getRevenue)
+                                .filter(amount -> amount != null)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add))
+                        .orderCount(entry.getValue().stream()
+                                .mapToLong(StatisticsResponse.MonthlyRevenue::getOrderCount)
+                                .sum())
+                        .build())
+                .sorted(Comparator.comparingInt(StatisticsResponse.YearlyRevenue::getYear))
+                .toList();
+
         List<StatisticsResponse.TopMotorcycle> topMotorcycles = orderDetailRepository.findAll().stream()
                 .collect(Collectors.groupingBy(detail -> detail.getMotorcycle().getId()))
                 .values()
@@ -69,7 +90,8 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .totalOrders(orderRepository.count())
                 .totalCustomers(userRepository.count())
                 .totalMotorcycles(motorcycleRepository.count())
-                .monthlyRevenues(monthlyRevenues)
+.monthlyRevenues(monthlyRevenues)
+                .yearlyRevenues(yearlyRevenues)
                 .topMotorcycles(topMotorcycles)
                 .build();
     }
