@@ -9,6 +9,7 @@ import MotorcyclePage from "../pages/Motorcycle/MotorcyclePage";
 import MotorcycleDetailPage from "../pages/Motorcycle/MotorcycleDetailPage";
 import CartPage from "../pages/Cart/CartPage";
 import CheckoutPage from "../pages/Order/CheckoutPage";
+import PaymentPage from "../pages/Order/PaymentPage";
 import OrderHistoryPage from "../pages/Order/OrderHistoryPage";
 import BookingPage from "../pages/Booking/BookingPage";
 import ContactPage from "../pages/Contact/ContactPage";
@@ -63,6 +64,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <OrderHistoryPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payment"
+          element={
+            <PrivateRoute>
+              <PaymentPage />
             </PrivateRoute>
           }
         />

@@ -10,6 +10,17 @@
 - [x] 6. Thêm truy vấn vào `BookingRepository`
 - [x] 7. Thêm truy vấn vào `ContactRepository`
 - [x] 8. Thêm truy vấn vào `UserRepository`
+- [x] 15. Tạo `entity/PaymentMethod.java` - entity quản lý phương thức thanh toán
+- [x] 16. Tạo `repository/PaymentMethodRepository.java`
+- [x] 17. Tạo `dto/request/PaymentMethodRequest.java`
+- [x] 18. Tạo `dto/response/PaymentMethodResponse.java`
+- [x] 19. Tạo `service/interfaces/PaymentMethodService.java`
+- [x] 20. Tạo `service/impl/PaymentMethodServiceImpl.java`
+- [x] 21. Tạo `controller/admin/AdminPaymentMethodController.java`
+
+## Phương thức thanh toán
+
+- [x] Thêm entity `PaymentMethod` với CRUD đầy đủ (Momo, Ngân hàng, VNPay, etc.)
 
 ## Frontend (FE)
 

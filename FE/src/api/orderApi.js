@@ -5,6 +5,7 @@ const orderApi = {
   getMyOrders: (params) => axiosClient.get("/orders/my-orders", { params }),
   getByCode: (orderCode) => axiosClient.get(`/orders/${orderCode}`),
   cancel: (id) => axiosClient.patch(`/orders/${id}/cancel`),
+  getStatus: (id) => axiosClient.get(`/orders/${id}/status`),
 
   // Admin
   getAllAdmin: (params) => axiosClient.get("/admin/orders", { params }),

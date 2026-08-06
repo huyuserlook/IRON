@@ -4,13 +4,11 @@ import {
   ArrowLeft,
   Banknote,
   Building2,
-  CreditCard,
   Lock,
   MapPin,
   MessageSquare,
   Package,
   ShoppingBag,
-  Smartphone,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderApi from "../../api/orderApi";
@@ -26,33 +24,6 @@ const API_ROOT = (import.meta.env.VITE_API_URL || "http://localhost:8080/api").r
   "",
 );
 
-const PAYMENT_OPTIONS = [
-  {
-    value: "CASH",
-    label: "Tiền mặt",
-    description: "Thanh toán khi nhận xe tại showroom",
-    icon: Banknote,
-  },
-  {
-    value: "BANK_TRANSFER",
-    label: "Chuyển khoản",
-    description: "Chuyển khoản ngân hàng — xác nhận trong 24h",
-    icon: Building2,
-  },
-  {
-    value: "MOMO",
-    label: "MoMo",
-    description: "Quét mã hoặc ví điện tử MoMo",
-    icon: Smartphone,
-  },
-  {
-    value: "VNPAY",
-    label: "VNPay",
-    description: "Thẻ nội địa, quốc tế qua cổng VNPay",
-    icon: CreditCard,
-  },
-];
-
 const resolveImageUrl = (url) => {
   if (!url) return "";
   if (
@@ -66,6 +37,21 @@ const resolveImageUrl = (url) => {
   return `${API_ROOT}/${url}`;
 };
 
+const PAYMENT_OPTIONS = [
+  {
+    value: "CASH",
+    label: "Tiền mặt",
+    description: "Thanh toán khi nhận xe tại showroom",
+    icon: Banknote,
+  },
+  {
+    value: "BANK_TRANSFER",
+    label: "Chuyển khoản",
+    description: "Chuyển khoản ngân hàng — quét mã QR",
+    icon: Building2,
+  },
+];
+
 const CheckoutPage = () => {
   const { items, total, clear } = useCart();
   const { user } = useAuth();
@@ -76,16 +62,17 @@ const CheckoutPage = () => {
     paymentMethod: "CASH",
     customerNote: "",
   });
+  const [skipCartRedirect, setSkipCartRedirect] = useState(false);
 
   const subtotal = total;
   const vat = useMemo(() => Math.round(subtotal * VAT_RATE), [subtotal]);
   const grandTotal = subtotal + SHIPPING_FEE + vat;
 
   useEffect(() => {
-    if (items.length === 0) {
+    if (items.length === 0 && !skipCartRedirect) {
       navigate("/cart", { replace: true });
     }
-  }, [items.length, navigate]);
+  }, [items.length, navigate, skipCartRedirect]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -110,7 +97,17 @@ const CheckoutPage = () => {
         paymentMethod: form.paymentMethod,
         customerNote: form.customerNote.trim(),
       };
-      await orderApi.create(orderData);
+      const res = await orderApi.create(orderData);
+      const createdOrder = res.data?.data || res.data;
+      const newOrderId = createdOrder.id;
+
+      if (form.paymentMethod === "BANK_TRANSFER") {
+        setSkipCartRedirect(true);
+        clear();
+        navigate(`/payment?orderId=${newOrderId}&amount=${grandTotal}`);
+        return;
+      }
+
       clear();
       toast.success("Đặt hàng thành công!");
       navigate("/my-orders");
@@ -199,7 +196,7 @@ const CheckoutPage = () => {
             >
               <div className="mb-5 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFF0F0] text-[#BC000A]">
-                  <CreditCard size={18} />
+                  <Banknote size={18} />
                 </div>
                 <h2 className="text-lg font-bold">Phương thức thanh toán</h2>
               </div>

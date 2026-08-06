@@ -6,10 +6,13 @@ import {
   Package,
   Receipt,
   ShoppingBag,
+  Send,
+  CheckCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderApi from "../../api/orderApi";
-import { ORDER_STATUS } from "../../utils/constants";
+import paymentApi from "../../api/paymentApi";
+import { ORDER_STATUS, PAYMENT_METHOD } from "../../utils/constants";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDateTime } from "../../utils/formatDate";
 
@@ -26,6 +29,9 @@ const STATUS_STYLES = {
 const OrderHistoryPage = () => {
   const [data, setData] = useState({ content: [] });
   const [loading, setLoading] = useState(true);
+  const [paymentMap, setPaymentMap] = useState({});
+  const [refs, setRefs] = useState({});
+  const [submittingRefs, setSubmittingRefs] = useState({});
 
   const load = () => {
     setLoading(true);
@@ -52,6 +58,43 @@ const OrderHistoryPage = () => {
       toast.error("Không thể hủy đơn hàng này");
     }
   };
+
+  const loadPayment = async (orderId) => {
+    try {
+      const res = await paymentApi.getByOrderId(orderId);
+      const payment = res.data?.data || res.data;
+      setPaymentMap((prev) => ({ ...prev, [orderId]: payment }));
+    } catch {
+      // ignore if no payment yet
+    }
+  };
+
+  const handleSubmitRef = async (orderId) => {
+    const ref = refs[orderId]?.trim();
+    if (!ref) {
+      toast.error("Vui lòng nhập mã giao dịch");
+      return;
+    }
+    setSubmittingRefs((prev) => ({ ...prev, [orderId]: true }));
+    try {
+      await paymentApi.submitTransactionRef(orderId, ref);
+      toast.success("Đã gửi mã giao dịch");
+      setRefs((prev) => ({ ...prev, [orderId]: "" }));
+      load();
+    } catch (err) {
+      toast.error(err.message || "Gửi thất bại");
+    } finally {
+      setSubmittingRefs((prev) => ({ ...prev, [orderId]: false }));
+    }
+  };
+
+  useEffect(() => {
+    data.content?.forEach((order) => {
+      if (order.paymentMethod && !paymentMap[order.id]) {
+        loadPayment(order.id);
+      }
+    });
+  }, [data.content]);
 
   return (
     <div className="min-h-screen bg-[#F7F5FA] pb-16 text-[#1A1B1F]">
@@ -170,25 +213,78 @@ const OrderHistoryPage = () => {
                     ))}
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEEAF1] bg-[#FAFAFB] px-5 py-4 sm:px-6">
-                    <div className="flex items-center gap-2">
-                      <Package size={16} className="text-[#7A6E71]" />
-                      <span className="text-sm text-[#7A6E71]">Tổng thanh toán</span>
-                      <span className="font-teko text-2xl font-bold text-[#BC000A]">
-                        {formatCurrency(order.totalAmount)}
-                      </span>
-                    </div>
+                   <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEEAF1] bg-[#FAFAFB] px-5 py-4 sm:px-6">
+                     <div className="flex items-center gap-2">
+                       <Package size={16} className="text-[#7A6E71]" />
+                       <span className="text-sm text-[#7A6E71]">Tổng thanh toán</span>
+                       <span className="font-teko text-2xl font-bold text-[#BC000A]">
+                         {formatCurrency(order.totalAmount)}
+                       </span>
+                     </div>
 
-                    {order.status === "PENDING" && (
-                      <button
-                        type="button"
-                        onClick={() => handleCancel(order.id)}
-                        className="rounded-[8px] border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-all duration-300 hover:bg-red-100 active:scale-95"
-                      >
-                        Hủy đơn
-                      </button>
+                     {order.status === "PENDING" && (
+                       <button
+                         type="button"
+                         onClick={() => handleCancel(order.id)}
+                         className="rounded-[8px] border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-all duration-300 hover:bg-red-100 active:scale-95"
+                       >
+                         Hủy đơn
+                       </button>
+                     )}
+                   </div>
+
+                    {order.paymentMethod && (
+                        <div className="border-t border-[#EEEAF1] px-5 py-4 sm:px-6 space-y-3">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-[#7A6E71]">Thanh toán</span>
+                            <span className="font-semibold text-[#1A1B1F]">
+                              {PAYMENT_METHOD[order.paymentMethod] || order.paymentMethod}
+                              {order.paymentStatus === "PAID" && (
+                                <span className="ml-2 inline-flex items-center gap-1 text-green-600 text-xs">
+                                  <CheckCircle size={12} /> Đã thanh toán
+                                </span>
+                              )}
+                            </span>
+                          </div>
+
+                          {paymentMap[order.id]?.transactionId && (
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-[#7A6E71]">Mã giao dịch</span>
+                              <span className="font-mono font-semibold text-[#1A1B1F]">
+                                {paymentMap[order.id].transactionId}
+                              </span>
+                            </div>
+                          )}
+
+                          {["MOMO", "BANK_TRANSFER", "VNPAY"].includes(order.paymentMethod) && order.paymentStatus !== "PAID" && !paymentMap[order.id]?.transactionId && (
+                            <form
+                              onSubmit={(e) => {
+                                e.preventDefault();
+                                handleSubmitRef(order.id);
+                              }}
+                              className="flex gap-2"
+                            >
+                              <input
+                                type="text"
+                                value={refs[order.id] || ""}
+                                onChange={(e) =>
+                                  setRefs((prev) => ({ ...prev, [order.id]: e.target.value }))
+                                }
+                                placeholder="Nhập mã giao dịch..."
+                                className="flex-1 rounded-[10px] border border-[#E3DEE6] bg-white px-3 py-2 text-sm outline-none focus:border-[#BC000A]"
+                              />
+                              <button
+                                type="submit"
+                                disabled={submittingRefs[order.id]}
+                                className="inline-flex items-center gap-2 rounded-[10px] bg-[#BC000A] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                <Send size={14} />
+                                {submittingRefs[order.id] ? "Đang gửi..." : "Gửi"}
+                              </button>
+                            </form>
+                          )}
+                        </div>
                     )}
-                  </div>
                 </article>
               );
             })}

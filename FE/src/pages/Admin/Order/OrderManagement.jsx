@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import orderApi from "../../../api/orderApi";
+import paymentApi from "../../../api/paymentApi";
 import { formatCurrency } from "../../../utils/formatCurrency";
 import { formatDateTime } from "../../../utils/formatDate";
-import { ORDER_STATUS } from "../../../utils/constants";
+import { ORDER_STATUS, PAYMENT_METHOD } from "../../../utils/constants";
 import toast from "react-hot-toast";
 
 const STATUSES = [
@@ -19,6 +20,8 @@ const OrderManagement = () => {
   const [data, setData] = useState({ content: [], totalPages: 0 });
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(0);
+  const [paymentMap, setPaymentMap] = useState({});
+  const [confirmingId, setConfirmingId] = useState(null);
 
   const load = useCallback(() => {
     orderApi
@@ -42,6 +45,39 @@ const OrderManagement = () => {
       toast.error("Cập nhật thất bại");
     }
   };
+
+  const loadPayment = async (orderId) => {
+    try {
+      const res = await paymentApi.getByOrderId(orderId);
+      const payment = res.data?.data || res.data;
+      if (payment) {
+        setPaymentMap((prev) => ({ ...prev, [orderId]: payment }));
+      }
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleConfirmPayment = async (orderId) => {
+    setConfirmingId(orderId);
+    try {
+      await paymentApi.confirmPayment(orderId);
+      toast.success("Xác nhận thanh toán thành công");
+      load();
+    } catch {
+      toast.error("Xác nhận thất bại");
+    } finally {
+      setConfirmingId(null);
+    }
+  };
+
+  useEffect(() => {
+    data.content?.forEach((order) => {
+      if (!paymentMap[order.id]) {
+        loadPayment(order.id);
+      }
+    });
+  }, [data.content]);
 
   return (
     <div>
@@ -74,6 +110,7 @@ const OrderManagement = () => {
               <th className="px-4 py-3 text-left">Khách hàng</th>
               <th className="px-4 py-3 text-right">Tổng tiền</th>
               <th className="px-4 py-3 text-center">Trạng thái</th>
+              <th className="px-4 py-3 text-left">Thanh toán</th>
               <th className="px-4 py-3 text-left">Ngày đặt</th>
               <th className="px-4 py-3 text-center">Cập nhật</th>
             </tr>
@@ -81,6 +118,7 @@ const OrderManagement = () => {
           <tbody className="divide-y divide-gray-100">
             {data.content?.map((order) => {
               const st = ORDER_STATUS[order.status] || {};
+              const payment = paymentMap[order.id];
               return (
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono font-medium text-orange-600">
@@ -103,6 +141,32 @@ const OrderManagement = () => {
                     >
                       {st.label || order.status}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {payment ? (
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-gray-700">
+                          {PAYMENT_METHOD[payment.paymentMethod] || payment.paymentMethod}
+                        </p>
+                        {payment.transactionId && (
+                          <p className="text-xs text-gray-500 font-mono">
+                            {payment.transactionId}
+                          </p>
+                        )}
+                        {order.status === "PENDING" && ["MOMO", "BANK_TRANSFER", "VNPAY"].includes(payment.paymentMethod) && (
+                          <button
+                            type="button"
+                            onClick={() => handleConfirmPayment(order.id)}
+                            disabled={confirmingId === order.id}
+                            className="text-xs font-semibold text-green-600 hover:text-green-700 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {confirmingId === order.id ? "Đang xác nhận..." : "Xác nhận TT"}
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-gray-400">-</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {formatDateTime(order.createdAt)}

@@ -8,6 +8,7 @@ import com.example.IRON.exception.UnauthorizedException;
 import com.example.IRON.repository.*;
 import com.example.IRON.service.interfaces.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,6 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal total = BigDecimal.ZERO;
 
         Order order = new Order();
-        order.setOrderCode(generateOrderCode());
         order.setUser(user);
         order.setShippingAddress(request.getShippingAddress());
         order.setCustomerNote(request.getCustomerNote());
@@ -65,7 +65,11 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderDetails(details);
         Order saved = orderRepository.save(order);
 
-        // Tạo payment
+        saved.setOrderCode(String.format("ORD-%s-%04d",
+                saved.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyyMMdd")),
+                saved.getId()));
+        saved = orderRepository.save(saved);
+
         Payment payment = new Payment();
         payment.setOrder(saved);
         payment.setAmount(total);
@@ -126,12 +130,6 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Chỉ có thể hủy đơn hàng đang chờ xác nhận");
         order.setStatus(Order.OrderStatus.CANCELLED);
         orderRepository.save(order);
-    }
-
-    private String generateOrderCode() {
-        String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        long count = orderRepository.count() + 1;
-        return String.format("ORD-%s-%04d", date, count);
     }
 
     private OrderResponse toResponse(Order order) {

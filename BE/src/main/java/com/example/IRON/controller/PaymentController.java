@@ -1,6 +1,8 @@
 package com.example.IRON.controller;
 
+import com.example.IRON.dto.request.PaymentRequest;
 import com.example.IRON.dto.response.ApiResponse;
+import com.example.IRON.dto.response.PaymentResponse;
 import com.example.IRON.entity.Payment;
 import com.example.IRON.service.interfaces.PaymentService;
 import lombok.RequiredArgsConstructor;
@@ -29,5 +31,41 @@ public class PaymentController {
         
         paymentService.updateStatus(orderId, Payment.PaymentStatus.valueOf(status), transactionId);
         return ResponseEntity.ok(ApiResponse.success(null, "Cập nhật trạng thái thanh toán thành công"));
+    }
+
+    @PostMapping("/{orderId}/qr")
+    public ResponseEntity<ApiResponse<PaymentResponse>> createQrPayment(
+            @PathVariable Long orderId,
+            @RequestBody PaymentRequest request) {
+        Payment.PaymentMethod method = request.getPaymentMethod();
+        PaymentResponse response = paymentService.createQrPayment(orderId, method);
+        return ResponseEntity.ok(ApiResponse.success(response, "Tạo QR thanh toán thành công"));
+    }
+
+    @GetMapping("/{orderId}/qr")
+    public ResponseEntity<ApiResponse<PaymentResponse>> getQrPayment(@PathVariable Long orderId) {
+        PaymentResponse response = paymentService.getQrPayment(orderId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/{orderId}/vnpay-url")
+    public ResponseEntity<ApiResponse<String>> getVnpayUrl(@PathVariable Long orderId) {
+        String url = paymentService.getVnpayPaymentUrl(orderId);
+        return ResponseEntity.ok(ApiResponse.success(url, "Tạo VNPay URL thành công"));
+    }
+
+    @GetMapping("/{orderId}/bank-transfer")
+    public ResponseEntity<ApiResponse<PaymentResponse>> getBankTransferInfo(@PathVariable Long orderId) {
+        PaymentResponse response = paymentService.getBankTransferInfo(orderId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/{orderId}/submit-transaction")
+    public ResponseEntity<ApiResponse<PaymentResponse>> submitTransactionRef(
+            @PathVariable Long orderId,
+            @RequestBody(required = false) java.util.Map<String, String> body) {
+        String ref = body != null ? body.get("transactionRef") : null;
+        PaymentResponse response = paymentService.submitTransactionRef(orderId, ref);
+        return ResponseEntity.ok(ApiResponse.success(response, "Gửi mã giao dịch thành công"));
     }
 }
