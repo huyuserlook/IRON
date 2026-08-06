@@ -41,6 +41,7 @@ public class UserServiceImpl implements UserService {
         res.setAddress(user.getAddress());
         res.setAvatarUrl(user.getAvatarUrl());
         res.setEnabled(user.getEnabled());
+        res.setDeleted(user.getDeleted());
         res.setRole(role);
         res.setCreatedAt(user.getCreatedAt());
         return res;
@@ -48,7 +49,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<UserResponse> getAllUsers(Pageable pageable) {
-        return userRepository.findAll(pageable).map(this::toResponse);
+        return userRepository.findByDeletedFalse(pageable).map(this::toResponse);
     }
 
     @Override
@@ -57,6 +58,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         user.setEnabled(!user.getEnabled());
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+        user.setDeleted(true);
         userRepository.save(user);
     }
 }

@@ -11,6 +11,7 @@ import CartPage from "../pages/Cart/CartPage";
 import CheckoutPage from "../pages/Order/CheckoutPage";
 import PaymentPage from "../pages/Order/PaymentPage";
 import OrderHistoryPage from "../pages/Order/OrderHistoryPage";
+import UserProfilePage from "../pages/User/UserProfilePage";
 import BookingPage from "../pages/Booking/BookingPage";
 import ContactPage from "../pages/Contact/ContactPage";
 import AboutPage from "../pages/About/AboutPage";
@@ -56,6 +57,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <CheckoutPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <UserProfilePage />
             </PrivateRoute>
           }
         />

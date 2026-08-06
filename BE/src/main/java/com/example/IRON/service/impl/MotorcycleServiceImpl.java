@@ -171,8 +171,12 @@ public class MotorcycleServiceImpl implements MotorcycleService {
             motorcycle.getImages().add(image);
         }
 
-        if (motorcycle.getThumbnailUrl() == null || motorcycle.getThumbnailUrl().isBlank()) {
-            motorcycle.setThumbnailUrl(rawImages.get(0).trim());
+        String firstValid = rawImages.stream()
+                .filter(u -> u != null && !u.isBlank())
+                .findFirst()
+                .orElse(null);
+        if (firstValid != null && (motorcycle.getThumbnailUrl() == null || motorcycle.getThumbnailUrl().isBlank())) {
+            motorcycle.setThumbnailUrl(firstValid.trim());
         }
     }
 

@@ -30,4 +30,10 @@ public class AdminUserController {
         userService.toggleUserStatus(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Cập nhật trạng thái người dùng thành công"));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<?>> delete(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Xóa người dùng thành công"));
+    }
 }

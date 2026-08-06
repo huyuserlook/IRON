@@ -43,7 +43,7 @@ public class Motorcycle {
     @Column(name = "year_model")
     private Integer yearModel;
 
-    @Column(name = "thumbnail_url", columnDefinition = "TEXT")
+    @Column(name = "thumbnail_url", columnDefinition = "LONGTEXT")
     private String thumbnailUrl;
 
     @Column(columnDefinition = "TEXT")

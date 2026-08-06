@@ -220,7 +220,7 @@ const Header = () => {
                 </Link>
               )}
               <Link
-                to="/my-orders"
+                to="/profile"
                 className="group text-xs sm:text-sm select-none cursor-pointer hover:text-iron-yellow flex items-center gap-1.5 sm:gap-2 transition-[transform,background-color,color] duration-250 ease-out hover:bg-white/5 px-2 py-1 rounded-lg active:scale-[0.97] active:bg-white/10 whitespace-nowrap"
               >
                 <span
@@ -384,7 +384,7 @@ const Header = () => {
               }}
             >
               <Link
-                to="/my-orders"
+                to="/profile"
                 onClick={() => setMenuOpen(false)}
                 className="select-none cursor-pointer px-4 py-3 rounded-xl hover:bg-white/5 transition-[transform,background-color] duration-250 ease-out flex items-center gap-3 active:scale-[0.98] active:bg-white/10 active:translate-y-px"
               >

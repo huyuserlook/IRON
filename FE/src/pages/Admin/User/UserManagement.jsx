@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import userApi from "../../../api/userApi";
 import { formatDate } from "../../../utils/formatDate";
 import toast from "react-hot-toast";
-import { UserCheck, UserX } from "lucide-react";
+import { UserCheck, UserX, Trash2 } from "lucide-react";
 
 const UserManagement = () => {
   const [data, setData] = useState({ content: [], totalPages: 0 });
@@ -30,6 +30,17 @@ const UserManagement = () => {
       load();
     } catch {
       toast.error("Thất bại");
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    if (!confirm(`Xóa vĩnh viễn tài khoản "${name}"? Hành động này không thể hoàn tác.`)) return;
+    try {
+      await userApi.delete(id);
+      toast.success("Đã xóa người dùng");
+      load();
+    } catch {
+      toast.error("Không thể xóa người dùng");
     }
   };
 
@@ -76,12 +87,20 @@ const UserManagement = () => {
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <button
-                    onClick={() => handleToggle(u.id, u.fullName, u.enabled)}
-                    className={`p-1.5 rounded-lg transition-colors ${u.enabled ? "hover:bg-red-50 text-red-500" : "hover:bg-green-50 text-green-500"}`}
-                  >
-                    {u.enabled ? <UserX size={16} /> : <UserCheck size={16} />}
-                  </button>
+                  <div className="flex items-center justify-center gap-1">
+                    <button
+                      onClick={() => handleToggle(u.id, u.fullName, u.enabled)}
+                      className={`p-1.5 rounded-lg transition-colors ${u.enabled ? "hover:bg-red-50 text-red-500" : "hover:bg-green-50 text-green-500"}`}
+                    >
+                      {u.enabled ? <UserX size={16} /> : <UserCheck size={16} />}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(u.id, u.fullName)}
+                      className="p-1.5 rounded-lg hover:bg-red-50 text-red-500 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

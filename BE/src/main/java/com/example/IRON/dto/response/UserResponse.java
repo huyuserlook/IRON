@@ -14,6 +14,7 @@ public class UserResponse {
     private String address;
     private String avatarUrl;
     private Boolean enabled;
+    private Boolean deleted;
     private String role;
     private LocalDateTime createdAt;
 

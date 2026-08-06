@@ -1,6 +1,7 @@
 package com.example.IRON.repository;
 
 import com.example.IRON.entity.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -23,4 +24,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.createdAt >= :since ORDER BY u.createdAt DESC")
     List<User> findNewUsers(@Param("since") LocalDateTime since, Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.deleted = false")
+    Page<User> findByDeletedFalse(Pageable pageable);
 }

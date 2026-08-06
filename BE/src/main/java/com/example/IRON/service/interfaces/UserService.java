@@ -10,4 +10,5 @@ public interface UserService {
     UserResponse toResponse(User user);
     Page<UserResponse> getAllUsers(Pageable pageable);
     void toggleUserStatus(Long userId);
+    void deleteUser(Long userId);
 }
