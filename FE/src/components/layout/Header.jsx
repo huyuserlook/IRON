@@ -4,6 +4,7 @@ import { ShoppingCart, User, LogOut, X, Menu, Phone, Info } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import IronLogo from "../common/IronLogo";
+import SearchBar from "../common/SearchBar";
 
 const NAV_LINKS = [
   { to: "/", label: "Trang chủ", end: true },
@@ -181,6 +182,8 @@ const Header = () => {
             );
           })}
         </nav>
+
+        <SearchBar />
 
         <div
           className={`flex items-center gap-2 sm:gap-3 transition-transform duration-500 ${SCROLL_EASE} ${BTN_SCALE} origin-right`}

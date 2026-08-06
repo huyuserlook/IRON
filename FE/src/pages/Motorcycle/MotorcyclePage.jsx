@@ -87,6 +87,15 @@ const MotorcyclePage = () => {
     sortDir: "desc",
   });
 
+  // Sync keyword from URL (e.g. from Header SearchBar) into filter state
+  useEffect(() => {
+    const kw = searchParams.get("keyword") || "";
+    setFilters((prev) => {
+      if (prev.keyword === kw) return prev;
+      return { ...prev, keyword: kw, page: 0 };
+    });
+  }, [searchParams]);
+
   const debouncedKeyword = useDebounce(filters.keyword, 400);
 
   useEffect(() => {
@@ -257,7 +266,8 @@ const MotorcyclePage = () => {
   }, []);
 
   const clearFilters = useCallback(() => {
-    setFilters({
+    setFilters((prev) => ({
+      ...prev,
       keyword: "",
       brandId: "",
       categoryId: "",
@@ -265,10 +275,7 @@ const MotorcyclePage = () => {
       minPrice: null,
       maxPrice: null,
       page: 0,
-      size: PAGE_SIZE,
-      sortBy: "createdAt",
-      sortDir: "desc",
-    });
+    }));
   }, []);
 
   const toggleFavorite = useCallback((id) => {

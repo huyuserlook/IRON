@@ -1,4 +1,4 @@
-import { Bike, ChevronDown, ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import { Bike, ChevronDown, ChevronLeft, ChevronRight, Search, Sparkles } from "lucide-react";
 import MotorcycleCard from "./MotorcycleCard";
 
 const MotorcycleGrid = ({
@@ -39,6 +39,25 @@ const MotorcycleGrid = ({
         </div>
 
         <div className="moto-fade flex items-center gap-3" style={{ animationDelay: "100ms" }}>
+          <div className="relative hidden sm:block">
+            <input
+              type="text"
+              value={filters.keyword || ""}
+              onChange={(e) =>
+                setFilters((prev) => ({
+                  ...prev,
+                  keyword: e.target.value,
+                  page: 0,
+                }))
+              }
+              placeholder="Tìm kiếm xe..."
+              className="w-full rounded-full border border-[#E3DEE6] bg-[#F7F5FA] px-3 py-1.5 text-xs text-[#1A1B1F] outline-none placeholder-[#D8D4DB] transition-colors focus:border-[#BC000A] focus:bg-white"
+            />
+            <Search
+              size={12}
+              className="absolute left-2 top-1/2 -translate-y-1/2 text-[#9A9196]"
+            />
+          </div>
           <div className="relative">
             <select
               value={`${filters.sortBy}-${filters.sortDir}`}
