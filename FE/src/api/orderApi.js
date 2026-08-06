@@ -14,6 +14,7 @@ const orderApi = {
     axiosClient.patch(`/admin/orders/${id}/status`, null, {
       params: { status },
     }),
+  deleteOrder: (id) => axiosClient.delete(`/admin/orders/${id}`),
 };
 
 export default orderApi;

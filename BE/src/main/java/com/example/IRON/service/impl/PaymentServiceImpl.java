@@ -212,12 +212,14 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public PaymentResponse submitTransactionRef(Long orderId, String transactionRef) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Thanh toán", "orderId", orderId));
 
         payment.setTransactionId(transactionRef);
         payment.setStatus(Payment.PaymentStatus.PAID);
+        payment.setPaidAt(LocalDateTime.now());
         paymentRepository.save(payment);
 
         Order order = payment.getOrder();
@@ -235,11 +237,13 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public PaymentResponse confirmPayment(Long orderId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Thanh toán", "orderId", orderId));
 
         payment.setStatus(Payment.PaymentStatus.PAID);
+        payment.setPaidAt(LocalDateTime.now());
         paymentRepository.save(payment);
 
         Order order = payment.getOrder();

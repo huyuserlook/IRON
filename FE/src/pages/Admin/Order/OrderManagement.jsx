@@ -5,6 +5,7 @@ import { formatCurrency } from "../../../utils/formatCurrency";
 import { formatDateTime } from "../../../utils/formatDate";
 import { ORDER_STATUS, PAYMENT_METHOD } from "../../../utils/constants";
 import toast from "react-hot-toast";
+import { Trash2 } from "lucide-react";
 
 const STATUSES = [
   "",
@@ -22,6 +23,7 @@ const OrderManagement = () => {
   const [page, setPage] = useState(0);
   const [paymentMap, setPaymentMap] = useState({});
   const [confirmingId, setConfirmingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   const load = useCallback(() => {
     orderApi
@@ -68,6 +70,20 @@ const OrderManagement = () => {
       toast.error("Xác nhận thất bại");
     } finally {
       setConfirmingId(null);
+    }
+   };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Bạn có chắc muốn xóa đơn hàng này?")) return;
+    setDeletingId(id);
+    try {
+      await orderApi.deleteOrder(id);
+      toast.success("Xóa đơn hàng thành công");
+      load();
+    } catch {
+      toast.error("Xóa đơn hàng thất bại");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -171,19 +187,53 @@ const OrderManagement = () => {
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {formatDateTime(order.createdAt)}
                   </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={order.status}
-                      onChange={(e) => handleStatus(order.id, e.target.value)}
-                      className="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-300"
-                    >
-                      {STATUSES.filter(Boolean).map((s) => (
-                        <option key={s} value={s}>
-                          {ORDER_STATUS[s]?.label}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
+                   <td className="px-4 py-3">
+                     <div className="flex items-center gap-2">
+                       <select
+                         value={order.status}
+                         onChange={(e) => handleStatus(order.id, e.target.value)}
+                         className="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-300"
+                       >
+                         {STATUSES.filter(Boolean).map((s) => (
+                           <option key={s} value={s}>
+                             {ORDER_STATUS[s]?.label}
+                           </option>
+                         ))}
+                       </select>
+                       <button
+                         type="button"
+                         onClick={() => handleDelete(order.id)}
+                         disabled={deletingId === order.id}
+                         className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                         title="Xóa đơn hàng"
+                       >
+                         {deletingId === order.id ? (
+                           <svg
+                             className="h-4 w-4 animate-spin"
+                             xmlns="http://www.w3.org/2000/svg"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                           >
+                             <circle
+                               className="opacity-25"
+                               cx="12"
+                               cy="12"
+                               r="10"
+                               stroke="currentColor"
+                               strokeWidth="4"
+                             />
+                             <path
+                               className="opacity-75"
+                               fill="currentColor"
+                               d="M8 12a4 4 0 018 0H8z"
+                             />
+                           </svg>
+                         ) : (
+                           <Trash2 size={14} />
+                         )}
+                       </button>
+                     </div>
+                   </td>
                 </tr>
               );
             })}

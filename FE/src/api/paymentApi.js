@@ -12,6 +12,9 @@ const paymentApi = {
 
   createVietQr: (orderId, amount) =>
     axiosClient.post(`/checkout/vietqr`, { orderId, amount }),
+
+  createMomoPayment: (orderId, amount, orderInfo) =>
+    axiosClient.post(`/checkout/momo`, { orderId: String(orderId), amount, orderInfo }),
 };
 
 export default paymentApi;

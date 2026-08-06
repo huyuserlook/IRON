@@ -13,7 +13,7 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import toast from "react-hot-toast";
 
-const exportExcel = (chartData, topMotorcycles, summary) => {
+const exportExcel = (chartData, yearlyData, topMotorcycles, summary) => {
   try {
     const wb = XLSX.utils.book_new();
 
@@ -30,6 +30,10 @@ const exportExcel = (chartData, topMotorcycles, summary) => {
       ["THỐNG KÊ DOANH THU THEO THÁNG"],
       ["Tháng", "Năm", "Doanh thu", "Số đơn"],
       ...chartData.map((m) => [m.name, m.year, m.revenue, m.orderCount]),
+      [],
+      ["THỐNG KÊ DOANH THU THEO NĂM"],
+      ["Năm", "Doanh thu", "Số đơn"],
+      ...yearlyData.map((y) => [y.year, y.revenue, y.orderCount]),
       [],
       ["TOP XE BÁN CHẠY"],
       ["Xe", "Đã bán", "Doanh thu"],
@@ -48,7 +52,7 @@ const exportExcel = (chartData, topMotorcycles, summary) => {
   }
 };
 
-const exportPDF = (chartData, topMotorcycles, summary) => {
+const exportPDF = (chartData, yearlyData, topMotorcycles, summary) => {
   try {
     const doc = new jsPDF({ orientation: "landscape" });
     doc.setFontSize(16);
@@ -83,9 +87,28 @@ const exportPDF = (chartData, topMotorcycles, summary) => {
       headStyles: { fillColor: [249, 115, 22] },
     });
 
+    // Yearly revenue
+    doc.setFontSize(12);
+    doc.text(
+      "3. Doanh thu theo năm",
+      14,
+      doc.lastAutoTable.finalY + 10,
+    );
+    autoTable(doc, {
+      startY: doc.lastAutoTable.finalY + 13,
+      head: [["Năm", "Doanh thu", "Số đơn"]],
+      body: yearlyData.map((y) => [y.year, y.revenue, y.orderCount]),
+      styles: { fontSize: 9 },
+      headStyles: { fillColor: [249, 115, 22] },
+    });
+
     // Top motorcycles
     doc.setFontSize(12);
-    doc.text("3. Top xe bán chạy", 14, doc.lastAutoTable.finalY + 10);
+    doc.text(
+      "4. Top xe bán chạy",
+      14,
+      doc.lastAutoTable.finalY + 10,
+    );
     autoTable(doc, {
       startY: doc.lastAutoTable.finalY + 13,
       head: [["Xe", "Đã bán", "Doanh thu"]],
@@ -139,6 +162,13 @@ const StatisticsPage = () => {
       orderCount: m.orderCount,
     })) || [];
 
+  const yearlyData =
+    stats?.yearlyRevenues?.map((y) => ({
+      year: y.year,
+      revenue: Number(y.revenue) || 0,
+      orderCount: y.orderCount,
+    })) || [];
+
   const topMotorcycles = stats?.topMotorcycles || [];
   const summary = {
     totalRevenue: formatCurrency(stats?.totalRevenue || 0),
@@ -148,15 +178,16 @@ const StatisticsPage = () => {
   };
 
   const handleExport = async (type) => {
-    if (!chartData.length && !topMotorcycles.length) {
+    if (!chartData.length && !topMotorcycles.length && !yearlyData.length) {
       toast.error("Không có dữ liệu để xuất");
       return;
     }
     setExporting(type);
     // allow UI to show the pending state
     await new Promise((r) => setTimeout(r, 50));
-    if (type === "excel") exportExcel(chartData, topMotorcycles, summary);
-    else exportPDF(chartData, topMotorcycles, summary);
+    if (type === "excel")
+      exportExcel(chartData, yearlyData, topMotorcycles, summary);
+    else exportPDF(chartData, yearlyData, topMotorcycles, summary);
     setExporting(null);
   };
 
@@ -167,10 +198,9 @@ const StatisticsPage = () => {
           <h1 className="text-2xl font-bold text-gray-800">
             Thống kê doanh thu
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Biểu đồ đường doanh thu theo tháng, biểu đồ miền doanh thu theo năm
-            và top xe bán chạy
-          </p>
+            <p className="mt-1 text-sm text-gray-500">
+              Biểu đồ tròn doanh thu theo tháng và năm, kèm top xe bán chạy
+            </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button
@@ -325,13 +355,46 @@ const StatisticsPage = () => {
                     ))}
                   </tbody>
                 </table>
-              </div>
-            )}
-          </div>
-        </>
-      )}
-    </div>
-  );
+               </div>
+             )}
+           </div>
+
+           {/* Yearly revenue table */}
+           {yearlyData.length > 0 && (
+             <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
+               <h2 className="font-semibold text-gray-700 mb-4">
+                 Chi tiết doanh thu theo năm
+               </h2>
+               <table className="w-full text-sm">
+                 <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                   <tr>
+                     <th className="px-4 py-3 text-left">Năm</th>
+                     <th className="px-4 py-3 text-right">Số đơn</th>
+                     <th className="px-4 py-3 text-right">Doanh thu</th>
+                   </tr>
+                 </thead>
+                 <tbody className="divide-y divide-gray-100">
+                   {yearlyData.map((y) => (
+                     <tr key={y.year} className="hover:bg-gray-50">
+                       <td className="px-4 py-3 font-medium text-gray-800">
+                         {y.year}
+                       </td>
+                       <td className="px-4 py-3 text-right text-gray-600">
+                         {y.orderCount} đơn
+                       </td>
+                       <td className="px-4 py-3 text-right font-semibold text-orange-600">
+                         {formatCurrency(y.revenue)}
+                       </td>
+                     </tr>
+                   ))}
+                 </tbody>
+               </table>
+             </div>
+           )}
+         </>
+       )}
+     </div>
+   );
 };
 
 export default StatisticsPage;

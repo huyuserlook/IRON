@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, QrCode, CheckCircle, Copy } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Copy,
+  ExternalLink,
+  QrCode,
+  RefreshCw,
+  Smartphone,
+} from "lucide-react";
 import toast from "react-hot-toast";
 import paymentApi from "../../api/paymentApi";
 import orderApi from "../../api/orderApi";
@@ -36,6 +44,9 @@ const PaymentPage = () => {
   const [paid, setPaid] = useState(false);
   const [polling, setPolling] = useState(true);
   const [qrError, setQrError] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [deeplink, setDeeplink] = useState(null);
+  const [payUrl, setPayUrl] = useState(null);
 
   const amount = amountParam ? Number(amountParam) : 0;
 
@@ -46,20 +57,38 @@ const PaymentPage = () => {
       return;
     }
 
-    const createQr = async () => {
+    const initPayment = async () => {
       try {
-        const res = await paymentApi.createVietQr(orderId, amount);
-        const data = res.data?.data || res.data;
-        const bankInfoData = data.bankInfo || {};
-        const qrUrl = data.qrCodeUrl ? resolveImageUrl(data.qrCodeUrl) : null;
-        setQrData(qrUrl);
-        setBankInfo({
-          account: bankInfoData.account || "161220054444",
-          bankName: bankInfoData.bankName || "MB",
-          accountName: bankInfoData.accountName || "HO XUAN HUY",
-          amount: bankInfoData.amount || amount,
-          addInfo: bankInfoData.addInfo || "DH" + orderId,
-        });
+        const statusRes = await orderApi.getStatus(orderId);
+        const statusData = statusRes.data?.data || statusRes.data;
+        const method = statusData?.paymentMethod;
+        const code = statusData?.orderCode;
+        setPaymentMethod(method);
+
+        if (method === "MOMO") {
+          const res = await paymentApi.createMomoPayment(
+            orderId,
+            amount,
+            `Thanh toán đơn hàng ${code || orderId}`
+          );
+          const data = res.data?.data || res.data;
+          setQrData(data.qrCodeUrl);
+          setDeeplink(data.deeplink);
+          setPayUrl(data.payUrl);
+        } else {
+          const res = await paymentApi.createVietQr(orderId, amount);
+          const data = res.data?.data || res.data;
+          const bankInfoData = data.bankInfo || {};
+          const qrUrl = data.qrCodeUrl ? resolveImageUrl(data.qrCodeUrl) : null;
+          setQrData(qrUrl);
+          setBankInfo({
+            account: bankInfoData.account || "161220054444",
+            bankName: bankInfoData.bankName || "MB",
+            accountName: bankInfoData.accountName || "HO XUAN HUY",
+            amount: bankInfoData.amount || amount,
+            addInfo: bankInfoData.addInfo || "DH" + orderId,
+          });
+        }
       } catch (err) {
         toast.error(err.message || "Loi khi tao QR thanh toan");
         navigate("/my-orders", { replace: true });
@@ -68,7 +97,7 @@ const PaymentPage = () => {
       }
     };
 
-    createQr();
+    initPayment();
   }, [orderId, amount, navigate]);
 
   useEffect(() => {
@@ -80,7 +109,7 @@ const PaymentPage = () => {
         if (data?.status === "CONFIRMED" || data?.paymentStatus === "PAID" || data?.status === "paid") {
           setPaid(true);
           setPolling(false);
-          toast.success("Thanh toan VietQR thanh cong!");
+          toast.success("Thanh toan thanh cong!");
           setTimeout(() => {
             navigate("/my-orders");
           }, 2000);
@@ -121,6 +150,8 @@ const PaymentPage = () => {
     );
   }
 
+  const isMomo = paymentMethod === "MOMO";
+
   return (
     <div className="min-h-screen bg-[#F7F5FA] pb-16 text-[#1A1B1F]">
       <div className="mx-auto max-w-[560px] px-4 py-10 sm:px-6 lg:py-12">
@@ -136,12 +167,16 @@ const PaymentPage = () => {
         <div className="rounded-[20px] border border-[#E3DEE6] bg-white p-6 shadow-[0_16px_40px_-32px_rgba(0,0,0,0.16)]">
           <div className="mb-6 flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#BC000A] text-white">
-              <QrCode size={18} />
+              {isMomo ? <Smartphone size={18} /> : <QrCode size={18} />}
             </div>
             <div>
-              <h1 className="text-lg font-bold">Thanh toan chuyen khoan</h1>
+              <h1 className="text-lg font-bold">
+                {isMomo ? "Thanh toan qua MoMo" : "Thanh toan chuyen khoan"}
+              </h1>
               <p className="text-sm text-[#7A6E71]">
-                Quet ma QR hoac chuyen khoan thu cong
+                {isMomo
+                  ? "Quet ma QR hoac mo app MoMo de thanh toan"
+                  : "Quet ma QR hoac chuyen khoan thu cong"}
               </p>
             </div>
           </div>
@@ -191,11 +226,36 @@ const PaymentPage = () => {
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-[12px] border border-[#E3DEE6] bg-white px-5 py-2.5 text-sm font-semibold text-[#1A1B1F] shadow-sm transition-all duration-300 hover:border-[#BC000A] hover:text-[#BC000A]"
               >
-                Mo ma QR trong tab moi
+                <ExternalLink size={14} />
+                {isMomo ? "Mo ma QR trong tab moi" : "Mo ma QR trong tab moi"}
               </a>
             )}
 
-            {bankInfo && (
+            {isMomo && deeplink && (
+              <a
+                href={deeplink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#C82A44] px-5 py-3 text-sm font-bold text-white shadow-sm transition-all duration-300 hover:brightness-110"
+              >
+                <Smartphone size={16} />
+                Mo app MoMo de thanh toan
+              </a>
+            )}
+
+            {isMomo && payUrl && (
+              <a
+                href={payUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-[12px] border border-[#E3DEE6] bg-white px-5 py-2.5 text-sm font-semibold text-[#1A1B1F] shadow-sm transition-all duration-300 hover:border-[#BC000A] hover:text-[#BC000A]"
+              >
+                <ExternalLink size={14} />
+                Mo trang thanh toan MoMo
+              </a>
+            )}
+
+            {!isMomo && bankInfo && (
               <div className="w-full rounded-[12px] bg-[#F7F5FA] p-4 space-y-3">
                 <h3 className="text-sm font-bold text-[#1A1B1F]">
                   Thong tin chuyen khoan
@@ -247,45 +307,61 @@ const PaymentPage = () => {
                   Sao chep thong tin
                 </button>
 
-                <p className="text-xs text-[#7A6E71]">
-                  Sau khi chuyen khoan xong, bam nut ben duoi de xac nhan
-                </p>
+                {!isMomo && (
+                  <>
+                    <p className="text-xs text-[#7A6E71]">
+                      Sau khi chuyen khoan xong, bam nut ben duoi de xac nhan
+                    </p>
 
-                <button
-                  type="button"
-                  onClick={async () => {
-                    try {
-                      await paymentApi.confirmVietQrPayment(orderId);
-                      setPaid(true);
-                      setPolling(false);
-                      toast.success("Xac nhan thanh toan thanh cong!");
-                      setTimeout(() => {
-                        navigate("/my-orders");
-                      }, 2000);
-                    } catch (err) {
-                      toast.error(err.message || "Xac nhan that bai");
-                    }
-                  }}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#BC000A] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white shadow-[0_10px_30px_-20px_rgba(188,0,10,0.7)] transition-all duration-300 hover:brightness-110"
-                >
-                  Da thanh toan
-                </button>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          await paymentApi.confirmVietQrPayment(orderId);
+                          setPaid(true);
+                          setPolling(false);
+                          toast.success("Xac nhan thanh toan thanh cong!");
+                          setTimeout(() => {
+                            navigate("/my-orders");
+                          }, 2000);
+                        } catch (err) {
+                          toast.error(err.message || "Xac nhan that bai");
+                        }
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-2 rounded-[12px] bg-[#BC000A] px-6 py-3 text-sm font-bold uppercase tracking-[0.14em] text-white shadow-[0_10px_30px_-20px_rgba(188,0,10,0.7)] transition-all duration-300 hover:brightness-110"
+                    >
+                      Da thanh toan
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
             <div className="w-full rounded-[12px] border border-[#E3DEE6] bg-[#FAF8FC] p-4">
               <h3 className="text-sm font-bold text-[#1A1B1F]">Huong dan</h3>
               <ol className="mt-2 list-inside list-decimal space-y-1 text-sm text-[#7A6E71]">
-                <li>Mo app ngan hang va chon chuc nang quet ma QR</li>
-                <li>Quet ma QR ben tren</li>
-                <li>Kiem tra thong tin va xac nhan chuyen khoan</li>
-                <li>Trang nay se tu cap nhat khi thanh toan thanh cong</li>
+                {isMomo ? (
+                  <>
+                    <li>Mo app MoMo va quet ma QR ben tren</li>
+                    <li>Kiem tra thong tin va xac nhan thanh toan</li>
+                    <li>MoMo se tu dong cap nhat trang thai thanh toan</li>
+                    <li>Trang nay se tu chuyen huong khi thanh toan thanh cong</li>
+                  </>
+                ) : (
+                  <>
+                    <li>Mo app ngan hang va chon chuc nang quet ma QR</li>
+                    <li>Quet ma QR ben tren</li>
+                    <li>Kiem tra thong tin va xac nhan chuyen khoan</li>
+                    <li>Trang nay se tu cap nhat khi thanh toan thanh cong</li>
+                  </>
+                )}
               </ol>
             </div>
 
-            <p className="text-xs text-[#9A9196]">
+            <div className="flex items-center gap-2 text-xs text-[#9A9196]">
+              <RefreshCw size={13} className={polling ? "animate-spin" : ""} />
               Dang kiem tra trang thai thanh toan...
-            </p>
+            </div>
           </div>
         </div>
       </div>

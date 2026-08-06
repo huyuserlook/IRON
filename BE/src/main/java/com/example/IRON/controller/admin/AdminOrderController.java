@@ -39,4 +39,10 @@ public class AdminOrderController {
         return ResponseEntity.ok(ApiResponse.success(
                 orderService.updateStatus(id, status), "Cập nhật trạng thái thành công"));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<?>> deleteOrder(@PathVariable Long id) {
+        orderService.deleteOrder(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Xóa đơn hàng thành công"));
+    }
 }

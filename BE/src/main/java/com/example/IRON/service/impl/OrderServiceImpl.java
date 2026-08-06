@@ -132,6 +132,14 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
+    @Override
+    @Transactional
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", id));
+        orderRepository.deleteById(id);
+    }
+
     private OrderResponse toResponse(Order order) {
         List<OrderResponse.OrderItemResponse> items = order.getOrderDetails().stream()
                 .map(d -> OrderResponse.OrderItemResponse.builder()

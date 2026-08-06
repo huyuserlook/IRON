@@ -9,6 +9,7 @@ import {
   MessageSquare,
   Package,
   ShoppingBag,
+  Smartphone,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderApi from "../../api/orderApi";
@@ -49,6 +50,12 @@ const PAYMENT_OPTIONS = [
     label: "Chuyển khoản",
     description: "Chuyển khoản ngân hàng — quét mã QR",
     icon: Building2,
+  },
+  {
+    value: "MOMO",
+    label: "MoMo",
+    description: "Thanh toán qua MoMo — tự động xác nhận",
+    icon: Smartphone,
   },
 ];
 
@@ -101,7 +108,7 @@ const CheckoutPage = () => {
       const createdOrder = res.data?.data || res.data;
       const newOrderId = createdOrder.id;
 
-      if (form.paymentMethod === "BANK_TRANSFER") {
+      if (form.paymentMethod === "BANK_TRANSFER" || form.paymentMethod === "MOMO") {
         setSkipCartRedirect(true);
         clear();
         navigate(`/payment?orderId=${newOrderId}&amount=${grandTotal}`);
