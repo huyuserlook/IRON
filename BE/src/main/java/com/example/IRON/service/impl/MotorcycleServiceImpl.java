@@ -47,6 +47,7 @@ public class MotorcycleServiceImpl implements MotorcycleService {
     }
 
     @Override
+    @Transactional
     public Page<MotorcycleResponse> search(Long brandId, Long categoryId,
                                            BigDecimal minPrice, BigDecimal maxPrice,
                                            String keyword,
@@ -70,6 +71,7 @@ public class MotorcycleServiceImpl implements MotorcycleService {
     }
 
     @Override
+    @Transactional
     public List<MotorcycleResponse> getFeatured() {
         List<MotorcycleResponse> result = new ArrayList<>();
         for (Motorcycle m : motorcycleRepository.findByFeaturedTrue()) {
@@ -219,6 +221,12 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         res.setThumbnailUrl(m.getThumbnailUrl());
         res.setStatus(m.getStatus());
         res.setFeatured(m.getFeatured());
+        String secondary = m.getImages().stream()
+                .filter(img -> img.getImageUrl() != null && !img.getImageUrl().isBlank())
+                .findFirst()
+                .map(MotorcycleImage::getImageUrl)
+                .orElse(m.getThumbnailUrl());
+        res.setImageUrl(secondary);
         int total = 0;
         for (Inventory inv : m.getInventories()) {
             total += (inv.getQuantity() != null ? inv.getQuantity() : 0);

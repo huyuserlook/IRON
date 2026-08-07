@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
+  ArrowRight,
+  Bike,
   Calendar,
   CheckCircle,
   ChevronLeft,
@@ -241,32 +243,55 @@ const MotorcycleDetailPage = () => {
     const categoryId = moto.category?.id || moto.categoryId;
     const brandId = moto.brand?.id || moto.brandId;
 
-    const params = {
-      page: 0,
-      size: 4,
-      sortBy: "createdAt",
-      sortDir: "desc",
+    const fetchRelated = async () => {
+      try {
+        const base = {
+          page: 0,
+          size: 8,
+          sortBy: "createdAt",
+          sortDir: "desc",
+        };
+
+        let payload = null;
+        let list = [];
+
+        if (categoryId && brandId) {
+          const res = await motorcycleApi.search({ ...base, categoryId, brandId });
+          payload = res?.data ?? res;
+        }
+
+        list = Array.isArray(payload) ? payload : payload?.content || [];
+
+        if (!list.length && categoryId) {
+          const res = await motorcycleApi.search({ ...base, categoryId });
+          payload = res?.data ?? res;
+          list = Array.isArray(payload) ? payload : payload?.content || [];
+        }
+
+        if (!list.length && brandId) {
+          const res = await motorcycleApi.search({ ...base, brandId });
+          payload = res?.data ?? res;
+          list = Array.isArray(payload) ? payload : payload?.content || [];
+        }
+
+        if (!list.length) {
+          const res = await motorcycleApi.search(base);
+          payload = res?.data ?? res;
+          list = Array.isArray(payload) ? payload : payload?.content || [];
+        }
+
+        const filtered = (list || [])
+          .filter((item) => item.slug !== moto.slug && item.id !== moto.id)
+          .slice(0, 4);
+        setRelatedMotorcycles(filtered);
+      } catch {
+        setRelatedMotorcycles([]);
+      } finally {
+        setRelatedLoading(false);
+      }
     };
 
-    if (categoryId) params.categoryId = categoryId;
-    if (brandId) params.brandId = brandId;
-
-    motorcycleApi
-      .search(params)
-      .then((res) => {
-        const payload = res?.data ?? res;
-        const list = Array.isArray(payload) ? payload : payload?.content || [];
-        setRelatedMotorcycles(
-          (list || [])
-            .filter((item) => item.slug !== moto.slug && item.id !== moto.id)
-            .slice(0, 4),
-        );
-      })
-      .catch(() => {
-        setRelatedMotorcycles([]);
-      })
-      .finally(() => setRelatedLoading(false));
-
+    fetchRelated();
     return undefined;
   }, [moto]);
 
@@ -414,8 +439,8 @@ const MotorcycleDetailPage = () => {
           100% { opacity: 1; transform: translateY(0); }
         }
         @keyframes detailImgIn {
-          0% { opacity: 0; transform: scale(1.05); filter: blur(6px); }
-          100% { opacity: 1; transform: scale(1); filter: blur(0); }
+          0% { opacity: 0; filter: blur(4px); }
+          100% { opacity: 1; filter: blur(0); }
         }
         @keyframes detailLightboxIn {
           0% { opacity: 0; }
@@ -456,7 +481,7 @@ const MotorcycleDetailPage = () => {
           Quay lại danh sách
         </Link>
 
-        <div className="grid gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] xl:gap-14">
+        <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:gap-14">
           {/* Gallery */}
           <div
             className="detail-rise space-y-4"
@@ -871,69 +896,76 @@ const MotorcycleDetailPage = () => {
         ) : null}
 
         <section
-          className="detail-rise mt-6 rounded-[24px] border border-[#E3DEE6] bg-white p-6 shadow-[0_20px_50px_-34px_rgba(0,0,0,0.14)] sm:p-8"
+          className="detail-rise mt-10 border-t border-[#E3DEE6] pt-10"
           style={{ animationDelay: "420ms" }}
         >
-          <div className="mb-6 flex items-center justify-between gap-3">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h2 className="font-teko text-3xl font-bold tracking-[-0.02em]">
-                Sản phẩm liên quan
-              </h2>
-              <p className="mt-2 text-sm text-[#5E3F3B]">
-                Những mẫu xe cùng dòng hoặc cùng hãng mà bạn có thể quan tâm.
+              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
+                GỢI Ý THÊM
               </p>
+              <h2 className="mt-2 font-teko text-3xl font-bold leading-none tracking-[-0.02em] text-[#1A1B1F] sm:text-4xl">
+                Sản phẩm gợi ý
+              </h2>
             </div>
-            <span className="rounded-full bg-[#FAF8FC] px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#7A6E71]">
-              {relatedMotorcycles.length} gợi ý
-            </span>
+            <Link
+              to="/motorcycles"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#BC000A] transition-transform duration-300 hover:-translate-y-0.5"
+            >
+              Xem thêm dòng xe
+              <ArrowRight size={14} />
+            </Link>
           </div>
 
           {relatedLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, index) => (
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, index) => (
                 <div
                   key={index}
-                  className="h-56 animate-pulse rounded-[20px] border border-[#E3DEE6] bg-[#F7F5FA]"
+                  className="h-64 animate-pulse rounded-[16px] border border-[#E3DEE6] bg-[#F7F5FA]"
                 />
               ))}
             </div>
           ) : relatedMotorcycles.length ? (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {relatedMotorcycles.map((item) => (
-                <Link
-                  key={item.id}
-                  to={`/motorcycles/${item.slug}`}
-                  className="group overflow-hidden rounded-[20px] border border-[#E3DEE6] bg-[#FAF8FC] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-28px_rgba(0,0,0,0.12)]"
-                >
-                  <div className="relative aspect-[4/3] overflow-hidden bg-white">
-                    <img
-                      src={resolveImageUrl(
-                        item.thumbnailUrl ||
-                          item.imageUrl ||
-                          item.images?.[0]?.imageUrl,
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {relatedMotorcycles.map((moto, index) => {
+                const imageUrl = resolveImageUrl(
+                  moto.thumbnailUrl || moto.imageUrl || moto.images?.[0]?.imageUrl,
+                );
+
+                return (
+                  <Link
+                    key={moto.id}
+                    to={`/motorcycles/${moto.slug}`}
+                    className="cart-rise group overflow-hidden rounded-[16px] border border-[#E3DEE6] bg-white shadow-[0_16px_40px_-32px_rgba(0,0,0,0.16)] transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_24px_50px_-28px_rgba(188,0,10,0.18)]"
+                    style={{ animationDelay: `${280 + index * 90}ms` }}
+                  >
+                    <div className="relative flex h-[180px] items-center justify-center overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F6F4F8_100%)]">
+                      <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#BC000A] shadow-sm">
+                        <Sparkles size={11} />
+                        Gợi ý
+                      </div>
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={moto.name}
+                          className="h-full w-full object-contain p-5 transition-transform duration-700 group-hover:scale-105"
+                        />
+                      ) : (
+                        <Bike size={36} className="text-[#D8D4DB]" />
                       )}
-                      alt={item.name}
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="p-4">
-                    <p className="text-xs uppercase tracking-[0.16em] text-[#7A6E71]">
-                      {item.brand?.name || item.brandName}
-                    </p>
-                    <h3 className="mt-2 line-clamp-2 text-lg font-bold text-[#1A1B1F]">
-                      {item.name}
-                    </h3>
-                    <div className="mt-3 flex items-center justify-between gap-3">
-                      <p className="text-sm font-semibold text-[#BC000A]">
-                        {formatCurrency(item.price)}
-                      </p>
-                      <span className="rounded-full bg-[#F0EDF4] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#5F5E5E]">
-                        {item.category?.name || item.categoryName}
-                      </span>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                    <div className="border-t border-[#EEEAF1] p-5">
+                      <p className="line-clamp-2 text-base font-semibold text-[#1A1B1F]">
+                        {moto.name}
+                      </p>
+                      <p className="mt-2 text-lg font-bold text-[#BC000A]">
+                        {formatCurrency(moto.price)}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           ) : (
             <div className="rounded-[20px] border border-dashed border-[#E3DEE6] bg-[#FAF8FC] p-8 text-center text-[#7A6E71]">

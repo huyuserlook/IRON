@@ -500,7 +500,6 @@ const MotorcycleForm = () => {
             >
               <option value="AVAILABLE">Còn hàng</option>
               <option value="OUT_OF_STOCK">Hết hàng</option>
-              <option value="COMING_SOON">Sắp ra mắt</option>
               <option value="DISCONTINUED">Ngừng sản xuất</option>
             </select>
           </div>

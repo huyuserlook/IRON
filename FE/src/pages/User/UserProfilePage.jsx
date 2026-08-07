@@ -8,9 +8,7 @@ import {
   Calendar,
   Package,
   CalendarClock,
-  ArrowRight,
   Settings,
-  LogOut,
   Heart,
   ChevronRight,
 } from "lucide-react";
@@ -19,7 +17,7 @@ import userApi from "../../api/userApi";
 import { useAuth } from "../../hooks/useAuth";
 
 const UserProfilePage = () => {
-  const { user, handleLogout } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -167,7 +165,7 @@ const UserProfilePage = () => {
               </Link>
 
               <Link
-                to="/booking"
+                to="/my-bookings"
                 className="profile-rise group flex items-center gap-4 rounded-[20px] border border-[#E3DEE6] bg-white p-5 shadow-[0_16px_40px_-32px_rgba(0,0,0,0.14)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_48px_-30px_rgba(0,0,0,0.18)]"
                 style={{ animationDelay: "180ms" }}
               >
@@ -176,26 +174,25 @@ const UserProfilePage = () => {
                 </div>
                 <div className="min-w-0">
                   <p className="font-teko text-lg font-bold leading-none">Lái thử</p>
-                  <p className="mt-1 text-xs text-[#7A6E71]">Lịch hẹn lái thử</p>
+                  <p className="mt-1 text-xs text-[#7A6E71]">Lịch sử đặt lái thử</p>
                 </div>
                 <ChevronRight size={16} className="shrink-0 text-[#7A6E71] transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="profile-rise group flex items-center gap-4 rounded-[20px] border border-[#E3DEE6] bg-white p-5 shadow-[0_16px_40px_-32px_rgba(0,0,0,0.14)] transition-all duration-300 hover:-translate-y-1 hover:border-red-200 hover:bg-red-50 hover:shadow-[0_22px_48px_-30px_rgba(0,0,0,0.18)]"
+              <Link
+                to="/profile/settings"
+                className="profile-rise group flex items-center gap-4 rounded-[20px] border border-[#E3DEE6] bg-white p-5 shadow-[0_16px_40px_-32px_rgba(0,0,0,0.14)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_22px_48px_-30px_rgba(0,0,0,0.18)]"
                 style={{ animationDelay: "260ms" }}
               >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-500 transition-transform duration-300 group-hover:scale-110">
-                  <LogOut size={22} strokeWidth={1.8} />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#BC000A]/10 text-[#BC000A] transition-transform duration-300 group-hover:scale-110">
+                  <Settings size={22} strokeWidth={1.8} />
                 </div>
-                <div className="min-w-0 text-left">
-                  <p className="font-teko text-lg font-bold leading-none">Đăng xuất</p>
-                  <p className="mt-1 text-xs text-[#7A6E71]">Thoát tài khoản</p>
+                <div className="min-w-0">
+                  <p className="font-teko text-lg font-bold leading-none">Cài đặt tài khoản</p>
+                  <p className="mt-1 text-xs text-[#7A6E71]">Thay đổi thông tin cá nhân</p>
                 </div>
-                <ChevronRight size={16} className="shrink-0 text-[#7A6E71] transition-transform duration-300 group-hover:translate-x-1 group-hover:text-red-400" />
-              </button>
+                <ChevronRight size={16} className="shrink-0 text-[#7A6E71] transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
             </div>
 
             <article
@@ -216,19 +213,6 @@ const UserProfilePage = () => {
                     </p>
                     <p className="mt-0.5 text-xs text-[#7A6E71]">
                       Xem các xe bạn đã quan tâm
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-3 rounded-[12px] bg-[#FAF8FC] px-4 py-3">
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#BC000A]">
-                    <Settings size={14} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-[#1A1B1F]">
-                      Cài đặt tài khoản
-                    </p>
-                    <p className="mt-0.5 text-xs text-[#7A6E71]">
-                      Thay đổi thông tin cá nhân
                     </p>
                   </div>
                 </div>

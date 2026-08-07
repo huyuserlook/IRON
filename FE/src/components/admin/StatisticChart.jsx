@@ -14,7 +14,7 @@ import {
 } from "recharts";
 import { formatCurrency } from "../../utils/formatCurrency";
 
-const SalesByBikeChart = ({ data }) => {
+const SalesByBikeChart = ({ data, exportRef }) => {
   const chartData = (data || []).map((m, i) => ({
     name: m.motorcycleName || `Xe #${i + 1}`,
     sold: m.soldCount,
@@ -22,7 +22,7 @@ const SalesByBikeChart = ({ data }) => {
   }));
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div ref={exportRef} className="bg-white rounded-xl shadow-sm p-6 mb-6">
       <h2 className="font-semibold text-gray-700 mb-4">
         Top xe bán chạy
       </h2>
@@ -70,7 +70,7 @@ const SalesByBikeChart = ({ data }) => {
 
 const MONTH_COLORS = ["#f97316", "#ea580c", "#6366f1"];
 
-const MonthlyRevenueChart = ({ data }) => {
+const MonthlyRevenueChart = ({ data, exportRef }) => {
   const chartData = (data || []).map((m) => ({
     name: `T${m.month}/${m.year}`,
     revenue: Number(m.revenue) || 0,
@@ -80,7 +80,7 @@ const MonthlyRevenueChart = ({ data }) => {
   const totalRevenue = chartData.reduce((sum, item) => sum + item.revenue, 0);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div ref={exportRef} className="bg-white rounded-xl shadow-sm p-6 mb-6">
       <h2 className="font-semibold text-gray-700 mb-4">
         Doanh thu theo tháng
       </h2>
@@ -164,7 +164,7 @@ const MonthlyRevenueChart = ({ data }) => {
 
 const YEAR_COLORS = ["#10b981", "#f97316", "#ef4444"];
 
-const YearlyRevenueChart = ({ data }) => {
+const YearlyRevenueChart = ({ data, exportRef }) => {
   const chartData = (data || []).map((y) => ({
     name: `${y.year}`,
     revenue: Number(y.revenue) || 0,
@@ -174,7 +174,7 @@ const YearlyRevenueChart = ({ data }) => {
   const totalRevenue = chartData.reduce((sum, item) => sum + item.revenue, 0);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+    <div ref={exportRef} className="bg-white rounded-xl shadow-sm p-6 mb-6">
       <h2 className="font-semibold text-gray-700 mb-4">
         Doanh thu theo năm
       </h2>
@@ -256,7 +256,7 @@ const YearlyRevenueChart = ({ data }) => {
   );
 };
 
-const StatisticChart = ({ stats, type = "all" }) => {
+const StatisticChart = ({ stats, type = "all", chartRefs }) => {
   if (!stats) {
     return null;
   }
@@ -267,9 +267,9 @@ const StatisticChart = ({ stats, type = "all" }) => {
 
   return (
     <div className="space-y-6">
-      {showMonthly && <MonthlyRevenueChart data={stats.monthlyRevenues} />}
-      {showYearly && <YearlyRevenueChart data={stats.yearlyRevenues} />}
-      {showBikes && <SalesByBikeChart data={stats.topMotorcycles} />}
+      {showMonthly && <MonthlyRevenueChart data={stats.monthlyRevenues} exportRef={chartRefs?.monthly} />}
+      {showYearly && <YearlyRevenueChart data={stats.yearlyRevenues} exportRef={chartRefs?.yearly} />}
+      {showBikes && <SalesByBikeChart data={stats.topMotorcycles} exportRef={chartRefs?.bikes} />}
     </div>
   );
 };

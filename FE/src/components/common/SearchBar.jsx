@@ -38,8 +38,10 @@ const SearchBar = () => {
     const q = debounced.trim();
     if (!q) {
       setResults([]);
+      setLoading(false);
       return;
     }
+    setOpen(true);
     setLoading(true);
     motorcycleApi
       .search({ keyword: q, page: 0, size: 8 })
@@ -82,9 +84,7 @@ const SearchBar = () => {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          onFocus={() => {
-            if (query.trim()) setOpen(true);
-          }}
+          onFocus={() => setOpen(true)}
           placeholder="Tìm kiếm xe..."
           className="peer w-full rounded-full border border-gray-300 bg-white px-3 py-1.5 pl-8 text-xs text-gray-800 placeholder-gray-400 shadow-sm outline-none transition-colors focus:border-iron-red focus:ring-1 focus:ring-iron-red"
         />
@@ -105,7 +105,7 @@ const SearchBar = () => {
 
       <div
         className={`absolute top-full mt-1 w-full max-h-80 overflow-y-auto rounded-xl border border-gray-200 bg-white py-1 shadow-[0_12px_32px_-12px_rgba(0,0,0,0.15)] transition-all duration-200 ease-out ${
-          open && query.trim()
+          open && (query.trim() || loading || results.length > 0)
             ? "opacity-100 scale-100"
             : "opacity-0 scale-95 pointer-events-none"
         }`}

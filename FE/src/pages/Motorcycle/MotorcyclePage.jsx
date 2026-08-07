@@ -29,7 +29,6 @@ const engineBands = [
 const statusMeta = {
   AVAILABLE: { label: "Mới", className: "bg-[#BC000A] text-white" },
   OUT_OF_STOCK: { label: "Hết hàng", className: "bg-[#1A1B1F] text-white" },
-  COMING_SOON: { label: "Sắp ra mắt", className: "bg-[#F0EDF4] text-[#5F5E5E]" },
   DISCONTINUED: { label: "Ngừng SX", className: "bg-[#F0EDF4] text-[#5F5E5E]" },
 };
 
@@ -198,7 +197,13 @@ const MotorcyclePage = () => {
       .search(params)
       .then((res) => {
         const payload = normalizePayload(res);
-        setData(payload || { content: [], totalPages: 0, totalElements: 0 });
+        const base = Array.isArray(payload) ? { content: payload, totalPages: 0, totalElements: payload.length } : (payload || { content: [], totalPages: 0, totalElements: 0 });
+        const filtered = base.content.filter((item) => item?.status !== "COMING_SOON");
+        setData({
+          ...base,
+          content: filtered,
+          totalElements: filtered.length,
+        });
       })
       .finally(() => setLoading(false));
   }, [

@@ -115,24 +115,6 @@ const MotorcycleGrid = ({
                 />
               );
             })}
-
-            <div className="moto-fade flex min-h-[430px] flex-col items-center justify-center rounded-[8px] border border-dashed border-[#E3DEE6] bg-white px-6 py-10 text-center shadow-[0_12px_30px_-28px_rgba(0,0,0,0.2)]">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#FAF8FC] text-[#D8D4DB]">
-                <Sparkles size={22} />
-              </div>
-              <h3 className="mt-4 font-teko text-3xl font-bold leading-none text-[#6E4A43]">
-                Sắp Ra Mắt
-              </h3>
-              <p className="mt-3 max-w-[220px] text-sm leading-6 text-[#7A6E71]">
-                Những mẫu xe tốc độ mới đang được hoàn thiện tại xưởng kỹ thuật.
-              </p>
-              <button
-                type="button"
-                className="mt-6 inline-flex items-center gap-2 text-sm font-bold uppercase tracking-[0.12em] text-[#BC000A] transition-transform duration-300 hover:-translate-y-0.5"
-              >
-                Đăng ký nhận thông tin
-              </button>
-            </div>
           </div>
 
           {totalPages > 1 && (

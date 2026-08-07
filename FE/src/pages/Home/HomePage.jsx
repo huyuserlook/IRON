@@ -73,9 +73,9 @@ const HomePage = () => {
       </section>
 
       {/* Featured */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center mb-14">
+      <section className="py-16 md:py-24 bg-white">
+        <div className="mx-auto max-w-[1200px] px-4">
+          <div className="mb-12 text-center">
             <p className="text-[#BC000A] font-jetBrainsMono text-xs font-semibold uppercase tracking-[0.3em] mb-4">
               LATEST ARRIVALS
             </p>
@@ -84,77 +84,70 @@ const HomePage = () => {
             </h2>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featured.slice(0, 3).map((moto, index) => (
               <article
                 key={moto.id}
-                className="group overflow-hidden rounded-[28px] border border-[#E8BCB6] bg-[#FAF9FE] shadow-[0_30px_80px_-55px_rgba(0,0,0,0.25)] transition-all duration-700 ease-out hover:-translate-y-3 hover:shadow-[0_40px_90px_-45px_rgba(188,0,10,0.18)]"
+                className="group relative overflow-hidden rounded-[24px] border border-[#E8BCB6] bg-[#FAF9FE] shadow-[0_30px_80px_-55px_rgba(0,0,0,0.25)] transition-all duration-700 ease-out hover:-translate-y-3 hover:shadow-[0_40px_90px_-45px_rgba(188,0,10,0.18)]"
                 style={{
                   animation: "fadeInUp 0.8s ease-out both",
                   animationDelay: `${index * 120}ms`,
                 }}
               >
-                <div className="relative overflow-hidden">
-                  <img
-                    src={moto.thumbnailUrl || "/placeholder-bike.jpg"}
-                    alt={moto.name}
-                    className="w-full h-[235px] object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute left-4 top-4 rounded-full bg-[#BC000A] px-3 py-1">
-                    <p className="text-[10px] uppercase tracking-[0.12em] text-white font-jetBrainsMono font-semibold">
-                      MỚI VỀ
-                    </p>
-                  </div>
-                </div>
-
-                <div className="p-8 flex flex-col gap-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-2xl font-bold text-[#1A1B1F] tracking-[-0.02em]">
-                        {moto.name}
-                      </p>
-                      <p className="mt-2 text-xs uppercase tracking-[0.2em] text-[#5F5E5E] font-jetBrainsMono">
-                        {moto.brandName}
+                <Link to={`/motorcycles/${moto.slug}`} className="block no-underline">
+                  <div className="relative h-44 overflow-hidden">
+                    <img
+                      src={moto.thumbnailUrl || "/placeholder-bike.jpg"}
+                      alt={moto.name}
+                      className="absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-0"
+                    />
+                    <img
+                      src={moto.imageUrl || moto.thumbnailUrl || "/placeholder-bike.jpg"}
+                      alt={moto.name}
+                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-100"
+                    />
+                    <div className="absolute left-4 top-4 rounded-full bg-[#BC000A] px-3 py-1">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-white font-jetBrainsMono font-semibold">
+                        MỚI VỀ
                       </p>
                     </div>
-                    <p className="text-2xl font-bold text-[#BC000A]">
-                      {formatCurrency(moto.price)}
-                    </p>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 border-t border-b border-[#E8BCB6] py-6">
-                    <div className="flex items-center gap-3">
-                      <Zap className="text-[#BC000A]" />
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.18em] text-[#5F5E5E] font-jetBrainsMono">
-                          Mã lực
-                        </p>
-                        <p className="text-sm font-bold text-[#1A1B1F]">
-                          {moto.horsepower ? `${moto.horsepower} HP` : "—"}
+                  <div className="p-6 flex flex-col gap-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-bold text-[#1A1B1F] tracking-[-0.01em] truncate">
+                          {moto.name}
+                        </h3>
+                        <p className="mt-1.5 text-[11px] uppercase tracking-[0.2em] text-[#5F5E5E] font-jetBrainsMono truncate">
+                          {moto.brandName}
                         </p>
                       </div>
+                      <p className="text-base font-bold text-[#BC000A] whitespace-nowrap">
+                        {formatCurrency(moto.price)}
+                      </p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Award className="text-[#BC000A]" />
-                      <div>
-                        <p className="text-[10px] uppercase tracking-[0.18em] text-[#5F5E5E] font-jetBrainsMono">
-                          Phân khối
-                        </p>
-                        <p className="text-sm font-bold text-[#1A1B1F]">
-                          {moto.engineCc ? `${moto.engineCc} CC` : "—"}
-                        </p>
-                      </div>
+
+                    <div className="flex items-center gap-3 border-t border-[#E8BCB6] pt-3 text-[10px] text-[#5F5E5E] font-jetBrainsMono uppercase tracking-[0.1em]">
+                      <span className="flex items-center gap-1.5">
+                        <Zap size={12} className="text-[#BC000A]" />
+                        {moto.horsepower ? `${moto.horsepower} HP` : "—"}
+                      </span>
+                      <span className="h-3 w-px bg-[#E8BCB6]" />
+                      <span className="flex items-center gap-1.5">
+                        <Award size={12} className="text-[#BC000A]" />
+                        {moto.engineCc ? `${moto.engineCc} CC` : "—"}
+                      </span>
+                    </div>
+
+                    <div className="mt-auto pt-2">
+                      <span className="inline-flex items-center gap-2 rounded-[14px] bg-[#1A1B1F] px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-white transition-all duration-300 group-hover:bg-[#2b2c31]">
+                        XEM CHI TIẾT
+                        <ArrowRight size={14} />
+                      </span>
                     </div>
                   </div>
-
-                  <Link
-                    to={`/motorcycles/${moto.slug}`}
-                    className="inline-flex items-center justify-center gap-2 rounded-[18px] bg-[#1A1B1F] px-6 py-4 text-sm font-semibold uppercase tracking-[0.15em] text-white transition-all duration-300 hover:bg-[#2b2c31]"
-                  >
-                    XEM CHI TIẾT
-                    <ArrowRight size={18} />
-                  </Link>
-                </div>
+                </Link>
               </article>
             ))}
           </div>

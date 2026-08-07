@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import adminApi from "../../../api/adminApi";
 import StatisticChart from "../../../components/admin/StatisticChart";
 import { formatCurrency } from "../../../utils/formatCurrency";
@@ -13,7 +13,51 @@ import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import toast from "react-hot-toast";
 
-const exportExcel = (chartData, yearlyData, topMotorcycles, summary) => {
+const svgElementToImage = (svgElement) =>
+  new Promise((resolve) => {
+    if (!svgElement) return resolve(null);
+
+    const svgClone = svgElement.cloneNode(true);
+    const width = svgElement.clientWidth || svgElement.viewBox?.baseVal?.width || 800;
+    const height = svgElement.clientHeight || svgElement.viewBox?.baseVal?.height || 600;
+
+    svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+    svgClone.setAttribute("width", width);
+    svgClone.setAttribute("height", height);
+    svgClone.style.background = "#ffffff";
+
+    const serializer = new XMLSerializer();
+    const svgString = serializer.serializeToString(svgClone);
+    const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(svgBlob);
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = width * 2;
+      canvas.height = height * 2;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+    img.src = url;
+  });
+
+const captureChartImages = async (refs) => {
+  const images = {};
+  for (const [key, ref] of Object.entries(refs)) {
+    const svg = ref?.querySelector?.("svg");
+    images[key] = await svgElementToImage(svg);
+  }
+  return images;
+};
+
+const exportExcel = (chartData, yearlyData, topMotorcycles, summary, chartImages) => {
   try {
     const wb = XLSX.utils.book_new();
 
@@ -45,6 +89,35 @@ const exportExcel = (chartData, yearlyData, topMotorcycles, summary) => {
     ]);
     XLSX.utils.book_append_sheet(wb, wsSummary, "Thống kê");
 
+    if (chartImages?.monthly || chartImages?.yearly || chartImages?.bikes) {
+      const wsCharts = XLSX.utils.aoa_to_sheet([["BIỂU ĐỒ THỐNG KÊ"]]);
+      XLSX.utils.book_append_sheet(wb, wsCharts, "Biểu đồ");
+
+      let row = 2;
+      for (const [key, dataUrl] of Object.entries(chartImages)) {
+        if (!dataUrl) continue;
+        const base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+
+        wsCharts["!rowcnt"] = row;
+        wsCharts["!ref"] = `A${row}`;
+        try {
+          wsCharts.addImage?.({
+            data: bytes.buffer,
+            type: "png",
+            name: `${key}-chart.png`,
+            width: 640,
+            height: 400,
+          });
+        } catch {
+          wsCharts[`C${row}`] = { t: "s", v: "[Biểu đồ không thể nhúng trong phiên bản hiện tại]" };
+        }
+        row += 20;
+      }
+    }
+
     XLSX.writeFile(wb, "thong-ke-iron.xlsx");
     toast.success("Đã xuất file Excel thành công");
   } catch {
@@ -52,7 +125,7 @@ const exportExcel = (chartData, yearlyData, topMotorcycles, summary) => {
   }
 };
 
-const exportPDF = (chartData, yearlyData, topMotorcycles, summary) => {
+const exportPDF = (chartData, yearlyData, topMotorcycles, summary, chartImages) => {
   try {
     const doc = new jsPDF({ orientation: "landscape" });
     doc.setFontSize(16);
@@ -87,30 +160,52 @@ const exportPDF = (chartData, yearlyData, topMotorcycles, summary) => {
       headStyles: { fillColor: [249, 115, 22] },
     });
 
+    if (chartImages?.monthly) {
+      doc.addImage(
+        chartImages.monthly,
+        "PNG",
+        14,
+        doc.lastAutoTable.finalY + 8,
+        180,
+        110,
+      );
+    }
+
     // Yearly revenue
     doc.setFontSize(12);
     doc.text(
       "3. Doanh thu theo năm",
       14,
-      doc.lastAutoTable.finalY + 10,
+      (chartImages?.monthly ? doc.lastAutoTable.finalY + 120 : doc.lastAutoTable.finalY + 10),
     );
     autoTable(doc, {
-      startY: doc.lastAutoTable.finalY + 13,
+      startY: (chartImages?.monthly ? doc.lastAutoTable.finalY + 123 : doc.lastAutoTable.finalY + 13),
       head: [["Năm", "Doanh thu", "Số đơn"]],
       body: yearlyData.map((y) => [y.year, y.revenue, y.orderCount]),
       styles: { fontSize: 9 },
       headStyles: { fillColor: [249, 115, 22] },
     });
 
+    if (chartImages?.yearly) {
+      doc.addImage(
+        chartImages.yearly,
+        "PNG",
+        14,
+        doc.lastAutoTable.finalY + 8,
+        180,
+        110,
+      );
+    }
+
     // Top motorcycles
     doc.setFontSize(12);
     doc.text(
       "4. Top xe bán chạy",
       14,
-      doc.lastAutoTable.finalY + 10,
+      (chartImages?.yearly ? doc.lastAutoTable.finalY + 120 : doc.lastAutoTable.finalY + 10),
     );
     autoTable(doc, {
-      startY: doc.lastAutoTable.finalY + 13,
+      startY: (chartImages?.yearly ? doc.lastAutoTable.finalY + 123 : doc.lastAutoTable.finalY + 13),
       head: [["Xe", "Đã bán", "Doanh thu"]],
       body: topMotorcycles.map((m) => [
         m.motorcycleName,
@@ -120,6 +215,17 @@ const exportPDF = (chartData, yearlyData, topMotorcycles, summary) => {
       styles: { fontSize: 9 },
       headStyles: { fillColor: [249, 115, 22] },
     });
+
+    if (chartImages?.bikes) {
+      doc.addImage(
+        chartImages.bikes,
+        "PNG",
+        14,
+        doc.lastAutoTable.finalY + 8,
+        180,
+        110,
+      );
+    }
 
     doc.save("thong-ke-iron.pdf");
     toast.success("Đã xuất file PDF thành công");
@@ -133,6 +239,16 @@ const StatisticsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [exporting, setExporting] = useState(null);
+
+  const monthlyChartRef = useRef(null);
+  const yearlyChartRef = useRef(null);
+  const bikesChartRef = useRef(null);
+
+  const chartRefs = {
+    monthly: monthlyChartRef,
+    yearly: yearlyChartRef,
+    bikes: bikesChartRef,
+  };
 
   const loadStats = () => {
     setLoading(true);
@@ -183,11 +299,14 @@ const StatisticsPage = () => {
       return;
     }
     setExporting(type);
-    // allow UI to show the pending state
     await new Promise((r) => setTimeout(r, 50));
+
+    const chartImages = await captureChartImages(chartRefs);
+
     if (type === "excel")
-      exportExcel(chartData, yearlyData, topMotorcycles, summary);
-    else exportPDF(chartData, yearlyData, topMotorcycles, summary);
+      exportExcel(chartData, yearlyData, topMotorcycles, summary, chartImages);
+    else exportPDF(chartData, yearlyData, topMotorcycles, summary, chartImages);
+
     setExporting(null);
   };
 
@@ -276,7 +395,7 @@ const StatisticsPage = () => {
           </div>
 
           {/* Charts */}
-          <StatisticChart stats={stats} type="all" />
+          <StatisticChart stats={stats} type="all" chartRefs={chartRefs} />
 
           {/* Top motorcycles + monthly table */}
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

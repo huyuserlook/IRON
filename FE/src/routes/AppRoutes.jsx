@@ -12,7 +12,9 @@ import CheckoutPage from "../pages/Order/CheckoutPage";
 import PaymentPage from "../pages/Order/PaymentPage";
 import OrderHistoryPage from "../pages/Order/OrderHistoryPage";
 import UserProfilePage from "../pages/User/UserProfilePage";
+import AccountSettingsPage from "../pages/User/AccountSettingsPage";
 import BookingPage from "../pages/Booking/BookingPage";
+import BookingHistoryPage from "../pages/Booking/BookingHistoryPage";
 import ContactPage from "../pages/Contact/ContactPage";
 import AboutPage from "../pages/About/AboutPage";
 import LoginPage from "../pages/Auth/LoginPage";
@@ -69,6 +71,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/profile/settings"
+          element={
+            <PrivateRoute>
+              <AccountSettingsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/my-orders"
           element={
             <PrivateRoute>
@@ -89,6 +99,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <BookingPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/my-bookings"
+          element={
+            <PrivateRoute>
+              <BookingHistoryPage />
             </PrivateRoute>
           }
         />

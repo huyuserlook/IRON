@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { login, logout, register, socialLogin } from "../store/authSlice";
+import { login, logout, register, socialLogin, updateProfile } from "../store/authSlice";
 import { clearCart } from "../store/cartSlice";
 import authApi from "../api/authApi";
 
@@ -62,6 +62,11 @@ export const useAuth = () => {
     }
   };
 
+  const updateUser = async (data) => {
+    const result = await dispatch(updateProfile(data));
+    return updateProfile.fulfilled.match(result);
+  };
+
   return {
     user,
     token,
@@ -75,5 +80,6 @@ export const useAuth = () => {
     handleLogout,
     handleForgotPassword,
     handleResetPassword,
+    updateUser,
   };
 };

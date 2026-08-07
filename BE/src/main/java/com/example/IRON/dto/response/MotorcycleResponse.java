@@ -21,6 +21,7 @@ public class MotorcycleResponse {
     private BigDecimal price;
     private Integer engineCc;
     private String thumbnailUrl;
+    private String imageUrl;
     private Motorcycle.MotorcycleStatus status;
     private Boolean featured;
     /** Tổng số lượng tồn kho của tất cả màu */

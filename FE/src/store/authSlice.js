@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authApi from "../api/authApi";
+import userApi from "../api/userApi";
 
 // Thunks
 export const login = createAsyncThunk(
@@ -39,6 +40,19 @@ export const socialLogin = createAsyncThunk(
       return payload;
     } catch (err) {
       return rejectWithValue(err.message || "Đăng nhập xã hội thất bại");
+    }
+  },
+);
+
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await userApi.updateProfile(data);
+      const payload = res?.data ?? res;
+      return payload?.data || payload;
+    } catch (err) {
+      return rejectWithValue(err.message || "Cập nhật thất bại");
     }
   },
 );
@@ -115,6 +129,13 @@ const authSlice = createSlice({
       })
       .addCase(socialLogin.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
+        localStorage.setItem("user", JSON.stringify(action.payload));
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

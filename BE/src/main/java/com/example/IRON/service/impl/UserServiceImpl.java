@@ -1,8 +1,10 @@
 package com.example.IRON.service.impl;
 
+import com.example.IRON.dto.request.UpdateProfileRequest;
 import com.example.IRON.dto.response.UserResponse;
 import com.example.IRON.entity.Role;
 import com.example.IRON.entity.User;
+import com.example.IRON.exception.DuplicateResourceException;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.repository.UserRepository;
 import com.example.IRON.service.interfaces.UserService;
@@ -10,6 +12,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -24,6 +28,26 @@ public class UserServiceImpl implements UserService {
     public UserResponse getProfile(Long userId) {
         return toResponse(userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId)));
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfile(Long userId, UpdateProfileRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        if (!Objects.equals(user.getEmail(), request.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new DuplicateResourceException("Email đã được sử dụng: " + request.getEmail());
+            }
+            user.setEmail(request.getEmail());
+        }
+
+        user.setFullName(request.getFullName());
+        user.setPhone(request.getPhone());
+        user.setAddress(request.getAddress());
+
+        return toResponse(userRepository.save(user));
     }
 
     @Override
