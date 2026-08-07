@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Star, Search, X, Trash2 } from "lucide-react";
+import { Star, Search, X, Trash2, CheckCircle, XCircle } from "lucide-react";
 import reviewApi from "../../../api/reviewApi";
 import toast from "react-hot-toast";
 
@@ -45,6 +45,7 @@ const ReviewManagement = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [updatingId, setUpdatingId] = useState(null);
   const [previewImage, setPreviewImage] = useState("");
 
   const loadReviews = useCallback(() => {
@@ -88,6 +89,19 @@ const ReviewManagement = () => {
       toast.error(err?.message || "Không thể xóa đánh giá");
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleUpdateStatus = async (review, newStatus) => {
+    setUpdatingId(review.id);
+    try {
+      await reviewApi.updateStatus(review.id, newStatus);
+      toast.success("Cập nhật trạng thái đánh giá thành công");
+      loadReviews();
+    } catch {
+      toast.error("Cập nhật trạng thái thất bại");
+    } finally {
+      setUpdatingId(null);
     }
   };
 
@@ -208,6 +222,30 @@ const ReviewManagement = () => {
                     <span>
                       {new Date(review.createdAt).toLocaleDateString("vi-VN")}
                     </span>
+                    {review.status === "PENDING" && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateStatus(review, "APPROVED")}
+                          disabled={updatingId === review.id}
+                          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-green-600 transition hover:bg-green-50 disabled:opacity-50"
+                          title="Duyệt đánh giá"
+                        >
+                          <CheckCircle size={14} />
+                          {updatingId === review.id ? "Đang duyệt..." : "Duyệt"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleUpdateStatus(review, "REJECTED")}
+                          disabled={updatingId === review.id}
+                          className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-red-500 transition hover:bg-red-50 disabled:opacity-50"
+                          title="Từ chối đánh giá"
+                        >
+                          <XCircle size={14} />
+                          {updatingId === review.id ? "Đang từ chối..." : "Từ chối"}
+                        </button>
+                      </>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleDelete(review)}

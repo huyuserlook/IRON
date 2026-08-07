@@ -240,50 +240,14 @@ const MotorcycleDetailPage = () => {
     if (!moto) return undefined;
 
     setRelatedLoading(true);
-    const categoryId = moto.category?.id || moto.categoryId;
-    const brandId = moto.brand?.id || moto.brandId;
+    const id = moto.id;
 
     const fetchRelated = async () => {
       try {
-        const base = {
-          page: 0,
-          size: 8,
-          sortBy: "createdAt",
-          sortDir: "desc",
-        };
-
-        let payload = null;
-        let list = [];
-
-        if (categoryId && brandId) {
-          const res = await motorcycleApi.search({ ...base, categoryId, brandId });
-          payload = res?.data ?? res;
-        }
-
-        list = Array.isArray(payload) ? payload : payload?.content || [];
-
-        if (!list.length && categoryId) {
-          const res = await motorcycleApi.search({ ...base, categoryId });
-          payload = res?.data ?? res;
-          list = Array.isArray(payload) ? payload : payload?.content || [];
-        }
-
-        if (!list.length && brandId) {
-          const res = await motorcycleApi.search({ ...base, brandId });
-          payload = res?.data ?? res;
-          list = Array.isArray(payload) ? payload : payload?.content || [];
-        }
-
-        if (!list.length) {
-          const res = await motorcycleApi.search(base);
-          payload = res?.data ?? res;
-          list = Array.isArray(payload) ? payload : payload?.content || [];
-        }
-
-        const filtered = (list || [])
-          .filter((item) => item.slug !== moto.slug && item.id !== moto.id)
-          .slice(0, 4);
-        setRelatedMotorcycles(filtered);
+        const res = await motorcycleApi.getSuggested(id);
+        const payload = res?.data ?? res;
+        const list = Array.isArray(payload) ? payload : payload?.content || [];
+        setRelatedMotorcycles(list.slice(0, 4));
       } catch {
         setRelatedMotorcycles([]);
       } finally {

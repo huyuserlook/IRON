@@ -15,6 +15,9 @@ const paymentApi = {
 
   createMomoPayment: (orderId, amount, orderInfo) =>
     axiosClient.post(`/checkout/momo`, { orderId: String(orderId), amount, orderInfo }),
+
+  confirmPayment: (orderId) =>
+    axiosClient.post(`/admin/payments/${orderId}/confirm`),
 };
 
 export default paymentApi;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import adminApi from "../../../api/adminApi";
 import motorcycleApi from "../../../api/motorcycleApi";
 import orderApi from "../../../api/orderApi";
@@ -11,6 +11,7 @@ const DashboardPage = () => {
   const [recentOrders, setRecentOrders] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let alive = true;
@@ -160,7 +161,11 @@ const DashboardPage = () => {
                 >
                   Lọc Dòng Xe
                 </Link>
-                <button className="text-sm px-3 py-1 bg-red-600 text-white rounded-full hover:bg-red-700">
+                <button
+                  type="button"
+                  onClick={() => navigate("/admin/statistics")}
+                  className="text-sm px-3 py-1 bg-red-600 text-white rounded-full hover:bg-red-700"
+                >
                   Xuất Báo Cáo
                 </button>
               </div>

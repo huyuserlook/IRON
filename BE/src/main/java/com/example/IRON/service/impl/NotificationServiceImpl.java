@@ -48,7 +48,8 @@ public class NotificationServiceImpl implements NotificationService {
                 + bookingRepository.countNewBookings(since)
                 + contactRepository.countNewContacts(since)
                 + reviewRepository.countNewReviews(since)
-                + userRepository.countNewUsers(since);
+                + userRepository.countNewUsers(since)
+                + userRepository.countPendingPasswordResetRequests(since);
     }
 
     @Override
@@ -109,6 +110,17 @@ public class NotificationServiceImpl implements NotificationService {
                                 .message(u.getFullName() + " (" + u.getEmail() + ")")
                                 .link("/admin/users")
                                 .createdAt(u.getCreatedAt())
+                                .build()));
+
+        // Yêu cầu đặt lại mật khẩu
+        userRepository.findPendingPasswordResetRequestsSince(since, PageRequest.of(0, limit))
+                .forEach(u -> notifications.add(
+                        NotificationResponse.builder()
+                                .type("PASSWORD_RESET")
+                                .title("Yêu cầu đổi mật khẩu")
+                                .message(u.getFullName() + " (" + (u.getPhone() != null ? u.getPhone() : u.getEmail()) + ") yêu cầu đặt lại mật khẩu")
+                                .link("/admin/password-reset-requests")
+                                .createdAt(u.getPasswordResetRequestedAt())
                                 .build()));
 
         // Sắp xếp theo thời gian giảm dần và giới hạn

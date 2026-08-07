@@ -59,16 +59,20 @@ export const updateProfile = createAsyncThunk(
 
 // Đọc user từ localStorage khi khởi động
 const getInitialUser = () => {
-  const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
-  if (token && user) {
-    try {
-      return JSON.parse(user);
-    } catch {
-      return null;
+  try {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    if (token && user) {
+      try {
+        return JSON.parse(user);
+      } catch {
+        return null;
+      }
     }
+    return null;
+  } catch {
+    return null;
   }
-  return null;
 };
 
 const authSlice = createSlice({

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import AdminSidebar from "../components/layout/Sidebar";
 import { useAuth } from "../hooks/useAuth";
 import notificationApi from "../api/notificationApi";
-import { Menu, LogOut, Bell, Star, Home, ShoppingCart, Calendar, Mail, Users } from "lucide-react";
+import { Menu, LogOut, Bell, Star, Home, ShoppingCart, Calendar, Mail, Users, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const formatTime = (value) => {
@@ -160,6 +160,8 @@ const AdminLayout = () => {
                                 <Star size={16} className="text-amber-400" />
                               ) : n.type === "USER" ? (
                                 <Users size={16} className="text-slate-600" />
+                              ) : n.type === "PASSWORD_RESET" ? (
+                                <ShieldCheck size={16} className="text-orange-500" />
                               ) : (
                                 <Bell size={16} className="text-slate-500" />
                               )}

@@ -103,6 +103,13 @@
 			<version>1.36.0</version>
 		</dependency>
 
+		<!-- ===== TWILIO SMS ===== -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>10.4.0</version>
+		</dependency>
+
 		<!-- ===== ZXING QR CODE ===== -->
 		<dependency>
 			<groupId>com.google.zxing</groupId>

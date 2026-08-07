@@ -9,6 +9,8 @@ export const useAuth = () => {
   const navigate = useNavigate();
   const { user, token, loading, error } = useSelector((state) => state.auth);
 
+  const effectiveToken = token || localStorage.getItem("token");
+
   const handleLogin = async (data, redirectTo = "/") => {
     const result = await dispatch(login(data));
     if (login.fulfilled.match(result)) {
@@ -62,6 +64,19 @@ export const useAuth = () => {
     }
   };
 
+  const forgotPasswordByPhone = async (data) => {
+    await authApi.forgotPasswordByPhone(data);
+  };
+
+  const checkPasswordResetStatus = async (phone) => {
+    const response = await authApi.checkPasswordResetStatus(phone);
+    return response?.data ?? response;
+  };
+
+  const resetPasswordByPhone = async (data) => {
+    await authApi.resetPasswordByPhone(data);
+  };
+
   const updateUser = async (data) => {
     const result = await dispatch(updateProfile(data));
     return updateProfile.fulfilled.match(result);
@@ -69,10 +84,10 @@ export const useAuth = () => {
 
   return {
     user,
-    token,
+    token: effectiveToken,
     loading,
     error,
-    isAuthenticated: !!token,
+    isAuthenticated: !!effectiveToken,
     isAdmin: user?.role === "ROLE_ADMIN",
     handleLogin,
     handleRegister,
@@ -80,6 +95,9 @@ export const useAuth = () => {
     handleLogout,
     handleForgotPassword,
     handleResetPassword,
+    forgotPasswordByPhone,
+    checkPasswordResetStatus,
+    resetPasswordByPhone,
     updateUser,
   };
 };

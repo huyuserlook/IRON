@@ -5,7 +5,9 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
   const { user, token } = useSelector((state) => state.auth);
   const location = useLocation();
 
-  if (!token) {
+  const effectiveToken = token || localStorage.getItem("token");
+
+  if (!effectiveToken) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

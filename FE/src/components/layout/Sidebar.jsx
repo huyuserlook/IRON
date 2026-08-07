@@ -12,6 +12,7 @@ import {
   Star,
   Home,
   MessageSquare,
+  ShieldCheck,
 } from "lucide-react";
 
 const navItems = [
@@ -23,6 +24,7 @@ const navItems = [
   { path: "/admin/orders", label: "Đơn hàng", icon: ShoppingBag },
   { path: "/admin/bookings", label: "Lịch lái thử", icon: Calendar },
   { path: "/admin/users", label: "Người dùng", icon: Users },
+  { path: "/admin/password-reset-requests", label: "Yêu cầu đổi MK", icon: ShieldCheck },
   { path: "/admin/reviews", label: "Đánh giá", icon: Star },
   { path: "/admin/contacts", label: "Liên hệ", icon: MessageSquare },
   { path: "/admin/statistics", label: "Thống kê", icon: BarChart2 },

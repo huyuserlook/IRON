@@ -21,6 +21,7 @@ import com.example.IRON.service.interfaces.MotorcycleService;
 import com.example.IRON.utils.SlugUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,8 +54,11 @@ public class MotorcycleServiceImpl implements MotorcycleService {
                                            String keyword,
                                            Motorcycle.MotorcycleStatus status,
                                            Pageable pageable) {
+        String keywordPattern = (keyword == null || keyword.isBlank())
+                ? null
+                : "%" + keyword.toLowerCase() + "%";
         return motorcycleRepository
-                .searchMotorcycles(brandId, categoryId, minPrice, maxPrice, keyword, status, pageable)
+                .searchMotorcycles(brandId, categoryId, minPrice, maxPrice, keywordPattern, status, pageable)
                 .map(this::toResponse);
     }
 
@@ -78,6 +82,28 @@ public class MotorcycleServiceImpl implements MotorcycleService {
             result.add(toResponse(m));
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public List<MotorcycleResponse> getSuggested(Long motorcycleId) {
+        Motorcycle current = motorcycleRepository.findById(motorcycleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Xe máy", "id", motorcycleId));
+
+        Long categoryId = current.getCategory() != null ? current.getCategory().getId() : null;
+        Long brandId = current.getBrand() != null ? current.getBrand().getId() : null;
+
+        List<Motorcycle> candidates = motorcycleRepository.findSuggestedByCategoryOrBrand(
+                motorcycleId, categoryId, brandId, Pageable.ofSize(20));
+
+        if (candidates.isEmpty() && (categoryId != null || brandId != null)) {
+            candidates = motorcycleRepository.findRecentExcluding(motorcycleId, Pageable.ofSize(20));
+        }
+
+        return candidates.stream()
+                .limit(4)
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override

@@ -36,4 +36,18 @@ public class AdminUserController {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Xóa người dùng thành công"));
     }
+
+    @PostMapping("/{id}/approve-password-reset")
+    public ResponseEntity<ApiResponse<?>> approvePasswordReset(@PathVariable Long id) {
+        userService.approvePasswordReset(id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Đã xác nhận yêu cầu đặt lại mật khẩu"));
+    }
+
+    @GetMapping("/password-reset-requests")
+    public ResponseEntity<ApiResponse<?>> getPasswordResetRequests(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(ApiResponse.success(
+                userService.getPendingPasswordResetRequests(PageRequest.of(page, size, Sort.by("passwordResetRequestedAt").descending()))));
+    }
 }

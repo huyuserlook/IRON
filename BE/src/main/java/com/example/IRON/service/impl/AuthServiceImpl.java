@@ -38,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
+    private final EsmsService smsService;
 
     @Override
     public JwtResponse login(LoginRequest request) {
@@ -191,6 +192,41 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void forgotPasswordByPhone(PhoneForgotPasswordRequest request) {
+        User user = userRepository.findByPhone(request.getPhone())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "phone", request.getPhone()));
+
+        user.setResetToken(java.util.UUID.randomUUID().toString());
+        user.setResetTokenExpiry(LocalDateTime.now().plusMinutes(15));
+        user.setResetTokenApproved(false);
+        user.setPasswordResetRequestedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void resetPasswordByPhone(PhoneResetPasswordRequest request) {
+        User user = userRepository.findByPhone(request.getPhone())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "phone", request.getPhone()));
+
+        if (user.getResetToken() == null || Boolean.FALSE.equals(user.getResetTokenApproved())) {
+            throw new RuntimeException("Yêu cầu đặt lại mật khẩu chưa được admin xác nhận");
+        }
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Yêu cầu đặt lại mật khẩu đã hết hạn");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setResetToken(null);
+        user.setResetTokenExpiry(null);
+        user.setResetTokenApproved(null);
+        user.setPasswordResetRequestedAt(null);
         userRepository.save(user);
     }
 }

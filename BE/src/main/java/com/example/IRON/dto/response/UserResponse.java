@@ -17,6 +17,8 @@ public class UserResponse {
     private Boolean deleted;
     private String role;
     private LocalDateTime createdAt;
+    private Boolean resetTokenApproved;
+    private LocalDateTime passwordResetRequestedAt;
 
     public UserResponse() {}
 }

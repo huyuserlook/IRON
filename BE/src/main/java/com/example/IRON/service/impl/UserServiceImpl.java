@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Service
@@ -68,6 +69,8 @@ public class UserServiceImpl implements UserService {
         res.setDeleted(user.getDeleted());
         res.setRole(role);
         res.setCreatedAt(user.getCreatedAt());
+        res.setResetTokenApproved(user.getResetTokenApproved());
+        res.setPasswordResetRequestedAt(user.getPasswordResetRequestedAt());
         return res;
     }
 
@@ -92,5 +95,28 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
         user.setDeleted(true);
         userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void approvePasswordReset(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+
+        if (user.getResetToken() == null || user.getResetTokenExpiry() == null) {
+            throw new RuntimeException("Người dùng chưa gửi yêu cầu đặt lại mật khẩu");
+        }
+
+        if (user.getResetTokenExpiry().isBefore(LocalDateTime.now())) {
+            throw new RuntimeException("Yêu cầu đặt lại mật khẩu đã hết hạn");
+        }
+
+        user.setResetTokenApproved(true);
+        userRepository.save(user);
+    }
+
+    @Override
+    public Page<UserResponse> getPendingPasswordResetRequests(Pageable pageable) {
+        return userRepository.findPendingPasswordResetRequests(pageable).map(this::toResponse);
     }
 }

@@ -13,4 +13,6 @@ public interface UserService {
     Page<UserResponse> getAllUsers(Pageable pageable);
     void toggleUserStatus(Long userId);
     void deleteUser(Long userId);
+    void approvePasswordReset(Long userId);
+    Page<UserResponse> getPendingPasswordResetRequests(Pageable pageable);
 }

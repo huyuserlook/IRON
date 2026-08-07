@@ -10,4 +10,6 @@ public interface AuthService {
     JwtResponse socialLogin(SocialLoginRequest request);
     void forgotPassword(ForgotPasswordRequest request);
     void resetPassword(ResetPasswordRequest request);
+    void forgotPasswordByPhone(PhoneForgotPasswordRequest request);
+    void resetPasswordByPhone(PhoneResetPasswordRequest request);
 }

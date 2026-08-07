@@ -42,6 +42,11 @@ public class MotorcycleController {
         return ResponseEntity.ok(ApiResponse.success(motorcycleService.getFeatured()));
     }
 
+    @GetMapping("/suggested/{id}")
+    public ResponseEntity<ApiResponse<?>> getSuggested(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(motorcycleService.getSuggested(id)));
+    }
+
     @GetMapping("/{slug}")
     public ResponseEntity<ApiResponse<?>> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(ApiResponse.success(motorcycleService.getBySlug(slug)));
