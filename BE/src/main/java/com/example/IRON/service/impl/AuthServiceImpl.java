@@ -14,6 +14,7 @@ import com.example.IRON.security.JwtTokenProvider;
 import com.example.IRON.service.interfaces.AuthService;
 import com.example.IRON.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,8 +24,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -39,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
     private final EsmsService smsService;
+
 
     @Override
     public JwtResponse login(LoginRequest request) {
@@ -128,9 +134,9 @@ public class AuthServiceImpl implements AuthService {
                                 newRole.setName(Role.RoleName.ROLE_USER);
                                 return roleRepository.save(newRole);
                             });
-                    newUser.setRoles(Set.of(userRole));
-                    return userRepository.save(newUser);
-                });
+                     newUser.setRoles(Set.of(userRole));
+                      return userRepository.save(newUser);
+                 });
 
         // Nếu user đã tồn tại nhưng chưa có provider_id (đăng ký thường trước đó)
         if (user.getProviderId() == null) {
@@ -163,6 +169,7 @@ public class AuthServiceImpl implements AuthService {
                 .avatarUrl(user.getAvatarUrl())
                 .build();
     }
+
 
     @Override
     @Transactional

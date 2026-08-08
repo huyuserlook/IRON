@@ -11,7 +11,7 @@ const RegisterPage = () => {
   const location = useLocation();
   const { handleRegister, loading, error } = useAuth();
   const redirectTo = location.state?.from?.pathname || "/";
-  const { handleGoogleLogin, handleFacebookLogin, loadingProvider } =
+  const { handleGoogleLogin, loadingProvider } =
     useSocialAuth(redirectTo);
   const [form, setForm] = useState({
     fullName: "",
@@ -115,7 +115,6 @@ const RegisterPage = () => {
 
         <SocialAuthButtons
           onGoogle={handleGoogleLogin}
-          onFacebook={handleFacebookLogin}
           loadingProvider={loadingProvider}
         />
 

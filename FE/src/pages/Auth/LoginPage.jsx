@@ -11,7 +11,7 @@ const LoginPage = () => {
   const location = useLocation();
   const { handleLogin, loading, error } = useAuth();
   const redirectTo = location.state?.from?.pathname || "/";
-  const { handleGoogleLogin, handleFacebookLogin, loadingProvider } =
+  const { handleGoogleLogin, loadingProvider } =
     useSocialAuth(redirectTo);
   const [form, setForm] = useState({ email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -97,7 +97,6 @@ const LoginPage = () => {
 
         <SocialAuthButtons
           onGoogle={handleGoogleLogin}
-          onFacebook={handleFacebookLogin}
           loadingProvider={loadingProvider}
         />
 
