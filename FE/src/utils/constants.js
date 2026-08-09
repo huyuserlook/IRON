@@ -30,4 +30,11 @@ export const PAYMENT_METHOD = {
   PAYOS: "PayOS",
 };
 
+export const PAYMENT_STATUS = {
+  PAID: { label: "Đã thanh toán", color: "green" },
+  PENDING: { label: "Chưa thanh toán", color: "orange" },
+  FAILED: { label: "Thanh toán thất bại", color: "red" },
+  REFUNDED: { label: "Đã hoàn tiền", color: "gray" },
+};
+
 export const PAGE_SIZE = 12;

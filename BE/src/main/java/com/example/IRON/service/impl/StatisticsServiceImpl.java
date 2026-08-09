@@ -138,6 +138,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                             .comparingInt(StatisticsResponse.MonthlyRevenue::getYear)
                             .thenComparingInt(StatisticsResponse.MonthlyRevenue::getMonth))
                     .toList();
+            monthlyRevenues = padMonthlyRevenues(monthlyRevenues, year);
         } else if ("month".equalsIgnoreCase(type) && year != null && month != null) {
             dailyRevenues = revenueOrders.stream()
                     .filter(order -> order.getCreatedAt() != null)
@@ -151,6 +152,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                     .map(entry -> toDailyRevenue(entry.getKey(), entry.getValue()))
                     .sorted(Comparator.comparingInt(StatisticsResponse.DailyRevenue::getDay))
                     .toList();
+            dailyRevenues = padDailyRevenues(dailyRevenues, year, month);
         }
 
         List<StatisticsResponse.TopMotorcycle> topMotorcycles = buildTopMotorcycles(revenueOrders);
@@ -212,6 +214,52 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .revenue(revenue)
                 .orderCount(orders.size())
                 .build();
+    }
+
+    private List<StatisticsResponse.MonthlyRevenue> padMonthlyRevenues(
+            List<StatisticsResponse.MonthlyRevenue> actual, int year) {
+        Map<Integer, StatisticsResponse.MonthlyRevenue> byMonth = actual.stream()
+                .collect(Collectors.toMap(StatisticsResponse.MonthlyRevenue::getMonth, m -> m));
+
+        List<StatisticsResponse.MonthlyRevenue> padded = new java.util.ArrayList<>();
+        for (int m = 1; m <= 12; m++) {
+            StatisticsResponse.MonthlyRevenue item = byMonth.get(m);
+            if (item != null) {
+                padded.add(item);
+            } else {
+                padded.add(StatisticsResponse.MonthlyRevenue.builder()
+                        .year(year)
+                        .month(m)
+                        .revenue(BigDecimal.ZERO)
+                        .orderCount(0)
+                        .build());
+            }
+        }
+        return padded;
+    }
+
+    private List<StatisticsResponse.DailyRevenue> padDailyRevenues(
+            List<StatisticsResponse.DailyRevenue> actual, int year, int month) {
+        Map<Integer, StatisticsResponse.DailyRevenue> byDay = actual.stream()
+                .collect(Collectors.toMap(StatisticsResponse.DailyRevenue::getDay, d -> d));
+
+        int daysInMonth = YearMonth.of(year, month).lengthOfMonth();
+        List<StatisticsResponse.DailyRevenue> padded = new java.util.ArrayList<>();
+        for (int d = 1; d <= daysInMonth; d++) {
+            StatisticsResponse.DailyRevenue item = byDay.get(d);
+            if (item != null) {
+                padded.add(item);
+            } else {
+                padded.add(StatisticsResponse.DailyRevenue.builder()
+                        .year(year)
+                        .month(month)
+                        .day(d)
+                        .revenue(BigDecimal.ZERO)
+                        .orderCount(0)
+                        .build());
+            }
+        }
+        return padded;
     }
 
     private List<StatisticsResponse.TopMotorcycle> buildTopMotorcycles(List<Order> revenueOrders) {

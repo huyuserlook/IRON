@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import orderApi from "../../../api/orderApi";
-import paymentApi from "../../../api/paymentApi";
 import { formatCurrency } from "../../../utils/formatCurrency";
 import { formatDateTime } from "../../../utils/formatDate";
-import { ORDER_STATUS, PAYMENT_METHOD } from "../../../utils/constants";
+import { ORDER_STATUS, PAYMENT_METHOD, PAYMENT_STATUS } from "../../../utils/constants";
 import toast from "react-hot-toast";
 import { Trash2 } from "lucide-react";
 
@@ -21,7 +20,6 @@ const OrderManagement = () => {
   const [data, setData] = useState({ content: [], totalPages: 0 });
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(0);
-  const [paymentMap, setPaymentMap] = useState({});
   const [deletingId, setDeletingId] = useState(null);
 
   const load = useCallback(() => {
@@ -47,18 +45,6 @@ const OrderManagement = () => {
     }
   };
 
-  const loadPayment = async (orderId) => {
-    try {
-      const res = await paymentApi.getByOrderId(orderId);
-      const payment = res.data?.data || res.data;
-      if (payment) {
-        setPaymentMap((prev) => ({ ...prev, [orderId]: payment }));
-      }
-    } catch {
-      // ignore
-    }
-  };
-
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa đơn hàng này?")) return;
     setDeletingId(id);
@@ -73,13 +59,26 @@ const OrderManagement = () => {
     }
   };
 
-  useEffect(() => {
-    data.content?.forEach((order) => {
-      if (!paymentMap[order.id]) {
-        loadPayment(order.id);
-      }
-    });
-  }, [data.content]);
+  const renderPayment = (order) => {
+    const method = order.paymentMethod;
+    const paymentStatus = order.paymentStatus;
+
+    const methodLabel = method ? PAYMENT_METHOD[method] || method : "Chưa xác định";
+    const statusInfo = paymentStatus ? PAYMENT_STATUS[paymentStatus] : null;
+    const statusLabel = statusInfo ? statusInfo.label : "Chưa xác định";
+    const statusColor = statusInfo ? statusInfo.color : "gray";
+
+    return (
+      <div className="space-y-1">
+        <p className="text-xs font-medium text-gray-700">{methodLabel}</p>
+        <span
+          className={`inline-block px-2 py-0.5 rounded-full text-[11px] font-medium bg-${statusColor}-100 text-${statusColor}-700`}
+        >
+          {statusLabel}
+        </span>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -120,7 +119,6 @@ const OrderManagement = () => {
           <tbody className="divide-y divide-gray-100">
             {data.content?.map((order) => {
               const st = ORDER_STATUS[order.status] || {};
-              const payment = paymentMap[order.id];
               return (
                 <tr key={order.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-mono font-medium text-orange-600">
@@ -145,72 +143,59 @@ const OrderManagement = () => {
                     </span>
                   </td>
                    <td className="px-4 py-3">
-                     {payment ? (
-                       <div className="space-y-1">
-                         <p className="text-xs font-medium text-gray-700">
-                           {PAYMENT_METHOD[payment.paymentMethod] || payment.paymentMethod}
-                         </p>
-                         {payment.transactionId && (
-                           <p className="text-xs text-gray-500 font-mono">
-                             {payment.transactionId}
-                           </p>
-                         )}
-                       </div>
-                     ) : (
-                       <span className="text-xs text-gray-400">-</span>
-                     )}
-                   </td>
+                    {renderPayment(order)}
+                  </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {formatDateTime(order.createdAt)}
                   </td>
                    <td className="px-4 py-3">
-                     <div className="flex items-center gap-2">
-                       <select
-                         value={order.status}
-                         onChange={(e) => handleStatus(order.id, e.target.value)}
-                         className="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-300"
-                       >
-                         {STATUSES.filter(Boolean).map((s) => (
-                           <option key={s} value={s}>
-                             {ORDER_STATUS[s]?.label}
-                           </option>
-                         ))}
-                       </select>
-                       <button
-                         type="button"
-                         onClick={() => handleDelete(order.id)}
-                         disabled={deletingId === order.id}
-                         className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
-                         title="Xóa đơn hàng"
-                       >
-                         {deletingId === order.id ? (
-                           <svg
-                             className="h-4 w-4 animate-spin"
-                             xmlns="http://www.w3.org/2000/svg"
-                             fill="none"
-                             viewBox="0 0 24 24"
-                           >
-                             <circle
-                               className="opacity-25"
-                               cx="12"
-                               cy="12"
-                               r="10"
-                               stroke="currentColor"
-                               strokeWidth="4"
-                             />
-                             <path
-                               className="opacity-75"
-                               fill="currentColor"
-                               d="M8 12a4 4 0 018 0H8z"
-                             />
-                           </svg>
-                         ) : (
-                           <Trash2 size={14} />
-                         )}
-                       </button>
-                     </div>
-                   </td>
-                </tr>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={order.status}
+                        onChange={(e) => handleStatus(order.id, e.target.value)}
+                        className="border border-gray-200 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-orange-300"
+                      >
+                        {STATUSES.filter(Boolean).map((s) => (
+                          <option key={s} value={s}>
+                            {ORDER_STATUS[s]?.label}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(order.id)}
+                        disabled={deletingId === order.id}
+                        className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-red-600 hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        title="Xóa đơn hàng"
+                      >
+                        {deletingId === order.id ? (
+                          <svg
+                            className="h-4 w-4 animate-spin"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M8 12a4 4 0 018 0H8z"
+                            />
+                          </svg>
+                        ) : (
+                          <Trash2 size={14} />
+                        )}
+                      </button>
+                    </div>
+                  </td>
+               </tr>
               );
             })}
           </tbody>

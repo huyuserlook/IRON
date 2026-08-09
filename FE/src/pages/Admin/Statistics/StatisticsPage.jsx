@@ -8,7 +8,8 @@ import {
   Loader2,
   AlertTriangle,
 } from "lucide-react";
-import * as XLSX from "xlsx";
+import html2canvas from "html2canvas";
+import ExcelJS from "exceljs";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import toast from "react-hot-toast";
@@ -16,6 +17,72 @@ import toast from "react-hot-toast";
 const currentYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => currentYear - i);
 const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
+
+const dataUrlToBuffer = (dataUrl) => {
+  try {
+    const base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return bytes.buffer;
+  } catch (e) {
+    console.error("Failed to convert data URL to buffer:", e);
+    return null;
+  }
+};
+
+const captureChartImages = async (chartRefs) => {
+  const images = {};
+  const entries = [
+    { key: "line", ref: chartRefs?.line },
+    { key: "bar", ref: chartRefs?.bar },
+  ];
+  for (const entry of entries) {
+    const container = entry.ref?.current;
+    if (!container) continue;
+    try {
+      const svg = container.querySelector("svg");
+      if (!svg) continue;
+      const width = svg.clientWidth || container.clientWidth || 800;
+      const height = svg.clientHeight || container.clientHeight || 360;
+      const scale = 2;
+      const canvas = document.createElement("canvas");
+      canvas.width = width * scale;
+      canvas.height = height * scale;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      const svgData = new XMLSerializer().serializeToString(svg);
+      const svgBlob = new Blob([svgData], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(svgBlob);
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+      };
+      await new Promise((resolve, reject) => {
+        img.onerror = (e) => {
+          URL.revokeObjectURL(url);
+          reject(e);
+        };
+        img.onload = () => {
+          URL.revokeObjectURL(url);
+          resolve();
+        };
+        img.src = url;
+      });
+      const dataUrl = canvas.toDataURL("image/png");
+      if (dataUrl && dataUrl !== "data:,") {
+        images[entry.key] = dataUrl;
+      }
+    } catch (e) {
+      console.error("Failed to capture chart:", entry.key, e);
+    }
+  }
+  return images;
+};
 
 const StatisticsPage = () => {
   const [stats, setStats] = useState(null);
@@ -62,7 +129,7 @@ const StatisticsPage = () => {
 
   useEffect(() => {
     loadStats();
-  }, [filterType, selectedYear, selectedMonth]);
+  }, [loadStats, filterType, selectedYear, selectedMonth]);
 
   const chartData = useMemo(() => {
     if (!stats) return [];
@@ -125,136 +192,191 @@ const StatisticsPage = () => {
     await new Promise((r) => setTimeout(r, 50));
 
     try {
+      const chartImages = await captureChartImages(chartRefs);
       if (type === "excel") {
-        exportExcel(chartData, topMotorcycles, summary, filterLabel);
+        await exportExcel(chartData, topMotorcycles, summary, filterLabel, chartImages);
       } else {
-        exportPDF(chartData, topMotorcycles, summary, filterLabel);
+        await exportPDF(chartData, topMotorcycles, summary, filterLabel, chartImages);
       }
       toast.success(type === "excel" ? "Đã xuất file Excel thành công" : "Đã xuất file PDF thành công");
-    } catch {
+    } catch (e) {
+      console.error("Export error:", e);
       toast.error("Không thể xuất file");
     } finally {
       setExporting(null);
     }
   };
 
-  const exportExcel = (chartData, topMotorcycles, summary, filterLabel) => {
+  const exportExcel = async (chartData, topMotorcycles, summary, filterLabel, chartImages) => {
     try {
-      const wb = XLSX.utils.book_new();
+      const workbook = new ExcelJS.Workbook();
+      workbook.creator = "IRON Admin";
+      workbook.created = new Date();
 
-      const summaryRows = [
-        ["Khoảng thời gian", filterLabel],
-        ["Tổng doanh thu", summary.totalRevenue],
-        ["Tổng đơn hàng", summary.totalOrders],
-        ["Giá trị đơn hàng TB", summary.avgOrderValue],
-        ["Tổng khách hàng", summary.totalCustomers],
-        ["Tổng số xe", summary.totalMotorcycles],
+      const headerFill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF97316" } };
+      const headerFont = { bold: true, color: { argb: "FFFFFFFF" } };
+
+      const wsSummary = workbook.addWorksheet("Tổng quan");
+      wsSummary.columns = [
+        { header: "Chỉ số", key: "label", width: 30 },
+        { header: "Giá trị", key: "value", width: 40 },
       ];
-      const wsSummary = XLSX.utils.aoa_to_sheet([
-        ["CHỈ SỐ", "GIÁ TRỊ"],
-        ...summaryRows,
-      ]);
-      XLSX.utils.book_append_sheet(wb, wsSummary, "Tổng quan");
+      const summaryHeader = wsSummary.addRow(["CHỈ SỐ", "GIÁ TRỊ"]);
+      summaryHeader.font = headerFont;
+      summaryHeader.fill = headerFill;
+      wsSummary.addRow(["Khoảng thời gian", filterLabel]);
+      wsSummary.addRow(["Tổng doanh thu", summary.totalRevenue]);
+      wsSummary.addRow(["Tổng đơn hàng", `${summary.totalOrders} đơn`]);
+      wsSummary.addRow(["Giá trị đơn hàng TB", summary.avgOrderValue]);
+      wsSummary.addRow(["Tổng khách hàng", `${summary.totalCustomers} người`]);
+      wsSummary.addRow(["Tổng số xe", `${summary.totalMotorcycles} xe`]);
 
       if (chartData.length > 0) {
-        const wsChart = XLSX.utils.aoa_to_sheet([
-          [filterType === "month" ? "Ngày" : "Tháng", "Năm", "Doanh thu", "Số đơn"],
-          ...chartData.map((item) => [
-            item.name,
-            item.year,
-            item.revenue,
-            item.orderCount,
-          ]),
-        ]);
-        XLSX.utils.book_append_sheet(wb, wsChart, "Doanh thu");
-      }
-
-      if (topMotorcycles.length > 0) {
-        const wsTop = XLSX.utils.aoa_to_sheet([
-          ["Xe", "Số lượng bán", "Doanh thu"],
-          ...topMotorcycles.map((m) => [
-            m.motorcycleName,
-            `${m.soldCount} xe`,
-            formatCurrency(m.revenue),
-          ]),
-        ]);
-        XLSX.utils.book_append_sheet(wb, wsTop, "Top xe bán chạy");
-      }
-
-      XLSX.writeFile(wb, fileName);
-    } catch {
-      toast.error("Không thể xuất file Excel");
-    }
-  };
-
-  const exportPDF = (chartData, topMotorcycles, summary, filterLabel) => {
-    try {
-      const doc = new jsPDF({ orientation: "landscape" });
-      doc.setFontSize(16);
-      doc.text("BÁO CÁO THỐNG KÊ - IRON SHOWROOM", 14, 15);
-      doc.setFontSize(10);
-      doc.text(`Khoảng thời gian: ${filterLabel}`, 14, 22);
-      doc.text(`Ngày xuất: ${new Date().toLocaleDateString("vi-VN")}`, 14, 28);
-
-      doc.setFontSize(12);
-      doc.text("1. Tổng quan", 14, 38);
-      autoTable(doc, {
-        startY: 41,
-        head: [["Chỉ số", "Giá trị"]],
-        body: [
-          ["Tổng doanh thu", summary.totalRevenue],
-          ["Tổng đơn hàng", `${summary.totalOrders} đơn`],
-          ["Giá trị đơn hàng TB", summary.avgOrderValue],
-          ["Tổng khách hàng", `${summary.totalCustomers} người`],
-          ["Tổng số xe", `${summary.totalMotorcycles} xe`],
-        ],
-        styles: { fontSize: 10 },
-        headStyles: { fillColor: [249, 115, 22] },
-      });
-
-      if (chartData.length > 0) {
-        doc.setFontSize(12);
-        doc.text("2. Doanh thu theo thời gian", 14, doc.lastAutoTable.finalY + 10);
-        autoTable(doc, {
-          startY: doc.lastAutoTable.finalY + 13,
-          head: [[filterType === "month" ? "Ngày" : "Tháng", "Năm", "Doanh thu", "Số đơn"]],
-          body: chartData.map((item) => [
-            item.name,
-            item.year,
-            formatCurrency(item.revenue),
-            `${item.orderCount} đơn`,
-          ]),
-          styles: { fontSize: 9 },
-          headStyles: { fillColor: [249, 115, 22] },
+        const wsChart = workbook.addWorksheet("Doanh thu");
+        wsChart.columns = [
+          { header: filterType === "month" ? "Ngày" : "Tháng", key: "name", width: 20 },
+          { header: "Năm", key: "year", width: 10 },
+          { header: "Doanh thu", key: "revenue", width: 22 },
+          { header: "Số đơn", key: "orderCount", width: 12 },
+        ];
+        const chartHeader = wsChart.addRow(wsChart.columns.map((c) => c.header));
+        chartHeader.font = headerFont;
+        chartHeader.fill = headerFill;
+        chartData.forEach((item) => {
+          wsChart.addRow([item.name, item.year, item.revenue, `${item.orderCount} đơn`]);
         });
       }
 
       if (topMotorcycles.length > 0) {
-        doc.setFontSize(12);
-        doc.text(
-          "3. Top xe bán chạy",
-          14,
-          chartData.length > 0 ? doc.lastAutoTable.finalY + 10 : doc.lastAutoTable.finalY + 8,
-        );
+        const wsTop = workbook.addWorksheet("Top xe bán chạy");
+        wsTop.columns = [
+          { header: "Xe", key: "name", width: 50 },
+          { header: "Số lượng bán", key: "sold", width: 15 },
+          { header: "Doanh thu", key: "revenue", width: 22 },
+        ];
+        const topHeader = wsTop.addRow(wsTop.columns.map((c) => c.header));
+        topHeader.font = headerFont;
+        topHeader.fill = headerFill;
+        topMotorcycles.forEach((m) => {
+          wsTop.addRow([m.motorcycleName, `${m.soldCount} xe`, formatCurrency(m.revenue)]);
+        });
+      }
+
+      const rawBuffer = await workbook.xlsx.writeBuffer();
+      const buffer = rawBuffer instanceof ArrayBuffer ? rawBuffer : new Uint8Array(rawBuffer).buffer;
+      const blob = new Blob([buffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+    } catch (e) {
+      console.error("Excel export error:", e);
+      toast.error("Không thể xuất file Excel");
+    }
+  };
+
+  const exportPDF = async (chartData, topMotorcycles, summary, filterLabel, chartImages) => {
+    try {
+      const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 40;
+      const usableWidth = pageWidth - margin * 2;
+      let y = margin;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(16);
+      doc.text("BAO CAO THONG KE - IRON SHOWROOM", margin, y);
+      y += 22;
+      doc.setFontSize(10);
+      doc.text(`Khoang thoi gian: ${filterLabel}`, margin, y);
+      y += 14;
+      doc.text(`Ngay xuat: ${new Date().toLocaleDateString("vi-VN")}`, margin, y);
+      y += 20;
+
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
+      doc.text("1. Tong quan", margin, y);
+      y += 4;
+      autoTable(doc, {
+        startY: y,
+        head: [["Chi so", "Gia tri"]],
+        body: [
+          ["Tong doanh thu", summary.totalRevenue],
+          ["Tong don hang", `${summary.totalOrders} don`],
+          ["Gia tri don hang TB", summary.avgOrderValue],
+          ["Tong khach hang", `${summary.totalCustomers} nguoi`],
+          ["Tong so xe", `${summary.totalMotorcycles} xe`],
+        ],
+        theme: "grid",
+        headStyles: { fillColor: [249, 115, 22], fontSize: 10 },
+        styles: { fontSize: 10, cellPadding: 6 },
+        margin: { left: margin, right: margin },
+      });
+      y = doc.lastAutoTable.finalY + 18;
+
+      if (chartImages.line) {
+        if (y + 170 > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("2. Doanh thu theo thoi gian", margin, y);
+        y += 8;
+        doc.addImage(chartImages.line, "PNG", margin, y, usableWidth, 170);
+        y += 180;
+      }
+
+      if (chartImages.bar) {
+        if (y + 170 > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("3. Top xe ban chay", margin, y);
+        y += 8;
+        doc.addImage(chartImages.bar, "PNG", margin, y, usableWidth, 170);
+        y += 180;
+      }
+
+      if (topMotorcycles.length > 0) {
+        if (y + 140 > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("4. Chi tiet top xe ban chay", margin, y);
+        y += 6;
         autoTable(doc, {
-          startY:
-            chartData.length > 0
-              ? doc.lastAutoTable.finalY + 13
-              : doc.lastAutoTable.finalY + 11,
-          head: [["Xe", "Số lượng bán", "Doanh thu"]],
+          startY: y,
+          head: [["Xe", "So luong ban", "Doanh thu"]],
           body: topMotorcycles.map((m) => [
             m.motorcycleName,
             `${m.soldCount} xe`,
             formatCurrency(m.revenue),
           ]),
-          styles: { fontSize: 9 },
-          headStyles: { fillColor: [249, 115, 22] },
+          theme: "grid",
+          headStyles: { fillColor: [249, 115, 22], fontSize: 10 },
+          styles: { fontSize: 9, cellPadding: 5 },
+          margin: { left: margin, right: margin },
         });
       }
 
       doc.save(fileName.replace(".xlsx", ".pdf"));
-    } catch {
-      toast.error("Không thể xuất file PDF");
+    } catch (e) {
+      console.error("PDF export error:", e);
+      toast.error("Khong the xuat file PDF");
     }
   };
 

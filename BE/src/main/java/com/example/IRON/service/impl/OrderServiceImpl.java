@@ -76,7 +76,12 @@ public class OrderServiceImpl implements OrderService {
         payment.setOrder(saved);
         payment.setAmount(total);
         payment.setPaymentMethod(request.getPaymentMethod());
-        payment.setStatus(Payment.PaymentStatus.PENDING);
+        if (request.getPaymentMethod() == Payment.PaymentMethod.CASH) {
+            payment.setStatus(Payment.PaymentStatus.PAID);
+            payment.setPaidAt(LocalDateTime.now());
+        } else {
+            payment.setStatus(Payment.PaymentStatus.PENDING);
+        }
         paymentRepository.save(payment);
 
         String customerName = user.getFullName() != null ? user.getFullName() : user.getEmail();
