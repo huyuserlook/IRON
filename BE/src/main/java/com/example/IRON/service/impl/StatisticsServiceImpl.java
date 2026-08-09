@@ -3,6 +3,7 @@ package com.example.IRON.service.impl;
 import com.example.IRON.dto.response.StatisticsResponse;
 import com.example.IRON.entity.Order;
 import com.example.IRON.entity.OrderDetail;
+import com.example.IRON.entity.Payment;
 import com.example.IRON.repository.MotorcycleRepository;
 import com.example.IRON.repository.OrderDetailRepository;
 import com.example.IRON.repository.OrderRepository;
@@ -14,10 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -55,7 +59,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                         .thenComparingInt(StatisticsResponse.MonthlyRevenue::getMonth))
                 .toList();
 
-List<StatisticsResponse.YearlyRevenue> yearlyRevenues = monthlyRevenues.stream()
+        List<StatisticsResponse.YearlyRevenue> yearlyRevenues = monthlyRevenues.stream()
                 .collect(Collectors.groupingBy(
                         StatisticsResponse.MonthlyRevenue::getYear,
                         LinkedHashMap::new,
@@ -76,33 +80,107 @@ List<StatisticsResponse.YearlyRevenue> yearlyRevenues = monthlyRevenues.stream()
                 .sorted(Comparator.comparingInt(StatisticsResponse.YearlyRevenue::getYear))
                 .toList();
 
-        List<StatisticsResponse.TopMotorcycle> topMotorcycles = orderDetailRepository.findAll().stream()
-                .collect(Collectors.groupingBy(detail -> detail.getMotorcycle().getId()))
-                .values()
-                .stream()
-                .map(this::toTopMotorcycle)
-                .sorted(Comparator.comparing(StatisticsResponse.TopMotorcycle::getRevenue).reversed())
-                .limit(5)
-                .toList();
+        List<StatisticsResponse.TopMotorcycle> topMotorcycles = buildTopMotorcycles(revenueOrders);
 
         return StatisticsResponse.builder()
                 .totalRevenue(totalRevenue)
                 .totalOrders(orderRepository.count())
                 .totalCustomers(userRepository.count())
                 .totalMotorcycles(motorcycleRepository.count())
-.monthlyRevenues(monthlyRevenues)
+                .monthlyRevenues(monthlyRevenues)
+                .yearlyRevenues(yearlyRevenues)
+                .topMotorcycles(topMotorcycles)
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public StatisticsResponse getStatistics(String type, Integer year, Integer month) {
+        LocalDateTime[] range = resolveRange(type, year, month);
+        if (range == null) {
+            return getStatistics();
+        }
+        LocalDateTime startDate = range[0];
+        LocalDateTime endDate = range[1];
+
+        List<Order> revenueOrders = orderRepository.findAll().stream()
+                .filter(this::countsAsRevenue)
+                .filter(order -> {
+                    LocalDateTime createdAt = order.getCreatedAt();
+                    return createdAt != null && !createdAt.isBefore(startDate) && !createdAt.isAfter(endDate);
+                })
+                .toList();
+
+        BigDecimal totalRevenue = revenueOrders.stream()
+                .map(Order::getTotalAmount)
+                .filter(amount -> amount != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        long totalOrders = revenueOrders.size();
+        long avgOrderValue = totalOrders > 0 ? totalRevenue.divide(BigDecimal.valueOf(totalOrders), BigDecimal.ROUND_HALF_UP).longValue() : 0;
+
+        List<StatisticsResponse.MonthlyRevenue> monthlyRevenues = List.of();
+        List<StatisticsResponse.DailyRevenue> dailyRevenues = List.of();
+        List<StatisticsResponse.YearlyRevenue> yearlyRevenues = List.of();
+
+        if ("year".equalsIgnoreCase(type) && year != null) {
+            monthlyRevenues = revenueOrders.stream()
+                    .filter(order -> order.getCreatedAt() != null)
+                    .collect(Collectors.groupingBy(
+                            order -> monthKey(order.getCreatedAt()),
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    ))
+                    .entrySet()
+                    .stream()
+                    .map(entry -> toMonthlyRevenue(entry.getKey(), entry.getValue()))
+                    .sorted(Comparator
+                            .comparingInt(StatisticsResponse.MonthlyRevenue::getYear)
+                            .thenComparingInt(StatisticsResponse.MonthlyRevenue::getMonth))
+                    .toList();
+        } else if ("month".equalsIgnoreCase(type) && year != null && month != null) {
+            dailyRevenues = revenueOrders.stream()
+                    .filter(order -> order.getCreatedAt() != null)
+                    .collect(Collectors.groupingBy(
+                            order -> dayKey(order.getCreatedAt()),
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    ))
+                    .entrySet()
+                    .stream()
+                    .map(entry -> toDailyRevenue(entry.getKey(), entry.getValue()))
+                    .sorted(Comparator.comparingInt(StatisticsResponse.DailyRevenue::getDay))
+                    .toList();
+        }
+
+        List<StatisticsResponse.TopMotorcycle> topMotorcycles = buildTopMotorcycles(revenueOrders);
+
+        return StatisticsResponse.builder()
+                .totalRevenue(totalRevenue)
+                .totalOrders(totalOrders)
+                .totalCustomers(userRepository.count())
+                .totalMotorcycles(motorcycleRepository.count())
+                .monthlyRevenues(monthlyRevenues)
+                .dailyRevenues(dailyRevenues)
                 .yearlyRevenues(yearlyRevenues)
                 .topMotorcycles(topMotorcycles)
                 .build();
     }
 
     private boolean countsAsRevenue(Order order) {
-        return order.getStatus() != Order.OrderStatus.CANCELLED
-                && order.getStatus() != Order.OrderStatus.REFUNDED;
+        if (order.getStatus() == Order.OrderStatus.DELIVERED) {
+            return true;
+        }
+        Payment payment = order.getPayment();
+        return payment != null && payment.getStatus() == Payment.PaymentStatus.PAID;
     }
 
     private String monthKey(LocalDateTime dateTime) {
         return dateTime.getYear() + "-" + dateTime.getMonthValue();
+    }
+
+    private String dayKey(LocalDateTime dateTime) {
+        return dateTime.getYear() + "-" + dateTime.getMonthValue() + "-" + dateTime.getDayOfMonth();
     }
 
     private StatisticsResponse.MonthlyRevenue toMonthlyRevenue(String key, List<Order> orders) {
@@ -118,6 +196,60 @@ List<StatisticsResponse.YearlyRevenue> yearlyRevenues = monthlyRevenues.stream()
                 .revenue(revenue)
                 .orderCount(orders.size())
                 .build();
+    }
+
+    private StatisticsResponse.DailyRevenue toDailyRevenue(String key, List<Order> orders) {
+        String[] parts = key.split("-");
+        BigDecimal revenue = orders.stream()
+                .map(Order::getTotalAmount)
+                .filter(amount -> amount != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return StatisticsResponse.DailyRevenue.builder()
+                .year(Integer.parseInt(parts[0]))
+                .month(Integer.parseInt(parts[1]))
+                .day(Integer.parseInt(parts[2]))
+                .revenue(revenue)
+                .orderCount(orders.size())
+                .build();
+    }
+
+    private List<StatisticsResponse.TopMotorcycle> buildTopMotorcycles(List<Order> revenueOrders) {
+        if (revenueOrders.isEmpty()) {
+            return List.of();
+        }
+
+        Set<Long> revenueOrderIds = revenueOrders.stream()
+                .map(Order::getId)
+                .collect(Collectors.toSet());
+
+        return orderDetailRepository.findAll().stream()
+                .filter(detail -> {
+                    Order order = detail.getOrder();
+                    return order != null && revenueOrderIds.contains(order.getId());
+                })
+                .collect(Collectors.groupingBy(detail -> detail.getMotorcycle().getId()))
+                .values()
+                .stream()
+                .map(this::toTopMotorcycle)
+                .sorted(Comparator.comparing(StatisticsResponse.TopMotorcycle::getSoldCount).reversed()
+                        .thenComparing(StatisticsResponse.TopMotorcycle::getRevenue).reversed())
+                .limit(10)
+                .toList();
+    }
+
+    private LocalDateTime[] resolveRange(String type, Integer year, Integer month) {
+        if ("month".equalsIgnoreCase(type) && year != null && month != null) {
+            LocalDate firstDay = LocalDate.of(year, month, 1);
+            LocalDate lastDay = firstDay.withDayOfMonth(firstDay.lengthOfMonth());
+            return new LocalDateTime[]{firstDay.atStartOfDay(), lastDay.atTime(23, 59, 59)};
+        }
+        if ("year".equalsIgnoreCase(type) && year != null) {
+            LocalDate firstDay = LocalDate.of(year, 1, 1);
+            LocalDate lastDay = LocalDate.of(year, 12, 31);
+            return new LocalDateTime[]{firstDay.atStartOfDay(), lastDay.atTime(23, 59, 59)};
+        }
+        return null;
     }
 
     private StatisticsResponse.TopMotorcycle toTopMotorcycle(List<OrderDetail> details) {

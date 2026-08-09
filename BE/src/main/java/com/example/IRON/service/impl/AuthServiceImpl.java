@@ -12,6 +12,7 @@ import com.example.IRON.repository.RoleRepository;
 import com.example.IRON.repository.UserRepository;
 import com.example.IRON.security.JwtTokenProvider;
 import com.example.IRON.service.interfaces.AuthService;
+import com.example.IRON.service.interfaces.NotificationService;
 import com.example.IRON.service.interfaces.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -44,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final UserService userService;
     private final EsmsService smsService;
+    private final NotificationService notificationService;
 
 
     @Override
@@ -112,6 +114,15 @@ public class AuthServiceImpl implements AuthService {
         user.setEnabled(true);
 
         userRepository.save(user);
+
+        notificationService.createNotification(
+                "USER",
+                "Người dùng mới",
+                user.getFullName() + " (" + user.getEmail() + ")",
+                "/admin/users",
+                user.getId()
+        );
+
         return userService.toResponse(user);
     }
 
@@ -213,6 +224,14 @@ public class AuthServiceImpl implements AuthService {
         user.setResetTokenApproved(false);
         user.setPasswordResetRequestedAt(LocalDateTime.now());
         userRepository.save(user);
+
+        notificationService.createNotification(
+                "PASSWORD_RESET",
+                "Yêu cầu đổi mật khẩu",
+                user.getFullName() + " (" + (user.getPhone() != null ? user.getPhone() : user.getEmail()) + ") yêu cầu đặt lại mật khẩu",
+                "/admin/password-reset-requests",
+                user.getId()
+        );
     }
 
     @Override

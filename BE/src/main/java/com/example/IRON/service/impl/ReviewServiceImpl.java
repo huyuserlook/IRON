@@ -11,6 +11,7 @@ import com.example.IRON.exception.UnauthorizedException;
 import com.example.IRON.repository.MotorcycleRepository;
 import com.example.IRON.repository.ReviewRepository;
 import com.example.IRON.repository.UserRepository;
+import com.example.IRON.service.interfaces.NotificationService;
 import com.example.IRON.service.interfaces.ReviewService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -30,13 +31,16 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final MotorcycleRepository motorcycleRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public ReviewServiceImpl(ReviewRepository reviewRepository,
                              MotorcycleRepository motorcycleRepository,
-                             UserRepository userRepository) {
+                             UserRepository userRepository,
+                             NotificationService notificationService) {
         this.reviewRepository = reviewRepository;
         this.motorcycleRepository = motorcycleRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -98,8 +102,20 @@ public class ReviewServiceImpl implements ReviewService {
         review.setImageUrl(request.getImageBase64());
         // Hiển thị ngay lập tức, không cần duyệt
         review.setStatus(Review.ReviewStatus.APPROVED);
+        Review saved = reviewRepository.save(review);
 
-        return toResponse(reviewRepository.save(review));
+        String customerName = review.getCustomerName() != null ? review.getCustomerName() : user.getFullName();
+        String bikeName = motorcycle.getName();
+        int stars = review.getRating() != null ? review.getRating() : 0;
+        notificationService.createNotification(
+                "REVIEW",
+                "Đánh giá mới",
+                customerName + " đánh giá " + bikeName + (stars > 0 ? " - " + stars + " sao" : ""),
+                "/admin/reviews",
+                saved.getId()
+        );
+
+        return toResponse(saved);
     }
 
     @Override

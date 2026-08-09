@@ -7,6 +7,7 @@ import com.example.IRON.entity.Contact;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.repository.ContactRepository;
 import com.example.IRON.service.interfaces.ContactService;
+import com.example.IRON.service.interfaces.NotificationService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,9 +17,11 @@ import org.springframework.stereotype.Service;
 public class ContactServiceImpl implements ContactService {
 
     private final ContactRepository contactRepository;
+    private final NotificationService notificationService;
 
-    public ContactServiceImpl(ContactRepository contactRepository) {
+    public ContactServiceImpl(ContactRepository contactRepository, NotificationService notificationService) {
         this.contactRepository = contactRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -32,7 +35,19 @@ Contact contact = new Contact();
         contact.setSubject(request.getSubject());
         contact.setMessage(request.getMessage() == null ? "" : request.getMessage());
         contact.setStatus(Contact.ContactStatus.NEW);
-        return toResponse(contactRepository.save(contact));
+        Contact saved = contactRepository.save(contact);
+
+        String name = request.getName() != null ? request.getName() : "";
+        String subject = request.getSubject() != null ? request.getSubject() : "Liên hệ mới";
+        notificationService.createNotification(
+                "CONTACT",
+                "Liên hệ mới",
+                name + " gửi liên hệ: " + subject,
+                "/admin/contacts",
+                saved.getId()
+        );
+
+        return toResponse(saved);
     }
 
     @Override

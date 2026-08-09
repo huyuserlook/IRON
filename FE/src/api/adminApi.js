@@ -1,7 +1,7 @@
 import axiosClient from "./axiosClient";
 
 const adminApi = {
-  getStatistics: () => axiosClient.get("/admin/statistics"),
+  getStatistics: (params) => axiosClient.get("/admin/statistics", { params }),
 };
 
 export default adminApi;

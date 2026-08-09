@@ -32,7 +32,7 @@ const AdminLayout = () => {
     notificationApi
       .getCount()
       .then((res) => {
-        const payload = res?.data ?? res;
+        const payload = res?.data?.data ?? res?.data ?? res;
         setNotifCount(Number(payload) || 0);
       })
       .catch(() => setNotifCount(0));
@@ -43,7 +43,7 @@ const AdminLayout = () => {
     notificationApi
       .getRecent(20)
       .then((res) => {
-        const payload = res?.data ?? res;
+        const payload = res?.data?.data ?? res?.data ?? res;
         setNotifications(Array.isArray(payload) ? payload : []);
       })
       .catch(() => setNotifications([]))
@@ -63,14 +63,17 @@ const AdminLayout = () => {
   useEffect(() => {
     const onDocClick = (event) => {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
+        if (notifOpen) {
+          notificationApi.markAllAsRead().then(() => setNotifCount(0)).catch(() => { /* ignore */ });
+        }
         setNotifOpen(false);
       }
     };
     document.addEventListener("mousedown", onDocClick);
     return () => document.removeEventListener("mousedown", onDocClick);
-  }, []);
+  }, [notifOpen]);
 
-  const toggleNotif = () => {
+  const toggleNotif = async () => {
     const next = !notifOpen;
     setNotifOpen(next);
     if (next) {
@@ -78,7 +81,20 @@ const AdminLayout = () => {
       loadNewCount();
       loadNotifications();
       setTimeout(() => setRefreshing(false), 600);
+    } else {
+      try {
+        await notificationApi.markAllAsRead();
+        setNotifCount(0);
+      } catch { /* ignore */ }
     }
+  };
+
+  const handleNotifClick = async () => {
+    try {
+      await notificationApi.markAllAsRead();
+      setNotifCount(0);
+    } catch { /* ignore */ }
+    setNotifOpen(false);
   };
 
   return (
@@ -145,7 +161,7 @@ const AdminLayout = () => {
                         <Link
                           key={`${n.type}-${n.title}-${n.createdAt}`}
                           to={n.link || "#"}
-                          onClick={() => setNotifOpen(false)}
+                          onClick={handleNotifClick}
                           className="block border-b border-slate-50 px-4 py-3 transition hover:bg-slate-50"
                         >
                           <div className="flex items-start gap-3">
@@ -184,7 +200,7 @@ const AdminLayout = () => {
                   </div>
                   <Link
                     to="/admin"
-                    onClick={() => setNotifOpen(false)}
+                    onClick={handleNotifClick}
                     className="block border-t border-slate-100 bg-slate-50 px-4 py-2.5 text-center text-xs font-bold uppercase tracking-wide text-red-600 transition hover:bg-slate-100"
                   >
                     Xem tất cả thông báo

@@ -35,7 +35,7 @@ const AdminSidebar = ({ open }) => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 h-full bg-slate-950 text-white transition-all duration-300 z-20 ${open ? "md:w-64 lg:w-72 w-20" : "w-20"}`}
+      className={`fixed top-0 left-0 h-full bg-slate-950 text-white transition-all duration-300 z-20 flex flex-col ${open ? "md:w-64 lg:w-72 w-20" : "w-20"}`}
     >
       {/* Logo */}
       <div className="h-20 flex items-center px-4 border-b border-white/10">
@@ -58,7 +58,7 @@ const AdminSidebar = ({ open }) => {
       </div>
 
       {/* Nav */}
-      <nav className="mt-4 flex flex-col gap-2 px-2">
+      <nav className="mt-4 flex-1 flex flex-col gap-2 overflow-y-auto px-2">
         {navItems.map(({ path, label, icon: Icon, exact }) => {
           const active = exact ? pathname === path : pathname.startsWith(path);
           return (

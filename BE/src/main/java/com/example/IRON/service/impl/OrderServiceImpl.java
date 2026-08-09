@@ -6,6 +6,7 @@ import com.example.IRON.entity.*;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.exception.UnauthorizedException;
 import com.example.IRON.repository.*;
+import com.example.IRON.service.interfaces.NotificationService;
 import com.example.IRON.service.interfaces.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -28,6 +29,7 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final MotorcycleRepository motorcycleRepository;
     private final PaymentRepository paymentRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -76,6 +78,15 @@ public class OrderServiceImpl implements OrderService {
         payment.setPaymentMethod(request.getPaymentMethod());
         payment.setStatus(Payment.PaymentStatus.PENDING);
         paymentRepository.save(payment);
+
+        String customerName = user.getFullName() != null ? user.getFullName() : user.getEmail();
+        notificationService.createNotification(
+                "ORDER",
+                "Đơn hàng mới",
+                "Đơn hàng " + saved.getOrderCode() + " từ " + customerName + " - " + total + " VND",
+                "/admin/orders",
+                saved.getId()
+        );
 
         return toResponse(saved);
     }

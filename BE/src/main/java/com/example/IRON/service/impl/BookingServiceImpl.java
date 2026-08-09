@@ -7,6 +7,7 @@ import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.exception.UnauthorizedException;
 import com.example.IRON.repository.*;
 import com.example.IRON.service.interfaces.BookingService;
+import com.example.IRON.service.interfaces.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final MotorcycleRepository motorcycleRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -44,7 +46,19 @@ public class BookingServiceImpl implements BookingService {
         booking.setNote(request.getNote());
         booking.setStatus(Booking.BookingStatus.PENDING);
 
-        return toResponse(bookingRepository.save(booking));
+        Booking saved = bookingRepository.save(booking);
+
+        String customerName = request.getCustomerName() != null ? request.getCustomerName() : user.getFullName();
+        String bikeName = motorcycle != null ? motorcycle.getName() : "Xe";
+        notificationService.createNotification(
+                "BOOKING",
+                "Lịch lái thử mới",
+                customerName + " đặt lịch lái thử " + bikeName,
+                "/admin/bookings",
+                saved.getId()
+        );
+
+        return toResponse(saved);
     }
 
     @Override
