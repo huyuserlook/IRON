@@ -26,6 +26,8 @@ const PaymentPage = () => {
   const [qrError, setQrError] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [payUrl, setPayUrl] = useState(null);
+  const [payosOrderCode, setPayosOrderCode] = useState(null);
+  const [fallbackPolling, setFallbackPolling] = useState(false);
 
   const amount = amountParam ? Number(amountParam) : 0;
 
@@ -49,6 +51,7 @@ const PaymentPage = () => {
           setQrCodeString(data.qrCode);
           setQrData(data.qrCodeUrl);
           setPayUrl(data.checkoutUrl || data.paymentUrl);
+          setPayosOrderCode(data.orderCode || data.payosOrderCode || null);
         }
       } catch (err) {
         toast.error(err.message || "Loi khi tao QR thanh toan");
@@ -70,6 +73,7 @@ const PaymentPage = () => {
         if (data?.status === "CONFIRMED" || data?.paymentStatus === "PAID" || data?.status === "paid") {
           setPaid(true);
           setPolling(false);
+          setFallbackPolling(false);
           toast.success("Thanh toan thanh cong!");
           setTimeout(() => {
             navigate("/my-orders");
@@ -81,6 +85,49 @@ const PaymentPage = () => {
     }, 3000);
     return () => clearInterval(timer);
   }, [polling, orderId, paid, navigate]);
+
+  /**
+   * Fallback polling: nếu sau 30s DB vẫn chưa cập nhật (do webhook fail/ngrok đổi URL),
+   * chủ động query PayOS API để lấy trạng thái thực tế và tự động cập nhật DB.
+   */
+  useEffect(() => {
+    if (!fallbackPolling || !orderId || paid || !payosOrderCode) return;
+
+    const fallbackTimer = setInterval(async () => {
+      try {
+        const res = await paymentApi.checkPayOSStatus(payosOrderCode);
+        const data = res.data?.data || res.data;
+        console.warn("[PaymentPage fallback] PayOS status for orderCode=" + payosOrderCode, data);
+
+        const payosStatus = data?.status;
+        const rawCode = data?.rawCode;
+
+        if ("PAID".equalsIgnoreCase(payosStatus) || "00".equals(rawCode)) {
+          setPaid(true);
+          setPolling(false);
+          setFallbackPolling(false);
+          toast.success("Thanh toan thanh cong! (kiem tra tu PayOS)");
+          setTimeout(() => {
+            navigate("/my-orders");
+          }, 2000);
+        }
+      } catch (err) {
+        console.warn("[PaymentPage fallback] PayOS check failed:", err);
+      }
+    }, 5000);
+
+    return () => clearInterval(fallbackTimer);
+  }, [fallbackPolling, orderId, paid, payosOrderCode, navigate]);
+
+  useEffect(() => {
+    const fallbackDelay = setTimeout(() => {
+      if (polling && !paid && payosOrderCode) {
+        setFallbackPolling(true);
+      }
+    }, 30000);
+
+    return () => clearTimeout(fallbackDelay);
+  }, [polling, paid, payosOrderCode]);
 
   if (!orderId || !amount || isNaN(amount) || amount <= 0) {
     return null;

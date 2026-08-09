@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderApi from "../../api/orderApi";
+import motorcycleApi from "../../api/motorcycleApi";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { formatCurrency } from "../../utils/formatCurrency";
@@ -83,6 +84,39 @@ const CheckoutPage = () => {
     if (!form.shippingAddress.trim()) {
       toast.error("Vui lòng nhập địa chỉ nhận xe");
       return;
+    }
+
+    for (const item of items) {
+      try {
+        const res = await motorcycleApi.getByIdPublic(item.motorcycleId);
+        const payload = res?.data ?? res;
+        const stock = payload?.stock ?? 0;
+        if (item.quantity > stock) {
+          toast.error(
+            `Sản phẩm "${item.name}" chỉ còn ${stock} xe trong kho, không đủ số lượng đặt mua.`,
+            { duration: 5000 },
+          );
+          return;
+        }
+      } catch (err) {
+        const status = err?.status || err?.response?.status;
+        const apiData = err?.response?.data;
+        const message =
+          (apiData && apiData.message) ||
+          err?.message ||
+          "Lỗi không xác định";
+        console.error("[CHECKOUT][STOCK_CHECK] failed", {
+          motorcycleId: item.motorcycleId,
+          name: item.name,
+          status,
+          message,
+          raw: err,
+        });
+        toast.error(
+          `Không thể kiểm tra tồn kho cho "${item.name}" (HTTP ${status || "?"}: ${message}). Vui lòng thử lại.`,
+        );
+        return;
+      }
     }
 
     setLoading(true);

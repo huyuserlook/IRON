@@ -68,6 +68,7 @@ CREATE TABLE motorcycles (
     torque DOUBLE,
     year_model INT,
     thumbnail_url VARCHAR(255),
+    stock INT DEFAULT 0 NOT NULL,
     description TEXT,
     specifications TEXT,
     status ENUM('AVAILABLE', 'OUT_OF_STOCK', 'DISCONTINUED', 'COMING_SOON') DEFAULT 'AVAILABLE' NOT NULL,

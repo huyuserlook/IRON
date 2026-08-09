@@ -293,6 +293,7 @@ const MotorcycleDetailPage = () => {
       price: moto.price,
       thumbnailUrl: activeImage?.imageUrl || moto.thumbnailUrl,
       colorName: null,
+      stock: moto.stock ?? 0,
     };
 
     try {
@@ -393,7 +394,9 @@ const MotorcycleDetailPage = () => {
     );
   }
 
-  const status = STATUS_META[moto.status] || STATUS_META.OUT_OF_STOCK;
+  const stock = moto.stock ?? 0;
+  const statusKey = stock > 0 ? "AVAILABLE" : "OUT_OF_STOCK";
+  const status = STATUS_META[statusKey] || STATUS_META.OUT_OF_STOCK;
 
   return (
     <div className="min-h-screen bg-[#F7F5FA] pb-16 text-[#1A1B1F]">
@@ -649,11 +652,11 @@ const MotorcycleDetailPage = () => {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                disabled={moto.status !== "AVAILABLE"}
+                disabled={stock <= 0}
                 className="inline-flex flex-1 items-center justify-center gap-2 rounded-[12px] bg-[#BC000A] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-[0_18px_40px_-24px_rgba(188,0,10,0.75)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <ShoppingCart size={18} />
-                Thêm vào giỏ
+                {stock <= 0 ? "Hết hàng" : "Thêm vào giỏ"}
               </button>
               <Link
                 to={`/booking?motorcycleId=${moto.id}`}

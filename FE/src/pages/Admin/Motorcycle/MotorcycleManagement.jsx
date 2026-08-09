@@ -40,12 +40,15 @@ const MotorcycleManagement = () => {
   const statusBadge = {
     AVAILABLE: "bg-green-100 text-green-700",
     OUT_OF_STOCK: "bg-red-100 text-red-600",
-    COMING_SOON: "bg-blue-100 text-blue-600",
   };
   const statusLabel = {
     AVAILABLE: "Còn hàng",
     OUT_OF_STOCK: "Hết hàng",
-    COMING_SOON: "Sắp ra mắt",
+  };
+
+  const getStatus = (moto) => {
+    const stock = moto.stock ?? 0;
+    return stock > 0 ? "AVAILABLE" : "OUT_OF_STOCK";
   };
 
   const renderRatingStars = (rating) =>
@@ -102,6 +105,7 @@ const MotorcycleManagement = () => {
               <th className="px-4 py-3 text-left">Hãng / Dòng</th>
               <th className="px-4 py-3 text-right">Giá bán</th>
               <th className="px-4 py-3 text-right">Giá vốn</th>
+              <th className="px-4 py-3 text-center">Tồn kho</th>
               <th className="px-4 py-3 text-center">Trạng thái</th>
               <th className="px-4 py-3 text-center">Đánh giá</th>
               <th className="px-4 py-3 text-center">Thao tác</th>
@@ -153,11 +157,14 @@ const MotorcycleManagement = () => {
                     <td className="px-4 py-3 text-right text-gray-500">
                       {moto.costPrice ? formatCurrency(moto.costPrice) : "-"}
                     </td>
+                    <td className="px-4 py-3 text-center font-semibold">
+                      {moto.stock ?? 0}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge[moto.status] || "bg-gray-100 text-gray-600"}`}
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge[getStatus(moto)] || "bg-gray-100 text-gray-600"}`}
                       >
-                        {statusLabel[moto.status] || moto.status}
+                        {statusLabel[getStatus(moto)] || getStatus(moto)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center">

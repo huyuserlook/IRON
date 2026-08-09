@@ -4,6 +4,7 @@ import com.example.IRON.entity.Motorcycle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -22,6 +23,14 @@ public interface MotorcycleRepository extends JpaRepository<Motorcycle, Long> {
     long countByBrandId(Long brandId);
 
     long countByCategoryId(Long categoryId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Motorcycle m SET m.stock = m.stock - :qty WHERE m.id = :id AND m.stock >= :qty")
+    int deductStock(@Param("id") Long id, @Param("qty") int qty);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Motorcycle m SET m.stock = m.stock + :qty WHERE m.id = :id")
+    int restoreStock(@Param("id") Long id, @Param("qty") int qty);
 
     @Query("""
         SELECT m FROM Motorcycle m

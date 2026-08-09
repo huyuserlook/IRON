@@ -6,6 +6,7 @@ import com.example.IRON.entity.Payment;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.repository.OrderRepository;
 import com.example.IRON.repository.PaymentRepository;
+import com.example.IRON.service.interfaces.OrderService;
 import com.example.IRON.service.PayOSService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class PayOSController {
     private static final Logger log = LoggerFactory.getLogger(PayOSController.class);
 
     private final PayOSService payOSService;
+    private final OrderService orderService;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
 
@@ -46,7 +48,7 @@ public class PayOSController {
         String status = params.get("status");
         String cancel = params.get("cancel");
 
-        log.info("[PayOS return] GET /api/payos/return. orderCode={}, status={}, cancel={}", orderCode, status, cancel);
+        log.warn("[PayOS return] GET /api/payos/return. orderCode={}, status={}, cancel={}, allParams={}", orderCode, status, cancel, params);
 
         if (orderCode != null) {
             Order order = null;
@@ -54,19 +56,23 @@ public class PayOSController {
             try {
                 Long orderId = Long.parseLong(orderCode);
                 order = orderRepository.findById(orderId).orElse(null);
+                log.warn("[PayOS return] Lookup by numeric orderId={}: found={}", orderId, order != null);
             } catch (NumberFormatException e) {
                 order = orderRepository.findByOrderCode(orderCode).orElse(null);
+                log.warn("[PayOS return] Lookup by orderCode={}: found={}", orderCode, order != null);
             }
 
             if (order == null) {
                 Payment paymentByPayosCode = paymentRepository.findByPayosOrderCode(orderCode).orElse(null);
                 if (paymentByPayosCode != null) {
                     order = paymentByPayosCode.getOrder();
+                    log.warn("[PayOS return] Lookup by payosOrderCode={}: found orderId={}", orderCode, order != null ? order.getId() : null);
                 }
             }
 
             if (order != null) {
                 Payment payment = paymentRepository.findByOrderId(order.getId()).orElse(null);
+                log.warn("[PayOS return] Found payment: id={}, status={}", payment != null ? payment.getId() : null, payment != null ? payment.getStatus() : null);
 
                 boolean isPaid = "PAID".equalsIgnoreCase(status);
                 boolean isCancelled = "true".equalsIgnoreCase(cancel);
@@ -75,26 +81,89 @@ public class PayOSController {
                     payment.setStatus(Payment.PaymentStatus.PAID);
                     payment.setPaidAt(java.time.LocalDateTime.now());
                     paymentRepository.save(payment);
-                    log.info("[PayOS return] Payment updated to PAID. paymentId={}, orderId={}", payment.getId(), order.getId());
+                    log.warn("[PayOS return] Payment UPDATED to PAID. paymentId={}, orderId={}", payment.getId(), order.getId());
+                } else {
+                    log.warn("[PayOS return] Payment update skipped: payment={}, isPaid={}", payment != null, isPaid);
                 }
 
                 if (isPaid && order.getStatus() == Order.OrderStatus.PENDING) {
-                    order.setStatus(Order.OrderStatus.CONFIRMED);
-                    orderRepository.save(order);
-                    log.info("[PayOS return] Order updated to CONFIRMED. orderId={}", order.getId());
+                    log.warn("[PayOS return] Order update via OrderService to CONFIRMED. orderId={}", order.getId());
+                    orderService.updateStatus(order.getId(), Order.OrderStatus.CONFIRMED);
                 } else {
-                    log.info("[PayOS return] Order status={}, isPaid={}, skipping order update", order.getStatus(), isPaid);
+                    log.warn("[PayOS return] Order update skipped: orderStatus={}, isPaid={}", order.getStatus(), isPaid);
                 }
             } else {
-                log.warn("[PayOS return] Order not found for orderCode={}", orderCode);
+                log.warn("[PayOS return] Order NOT FOUND for orderCode={}", orderCode);
             }
+        } else {
+            log.warn("[PayOS return] No orderCode in request params");
         }
 
-        log.info("[PayOS return] Redirecting to frontend: {}", frontendUrl + "/payment-return?orderCode=" + (orderCode != null ? orderCode : "") + "&status=" + (status != null ? status : "UNKNOWN"));
-
         String redirectUrl = frontendUrl + "/payment-return?orderCode=" + (orderCode != null ? orderCode : "") + "&status=" + (status != null ? status : "UNKNOWN");
+        log.warn("[PayOS return] Redirecting to frontend: {}", redirectUrl);
+
         String html = "<html><head><meta charset=\"UTF-8\"><meta http-equiv=\"refresh\" content=\"0;url=" + redirectUrl + "\"/></head><body>Đang chuyển hướng...</body></html>";
         return ResponseEntity.ok(html);
+    }
+
+    /**
+     * REMINDER: Mỗi lần restart ngrok, URL public sẽ đổi.
+     * Cần cập nhật lại payos.return-url, payos.cancel-url, payos.webhook-url trong application.properties,
+     * rồi cập nhật lại Webhook URL + Return URL trong PayOS Merchant Portal.
+     * Hoặc đăng ký static domain ngrok để cố định URL.
+     */
+    @GetMapping("/check-status/{orderCode}")
+    public ResponseEntity<?> checkPayOSStatus(@PathVariable String orderCode) {
+        log.warn("[PayOS check-status] GET /api/payos/check-status/{}", orderCode);
+        try {
+            Map<String, Object> payosInfo = payOSService.getPaymentLinkInformation(orderCode);
+            log.warn("[PayOS check-status] PayOS info for orderCode={}: {}", orderCode, payosInfo);
+
+            String status = (String) payosInfo.get("status");
+            String transactionId = (String) payosInfo.get("transactionId");
+            String rawCode = (String) payosInfo.get("rawCode");
+
+            if ("PAID".equalsIgnoreCase(status) || "00".equals(rawCode)) {
+                Order order = null;
+                Long parsedOrderId = null;
+                try {
+                    parsedOrderId = Long.parseLong(orderCode);
+                    order = orderRepository.findById(parsedOrderId).orElse(null);
+                } catch (NumberFormatException e) {
+                    order = orderRepository.findByOrderCode(orderCode).orElse(null);
+                }
+
+                if (order == null) {
+                    Payment paymentByPayosCode = paymentRepository.findByPayosOrderCode(orderCode).orElse(null);
+                    if (paymentByPayosCode != null) {
+                        order = paymentByPayosCode.getOrder();
+                    }
+                }
+
+                if (order != null) {
+                    Payment payment = paymentRepository.findByOrderId(order.getId()).orElse(null);
+                    if (payment != null && payment.getStatus() != Payment.PaymentStatus.PAID) {
+                        payment.setStatus(Payment.PaymentStatus.PAID);
+                        payment.setTransactionId(transactionId);
+                        payment.setPaidAt(java.time.LocalDateTime.now());
+                        paymentRepository.save(payment);
+                        log.warn("[PayOS check-status] Payment UPDATED to PAID via fallback. paymentId={}, orderId={}", payment.getId(), order.getId());
+                    }
+
+                    if (order.getStatus() == Order.OrderStatus.PENDING) {
+                        log.warn("[PayOS check-status] Order update via OrderService to CONFIRMED. orderId={}", order.getId());
+                        orderService.updateStatus(order.getId(), Order.OrderStatus.CONFIRMED);
+                    }
+                } else {
+                    log.warn("[PayOS check-status] Order not found for orderCode={}", orderCode);
+                }
+            }
+
+            return ResponseEntity.ok(ApiResponse.success(payosInfo));
+        } catch (Exception e) {
+            log.error("[PayOS check-status] Error checking status for orderCode={}", orderCode, e);
+            return ResponseEntity.ok(ApiResponse.error("Không thể kiểm tra trạng thái PayOS: " + e.getMessage()));
+        }
     }
 
     @PostMapping("/webhook")
@@ -113,8 +182,8 @@ public class PayOSController {
             }
         }
 
-        log.info("[PayOS webhook] Received POST /api/payos/webhook. signature={}", signature);
-        log.info("[PayOS webhook] Raw body: {}", body);
+        log.warn("[PayOS webhook] RAW REQUEST BODY: {}", body);
+        log.warn("[PayOS webhook] signature header={}", signature);
 
         if (webhookDebug) {
             log.warn("[PayOS webhook] DEBUG MODE ENABLED - bypassing signature verification");
@@ -125,7 +194,7 @@ public class PayOSController {
 
         try {
             payOSService.handleWebhook(payload, signature);
-            log.info("[PayOS webhook] Handler completed successfully");
+            log.warn("[PayOS webhook] Handler completed successfully");
             return ResponseEntity.ok(Map.of("code", "00", "desc", "Thành công"));
         } catch (SecurityException e) {
             log.error("[PayOS webhook] Signature verification FAILED: {}", e.getMessage());

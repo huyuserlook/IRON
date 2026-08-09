@@ -44,6 +44,8 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .filter(amount -> amount != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal totalProfit = calculateTotalProfit(revenueOrders);
+
         List<StatisticsResponse.MonthlyRevenue> monthlyRevenues = revenueOrders.stream()
                 .filter(order -> order.getCreatedAt() != null)
                 .collect(Collectors.groupingBy(
@@ -73,6 +75,10 @@ public class StatisticsServiceImpl implements StatisticsService {
                                 .map(StatisticsResponse.MonthlyRevenue::getRevenue)
                                 .filter(amount -> amount != null)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add))
+                        .profit(entry.getValue().stream()
+                                .map(StatisticsResponse.MonthlyRevenue::getProfit)
+                                .filter(amount -> amount != null)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add))
                         .orderCount(entry.getValue().stream()
                                 .mapToLong(StatisticsResponse.MonthlyRevenue::getOrderCount)
                                 .sum())
@@ -84,6 +90,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         return StatisticsResponse.builder()
                 .totalRevenue(totalRevenue)
+                .totalProfit(totalProfit)
                 .totalOrders(orderRepository.count())
                 .totalCustomers(userRepository.count())
                 .totalMotorcycles(motorcycleRepository.count())
@@ -115,6 +122,8 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .map(Order::getTotalAmount)
                 .filter(amount -> amount != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal totalProfit = calculateTotalProfit(revenueOrders);
 
         long totalOrders = revenueOrders.size();
         long avgOrderValue = totalOrders > 0 ? totalRevenue.divide(BigDecimal.valueOf(totalOrders), BigDecimal.ROUND_HALF_UP).longValue() : 0;
@@ -159,6 +168,7 @@ public class StatisticsServiceImpl implements StatisticsService {
 
         return StatisticsResponse.builder()
                 .totalRevenue(totalRevenue)
+                .totalProfit(totalProfit)
                 .totalOrders(totalOrders)
                 .totalCustomers(userRepository.count())
                 .totalMotorcycles(motorcycleRepository.count())
@@ -185,6 +195,34 @@ public class StatisticsServiceImpl implements StatisticsService {
         return dateTime.getYear() + "-" + dateTime.getMonthValue() + "-" + dateTime.getDayOfMonth();
     }
 
+    private BigDecimal calculateOrderCost(Order order) {
+        if (order.getOrderDetails() == null || order.getOrderDetails().isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return order.getOrderDetails().stream()
+                .map(detail -> {
+                    BigDecimal costPrice = BigDecimal.ZERO;
+                    if (detail.getMotorcycle() != null && detail.getMotorcycle().getCostPrice() != null) {
+                        costPrice = detail.getMotorcycle().getCostPrice();
+                    }
+                    Integer qty = detail.getQuantity();
+                    if (qty == null) qty = 0;
+                    return costPrice.multiply(BigDecimal.valueOf(qty));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private BigDecimal calculateTotalProfit(List<Order> revenueOrders) {
+        return revenueOrders.stream()
+                .map(order -> {
+                    BigDecimal totalAmount = order.getTotalAmount();
+                    if (totalAmount == null) totalAmount = BigDecimal.ZERO;
+                    BigDecimal orderCost = calculateOrderCost(order);
+                    return totalAmount.subtract(orderCost);
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
     private StatisticsResponse.MonthlyRevenue toMonthlyRevenue(String key, List<Order> orders) {
         String[] parts = key.split("-");
         BigDecimal revenue = orders.stream()
@@ -192,10 +230,20 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .filter(amount -> amount != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal profit = orders.stream()
+                .map(order -> {
+                    BigDecimal totalAmount = order.getTotalAmount();
+                    if (totalAmount == null) totalAmount = BigDecimal.ZERO;
+                    BigDecimal orderCost = calculateOrderCost(order);
+                    return totalAmount.subtract(orderCost);
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         return StatisticsResponse.MonthlyRevenue.builder()
                 .year(Integer.parseInt(parts[0]))
                 .month(Integer.parseInt(parts[1]))
                 .revenue(revenue)
+                .profit(profit)
                 .orderCount(orders.size())
                 .build();
     }
@@ -207,11 +255,21 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .filter(amount -> amount != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal profit = orders.stream()
+                .map(order -> {
+                    BigDecimal totalAmount = order.getTotalAmount();
+                    if (totalAmount == null) totalAmount = BigDecimal.ZERO;
+                    BigDecimal orderCost = calculateOrderCost(order);
+                    return totalAmount.subtract(orderCost);
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         return StatisticsResponse.DailyRevenue.builder()
                 .year(Integer.parseInt(parts[0]))
                 .month(Integer.parseInt(parts[1]))
                 .day(Integer.parseInt(parts[2]))
                 .revenue(revenue)
+                .profit(profit)
                 .orderCount(orders.size())
                 .build();
     }
@@ -231,6 +289,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                         .year(year)
                         .month(m)
                         .revenue(BigDecimal.ZERO)
+                        .profit(BigDecimal.ZERO)
                         .orderCount(0)
                         .build());
             }
@@ -255,6 +314,7 @@ public class StatisticsServiceImpl implements StatisticsService {
                         .month(month)
                         .day(d)
                         .revenue(BigDecimal.ZERO)
+                        .profit(BigDecimal.ZERO)
                         .orderCount(0)
                         .build());
             }
@@ -312,12 +372,27 @@ public class StatisticsServiceImpl implements StatisticsService {
                 .filter(subtotal -> subtotal != null)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal cost = details.stream()
+                .map(detail -> {
+                    BigDecimal costPrice = BigDecimal.ZERO;
+                    if (detail.getMotorcycle() != null && detail.getMotorcycle().getCostPrice() != null) {
+                        costPrice = detail.getMotorcycle().getCostPrice();
+                    }
+                    Integer qty = detail.getQuantity();
+                    if (qty == null) qty = 0;
+                    return costPrice.multiply(BigDecimal.valueOf(qty));
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal profit = revenue.subtract(cost);
+
         return StatisticsResponse.TopMotorcycle.builder()
                 .motorcycleId(first.getMotorcycle().getId())
                 .motorcycleName(first.getMotorcycleName())
                 .thumbnailUrl(first.getMotorcycle().getThumbnailUrl())
                 .soldCount(soldCount)
                 .revenue(revenue)
+                .profit(profit)
                 .build();
     }
 }

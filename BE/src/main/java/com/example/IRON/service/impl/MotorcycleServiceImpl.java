@@ -120,15 +120,17 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         motorcycle.setBrand(brand);
         motorcycle.setCategory(category);
         motorcycle.setPrice(request.getPrice());
+        motorcycle.setCostPrice(request.getCostPrice());
         motorcycle.setEngineCc(request.getEngineCc());
         motorcycle.setHorsepower(request.getHorsepower());
         motorcycle.setTorque(request.getTorque());
         motorcycle.setYearModel(request.getYearModel());
         motorcycle.setThumbnailUrl(request.getThumbnailUrl());
+        motorcycle.setStock(request.getStock() != null ? request.getStock() : 0);
         motorcycle.setDescription(request.getDescription());
         motorcycle.setSpecifications(request.getSpecifications());
-        motorcycle.setStatus(request.getStatus() != null ? request.getStatus() : Motorcycle.MotorcycleStatus.AVAILABLE);
         motorcycle.setFeatured(request.getFeatured() != null ? request.getFeatured() : Boolean.FALSE);
+        syncStatusWithStock(motorcycle);
 
         attachImages(motorcycle, request);
         attachInventories(motorcycle, request);
@@ -150,15 +152,17 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         motorcycle.setBrand(brand);
         motorcycle.setCategory(category);
         motorcycle.setPrice(request.getPrice());
+        if (request.getCostPrice() != null) motorcycle.setCostPrice(request.getCostPrice());
         if (request.getEngineCc() != null) motorcycle.setEngineCc(request.getEngineCc());
         if (request.getHorsepower() != null) motorcycle.setHorsepower(request.getHorsepower());
         if (request.getTorque() != null) motorcycle.setTorque(request.getTorque());
         if (request.getYearModel() != null) motorcycle.setYearModel(request.getYearModel());
         if (request.getThumbnailUrl() != null) motorcycle.setThumbnailUrl(request.getThumbnailUrl());
+        if (request.getStock() != null) motorcycle.setStock(request.getStock());
         if (request.getDescription() != null) motorcycle.setDescription(request.getDescription());
         if (request.getSpecifications() != null) motorcycle.setSpecifications(request.getSpecifications());
-        if (request.getStatus() != null) motorcycle.setStatus(request.getStatus());
         if (request.getFeatured() != null) motorcycle.setFeatured(request.getFeatured());
+        syncStatusWithStock(motorcycle);
 
         // Cập nhật lại danh sách ảnh & tồn kho
         motorcycle.getImages().clear();
@@ -235,6 +239,23 @@ public class MotorcycleServiceImpl implements MotorcycleService {
                 .orElseThrow(() -> new ResourceNotFoundException("Xe máy", "id", id));
     }
 
+    private void syncStatusWithStock(Motorcycle motorcycle) {
+        Integer stock = motorcycle.getStock();
+        if (stock == null || stock <= 0) {
+            motorcycle.setStatus(Motorcycle.MotorcycleStatus.OUT_OF_STOCK);
+        } else {
+            motorcycle.setStatus(Motorcycle.MotorcycleStatus.AVAILABLE);
+        }
+    }
+
+    private Motorcycle.MotorcycleStatus computeStatus(Motorcycle m) {
+        Integer stock = m.getStock();
+        if (stock == null || stock <= 0) {
+            return Motorcycle.MotorcycleStatus.OUT_OF_STOCK;
+        }
+        return Motorcycle.MotorcycleStatus.AVAILABLE;
+    }
+
     private MotorcycleResponse toResponse(Motorcycle m) {
         MotorcycleResponse res = new MotorcycleResponse();
         res.setId(m.getId());
@@ -243,9 +264,11 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         res.setBrandName(m.getBrand().getName());
         res.setCategoryName(m.getCategory().getName());
         res.setPrice(m.getPrice());
+        res.setCostPrice(m.getCostPrice());
         res.setEngineCc(m.getEngineCc());
         res.setThumbnailUrl(m.getThumbnailUrl());
-        res.setStatus(m.getStatus());
+        res.setStock(m.getStock());
+        res.setStatus(computeStatus(m));
         res.setFeatured(m.getFeatured());
         String secondary = m.getImages().stream()
                 .filter(img -> img.getImageUrl() != null && !img.getImageUrl().isBlank())
@@ -318,14 +341,16 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         res.setBrand(brandRes);
         res.setCategory(catRes);
         res.setPrice(m.getPrice());
+        res.setCostPrice(m.getCostPrice());
         res.setEngineCc(m.getEngineCc());
         res.setHorsepower(m.getHorsepower());
         res.setTorque(m.getTorque());
         res.setYearModel(m.getYearModel());
         res.setThumbnailUrl(m.getThumbnailUrl());
+        res.setStock(m.getStock());
         res.setDescription(m.getDescription());
         res.setSpecifications(m.getSpecifications());
-        res.setStatus(m.getStatus());
+        res.setStatus(computeStatus(m));
         res.setFeatured(m.getFeatured());
         res.setImages(images);
         res.setInventories(inventories);

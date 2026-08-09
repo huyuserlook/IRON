@@ -19,11 +19,13 @@ public class MotorcycleResponse {
     private String brandName;
     private String categoryName;
     private BigDecimal price;
+    private BigDecimal costPrice;
     private Integer engineCc;
     private String thumbnailUrl;
     private String imageUrl;
     private Motorcycle.MotorcycleStatus status;
     private Boolean featured;
+    private Integer stock;
     /** Tổng số lượng tồn kho của tất cả màu */
     private Integer totalInventory;
 }

@@ -14,7 +14,9 @@ const MotorcycleCard = ({
   const imageUrl = resolveImageUrl(
     moto.thumbnailUrl || moto.imageUrl || moto.images?.[0]?.imageUrl,
   );
-  const status = statusMeta[moto.status] || statusMeta.AVAILABLE;
+  const stock = moto.stock ?? 0;
+  const statusKey = stock > 0 ? "AVAILABLE" : "OUT_OF_STOCK";
+  const status = statusMeta[statusKey] || statusMeta.AVAILABLE;
 
   return (
     <article

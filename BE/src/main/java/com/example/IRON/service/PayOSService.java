@@ -6,6 +6,7 @@ import com.example.IRON.entity.Payment;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.repository.OrderRepository;
 import com.example.IRON.repository.PaymentRepository;
+import com.example.IRON.service.interfaces.OrderService;
 import com.example.IRON.utils.QrCodeUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +37,7 @@ public class PayOSService {
     private final PayOSProperties payOSProperties;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final OrderService orderService;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -153,6 +155,57 @@ public class PayOSService {
         return result;
     }
 
+    /**
+     * REMINDER: Mỗi lần restart ngrok, URL public sẽ đổi.
+     * Cần cập nhật lại các URL sau trong application.properties:
+     *   - payos.return-url
+     *   - payos.cancel-url
+     *   - payos.webhook-url
+     * Sau đó restart backend và cập nhật lại trong PayOS Merchant Portal.
+     * Nếu không muốn lặp lại, đăng ký static domain ngrok để cố định URL.
+     */
+    @Transactional
+    public Map<String, Object> getPaymentLinkInformation(String orderCode) throws Exception {
+        log.warn("[PayOS check-status] Querying PayOS for orderCode={}", orderCode);
+
+        Map<String, Object> requestBody = new LinkedHashMap<>();
+        requestBody.put("orderCode", orderCode);
+
+        String signature = createSignature(requestBody, payOSProperties.getChecksumKey());
+        requestBody.put("signature", signature);
+
+        String jsonBody = objectMapper.writeValueAsString(requestBody);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(payOSProperties.getEndpoint() + "/" + orderCode))
+                .header("Content-Type", "application/json")
+                .header("x-client-id", payOSProperties.getClientId())
+                .header("x-api-key", payOSProperties.getApiKey())
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        String responseBody = response.body();
+        JsonNode root = objectMapper.readTree(responseBody);
+
+        log.warn("[PayOS check-status] PayOS response: code={}, body={}", root.path("code").asText(null), responseBody);
+
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("rawCode", root.path("code").asText(null));
+        result.put("rawDesc", root.path("desc").asText(null));
+
+        JsonNode data = root.path("data");
+        result.put("status", data.path("status").asText(null));
+        result.put("transactionId", data.path("reference").asText(null));
+        result.put("paidAmount", data.path("amount").asText(null));
+
+        if (data.has("orderCode")) {
+            result.put("orderCode", data.path("orderCode").asText(null));
+        }
+
+        return result;
+    }
+
     public boolean verifyWebhookSignature(Map<String, Object> data, String signature) {
         if (signature == null || signature.isBlank()) {
             log.warn("[PayOS webhook] Missing signature");
@@ -173,21 +226,24 @@ public class PayOSService {
 
     @Transactional
     public void handleWebhook(Map<String, Object> data, String signature) {
-        log.info("[PayOS webhook] Received webhook payload. signatureHeader={}", signature);
+        log.warn("[PayOS webhook] ========== WEBHOOK RECEIVED ==========");
+        log.warn("[PayOS webhook] Full payload data={}", data);
+        log.warn("[PayOS webhook] signature={}", signature);
 
         Map<String, Object> innerData = (Map<String, Object>) data.get("data");
         if (innerData == null) {
             innerData = data;
         }
 
-        log.info("[PayOS webhook] innerData keys: {}", innerData != null ? innerData.keySet() : "null");
-        log.info("[PayOS webhook] innerData orderCode={}, code={}", innerData.get("orderCode"), innerData.get("code"));
+        log.warn("[PayOS webhook] innerData={}", innerData);
+        log.warn("[PayOS webhook] innerData orderCode={}, code={}", innerData.get("orderCode"), innerData.get("code"));
 
         if (!webhookDebug) {
             if (!verifyWebhookSignature(innerData, signature)) {
+                log.error("[PayOS webhook] Signature verification FAILED - rejecting webhook");
                 throw new SecurityException("Invalid PayOS webhook signature");
             }
-            log.info("[PayOS webhook] Signature verified OK");
+            log.warn("[PayOS webhook] Signature verified OK");
         } else {
             log.warn("[PayOS webhook] DEBUG MODE - skipping signature verification");
         }
@@ -197,7 +253,7 @@ public class PayOSService {
         String reference = String.valueOf(innerData.getOrDefault("reference", ""));
         String code = String.valueOf(innerData.getOrDefault("code", ""));
 
-        log.info("[PayOS webhook] Parsed orderCode={}, reference={}, code={}", orderCode, reference, code);
+        log.warn("[PayOS webhook] Parsed orderCode={}, reference={}, code={}", orderCode, reference, code);
 
         if (orderCode == null || !"00".equals(code)) {
             log.warn("[PayOS webhook] Skipping: orderCode={}, code={}", orderCode, code);
@@ -209,38 +265,38 @@ public class PayOSService {
         try {
             parsedOrderId = Long.parseLong(orderCode);
             order = orderRepository.findById(parsedOrderId).orElse(null);
-            log.info("[PayOS webhook] Lookup by orderId={}: found={}", parsedOrderId, order != null);
+            log.warn("[PayOS webhook] Lookup by orderId={}: found={}", parsedOrderId, order != null);
         } catch (NumberFormatException e) {
-            log.info("[PayOS webhook] orderCode is not a numeric id, trying orderCode/payosOrderCode lookup");
+            log.warn("[PayOS webhook] orderCode is not numeric, trying orderCode/payosOrderCode lookup");
         }
 
         if (order == null) {
             order = orderRepository.findByOrderCode(orderCode).orElse(null);
-            log.info("[PayOS webhook] Lookup by orderCode={}: found={}", orderCode, order != null);
+            log.warn("[PayOS webhook] Lookup by orderCode={}: found={}", orderCode, order != null);
         }
 
         if (order == null) {
             Payment paymentByPayosCode = paymentRepository.findByPayosOrderCode(orderCode).orElse(null);
             if (paymentByPayosCode != null) {
                 order = paymentByPayosCode.getOrder();
-                log.info("[PayOS webhook] Lookup by payosOrderCode={}: found orderId={}", orderCode, order != null ? order.getId() : null);
+                log.warn("[PayOS webhook] Lookup by payosOrderCode={}: found orderId={}", orderCode, order != null ? order.getId() : null);
             } else {
-                log.warn("[PayOS webhook] Order not found by any lookup method for orderCode={}", orderCode);
+                log.error("[PayOS webhook] ORDER NOT FOUND by any method for orderCode={}", orderCode);
             }
         }
 
         if (order == null) {
-            log.error("[PayOS webhook] ORDER NOT FOUND - aborting update for orderCode={}", orderCode);
+            log.error("[PayOS webhook] ABORTING - order not found for orderCode={}", orderCode);
             return;
         }
 
         Payment payment = paymentRepository.findByOrderId(order.getId()).orElse(null);
         if (payment == null) {
-            log.error("[PayOS webhook] PAYMENT NOT FOUND for orderId={} - aborting", order.getId());
+            log.error("[PayOS webhook] ABORTING - payment not found for orderId={}", order.getId());
             return;
         }
 
-        log.info("[PayOS webhook] Before update: paymentId={}, paymentStatus={}, orderStatus={}",
+        log.warn("[PayOS webhook] Before update: paymentId={}, paymentStatus={}, orderStatus={}",
                 payment.getId(), payment.getStatus(), order.getStatus());
 
         if (payment.getStatus() != Payment.PaymentStatus.PAID) {
@@ -248,20 +304,19 @@ public class PayOSService {
             payment.setTransactionId(reference);
             payment.setPaidAt(LocalDateTime.now());
             paymentRepository.save(payment);
-            log.info("[PayOS webhook] Payment updated to PAID. paymentId={}, reference={}", payment.getId(), reference);
+            log.warn("[PayOS webhook] Payment UPDATED to PAID. paymentId={}, reference={}", payment.getId(), reference);
         } else {
-            log.info("[PayOS webhook] Payment already PAID, skipping payment update. paymentId={}", payment.getId());
+            log.warn("[PayOS webhook] Payment already PAID, skipping. paymentId={}", payment.getId());
         }
 
         if (order.getStatus() == Order.OrderStatus.PENDING) {
-            order.setStatus(Order.OrderStatus.CONFIRMED);
-            orderRepository.save(order);
-            log.info("[PayOS webhook] Order updated to CONFIRMED. orderId={}", order.getId());
+            log.warn("[PayOS webhook] Order update via OrderService to CONFIRMED. orderId={}", order.getId());
+            orderService.updateStatus(order.getId(), Order.OrderStatus.CONFIRMED);
         } else {
-            log.info("[PayOS webhook] Order status={}, skipping order update", order.getStatus());
+            log.warn("[PayOS webhook] Order status={}, skipping order update", order.getStatus());
         }
 
-        log.info("[PayOS webhook] Processing complete for orderCode={}", orderCode);
+        log.warn("[PayOS webhook] ========== PROCESSING COMPLETE ==========");
     }
 
     private String createSignature(Map<String, Object> body, String checksumKey) throws Exception {

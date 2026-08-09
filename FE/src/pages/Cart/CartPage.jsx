@@ -48,6 +48,9 @@ const CartPage = () => {
   const [removingKey, setRemovingKey] = useState(null);
   const [suggested, setSuggested] = useState([]);
   const [totalPulse, setTotalPulse] = useState(false);
+  const [stockMap, setStockMap] = useState({});
+  const [loadingStock, setLoadingStock] = useState(false);
+  const [adjustedItems, setAdjustedItems] = useState({});
 
   const cartIds = useMemo(
     () => new Set(items.map((item) => String(item.motorcycleId))),
@@ -76,6 +79,62 @@ const CartPage = () => {
       alive = false;
     };
   }, [cartIds]);
+
+  useEffect(() => {
+    let alive = true;
+    setLoadingStock(true);
+
+    const fetchStock = async () => {
+      const promises = items.map(async (item) => {
+        try {
+          const res = await motorcycleApi.getByIdPublic(item.motorcycleId);
+          const payload = res?.data ?? res;
+          const stock = payload?.stock ?? 0;
+          return { key: itemKey(item), stock };
+        } catch {
+          return { key: itemKey(item), stock: item.stock || 0 };
+        }
+      });
+
+      const results = await Promise.all(promises);
+      if (!alive) return;
+
+      const newStockMap = {};
+      const newAdjusted = {};
+      results.forEach(({ key, stock }) => {
+        newStockMap[key] = stock;
+        const item = items.find((i) => itemKey(i) === key);
+        if (item && item.quantity > stock) {
+          newAdjusted[key] = true;
+          updateQty(item.motorcycleId, item.colorName, stock);
+        }
+      });
+
+      setStockMap(newStockMap);
+      setAdjustedItems(newAdjusted);
+
+      if (Object.keys(newAdjusted).length > 0) {
+        toast.error(
+          "Một số sản phẩm đã được điều chỉnh do tồn kho có hạn",
+          { duration: 4000 },
+        );
+      }
+
+      setLoadingStock(false);
+    };
+
+    if (items.length > 0) {
+      fetchStock();
+    } else {
+      setStockMap({});
+      setAdjustedItems({});
+      setLoadingStock(false);
+    }
+
+    return () => {
+      alive = false;
+    };
+  }, [items, updateQty]);
 
   useEffect(() => {
     setTotalPulse(true);
@@ -226,6 +285,9 @@ const CartPage = () => {
               const key = itemKey(item);
               const isRemoving = removingKey === key;
               const imageUrl = resolveImageUrl(item.thumbnailUrl);
+              const stock = stockMap[key] ?? item.stock ?? 0;
+              const isAtMax = item.quantity >= stock;
+              const wasAdjusted = adjustedItems[key];
 
               return (
                 <article
@@ -270,6 +332,12 @@ const CartPage = () => {
                         </p>
                       ) : null}
 
+                      {wasAdjusted && (
+                        <p className="mt-1.5 text-xs text-orange-600">
+                          Số lượng đã được điều chỉnh do tồn kho có hạn
+                        </p>
+                      )}
+
                       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                         <div className="inline-flex items-center rounded-[10px] border border-[#E3DEE6] bg-[#FAF8FC] p-1">
                           <button
@@ -301,12 +369,24 @@ const CartPage = () => {
                                 item.quantity + 1,
                               )
                             }
-                            className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#1A1B1F] transition-all duration-200 hover:bg-white hover:shadow-sm active:scale-95"
+                            disabled={isAtMax}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-[8px] text-[#1A1B1F] transition-all duration-200 hover:bg-white hover:shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                             aria-label="Tăng số lượng"
                           >
                             <Plus size={14} />
                           </button>
                         </div>
+
+                        {isAtMax && stock > 0 && (
+                          <p className="text-xs text-[#9A9196]">
+                            Chỉ còn {stock} xe trong kho
+                          </p>
+                        )}
+                        {stock <= 0 && (
+                          <p className="text-xs text-red-500">
+                            Sản phẩm này đã hết hàng
+                          </p>
+                        )}
 
                         <p className="text-base font-bold text-[#1A1B1F] sm:text-lg">
                           {formatCurrency(item.price * item.quantity)}

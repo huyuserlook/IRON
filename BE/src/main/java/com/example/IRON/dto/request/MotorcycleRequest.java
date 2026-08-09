@@ -22,11 +22,15 @@ public class MotorcycleRequest {
     @NotNull @Positive(message = "Giá phải lớn hơn 0")
     private BigDecimal price;
 
+    @DecimalMin(value = "0", message = "Giá vốn không được âm")
+    private BigDecimal costPrice;
+
     private Integer engineCc;
     private Double horsepower;
     private Double torque;
     private Integer yearModel;
     private String thumbnailUrl;
+    private Integer stock;
     private String description;
     private String specifications;
     private Motorcycle.MotorcycleStatus status;

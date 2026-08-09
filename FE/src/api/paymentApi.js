@@ -12,6 +12,14 @@ const paymentApi = {
 
   confirmPayment: (orderId) =>
     axiosClient.post(`/admin/payments/${orderId}/confirm`),
+
+  /**
+   * Fallback: chủ động query PayOS để lấy trạng thái thực tế của đơn hàng.
+   * Dùng khi webhook bị fail/ngrok đổi URL mà DB vẫn chưa cập nhật.
+   * Backend endpoint: GET /api/payos/check-status/{orderCode}
+   */
+  checkPayOSStatus: (orderCode) =>
+    axiosClient.get(`/payos/check-status/${encodeURIComponent(orderCode)}`),
 };
 
 export default paymentApi;

@@ -27,7 +27,7 @@ const engineBands = [
 ];
 
 const statusMeta = {
-  AVAILABLE: { label: "Mới", className: "bg-[#BC000A] text-white" },
+  AVAILABLE: { label: "Còn hàng", className: "bg-[#BC000A] text-white" },
   OUT_OF_STOCK: { label: "Hết hàng", className: "bg-[#1A1B1F] text-white" },
   DISCONTINUED: { label: "Ngừng SX", className: "bg-[#F0EDF4] text-[#5F5E5E]" },
 };

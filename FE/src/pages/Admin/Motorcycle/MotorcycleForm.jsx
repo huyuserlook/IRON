@@ -60,9 +60,9 @@ const MotorcycleForm = () => {
     torque: "",
     yearModel: "",
     thumbnailUrl: "",
+    stock: "",
     description: "",
     specifications: "",
-    status: "AVAILABLE",
     featured: false,
   });
 
@@ -91,9 +91,9 @@ const MotorcycleForm = () => {
           torque: m.torque || "",
           yearModel: m.yearModel || "",
           thumbnailUrl: m.thumbnailUrl || "",
+          stock: m.stock ?? 0,
           description: m.description || "",
           specifications: m.specifications || "",
-          status: m.status,
           featured: m.featured,
         });
         // Load lại danh sách ảnh đã lưu
@@ -164,7 +164,7 @@ const MotorcycleForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const payload = {
+      const { status, ...payload } = {
         ...form,
         price: Number(form.price),
         costPrice: form.costPrice ? Number(form.costPrice) : null,
@@ -172,8 +172,8 @@ const MotorcycleForm = () => {
         horsepower: form.horsepower ? Number(form.horsepower) : null,
         torque: form.torque ? Number(form.torque) : null,
         yearModel: form.yearModel ? Number(form.yearModel) : null,
+        stock: form.stock ? Number(form.stock) : 0,
         images,
-        // Gửi các dòng tồn kho có tên màu
         inventories: inventories
           .filter((row) => row.colorName && row.colorName.trim())
           .map((row) => ({
@@ -427,6 +427,38 @@ const MotorcycleForm = () => {
           />
         </div>
 
+        {/* Số lượng tồn kho */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Số lượng tồn kho
+          </label>
+          <input
+            type="number"
+            min="0"
+            value={form.stock}
+            onChange={(e) => set("stock", e.target.value)}
+            placeholder="0"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+          />
+          <p className="mt-1 text-xs text-gray-400">
+            Nhập tổng số xe hiện có. Khi hết hàng (0), trạng thái sẽ tự động chuyển thành &quot;Hết hàng&quot;.
+          </p>
+        </div>
+
+        {/* Xe nổi bật */}
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="featured"
+            checked={form.featured}
+            onChange={(e) => set("featured", e.target.checked)}
+            className="w-4 h-4 accent-orange-500"
+          />
+          <label htmlFor="featured" className="text-sm font-medium text-gray-700">
+            Xe nổi bật (hiển thị trang chủ)
+          </label>
+        </div>
+
         {/* Tồn kho theo màu */}
         <div>
           <div className="flex items-center justify-between mb-2">
@@ -512,38 +544,26 @@ const MotorcycleForm = () => {
           />
         </div>
 
-        {/* Status & Featured */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Trạng thái
-            </label>
-            <select
-              value={form.status}
-              onChange={(e) => set("status", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
-            >
-              <option value="AVAILABLE">Còn hàng</option>
-              <option value="OUT_OF_STOCK">Hết hàng</option>
-              <option value="DISCONTINUED">Ngừng sản xuất</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-3 pt-6">
-            <input
-              type="checkbox"
-              id="featured"
-              checked={form.featured}
-              onChange={(e) => set("featured", e.target.checked)}
-              className="w-4 h-4 accent-orange-500"
-            />
-            <label
-              htmlFor="featured"
-              className="text-sm font-medium text-gray-700"
-            >
-              Xe nổi bật (hiển thị trang chủ)
-            </label>
-          </div>
+        {/* Trạng thái (tự động theo tồn kho) */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Trạng thái
+          </label>
+          <span
+            className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${
+              Number(form.stock) > 0
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-600"
+            }`}
+          >
+            {Number(form.stock) > 0 ? "Còn hàng" : "Hết hàng"}
+          </span>
+          <p className="mt-1 text-xs text-gray-400">
+            Trạng thái được tính tự động theo số lượng tồn kho.
+          </p>
         </div>
+
+        {/* Mô tả */}
 
         {/* Submit */}
         <div className="flex gap-3 pt-2">
