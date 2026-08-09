@@ -19,8 +19,4 @@ public class PaymentRequest {
     private Long orderId;
 
     private String description;
-
-    public enum QrPaymentType {
-        MOMO_QR, BANK_TRANSFER_QR, VNPAY_QR
-    }
 }

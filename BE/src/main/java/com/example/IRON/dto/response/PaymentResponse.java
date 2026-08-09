@@ -22,6 +22,7 @@ public class PaymentResponse {
     private Payment.PaymentStatus status;
     private String transactionId;
     private String qrCodeUrl;
+    private String qrCode;
     private String paymentUrl;
     private String bankAccount;
     private String bankName;

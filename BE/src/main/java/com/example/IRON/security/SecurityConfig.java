@@ -51,7 +51,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/brands/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categories/**").permitAll()
                         .requestMatchers("/api/contacts").permitAll()
-                        .requestMatchers("/api/checkout/**").permitAll()
+                        .requestMatchers("/api/payos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/webhook/momo").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

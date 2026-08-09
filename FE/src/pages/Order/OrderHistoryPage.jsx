@@ -6,7 +6,6 @@ import {
   Package,
   Receipt,
   ShoppingBag,
-  Send,
   CheckCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -30,8 +29,6 @@ const OrderHistoryPage = () => {
   const [data, setData] = useState({ content: [] });
   const [loading, setLoading] = useState(true);
   const [paymentMap, setPaymentMap] = useState({});
-  const [refs, setRefs] = useState({});
-  const [submittingRefs, setSubmittingRefs] = useState({});
 
   const load = () => {
     setLoading(true);
@@ -66,25 +63,6 @@ const OrderHistoryPage = () => {
       setPaymentMap((prev) => ({ ...prev, [orderId]: payment }));
     } catch {
       // ignore if no payment yet
-    }
-  };
-
-  const handleSubmitRef = async (orderId) => {
-    const ref = refs[orderId]?.trim();
-    if (!ref) {
-      toast.error("Vui lòng nhập mã giao dịch");
-      return;
-    }
-    setSubmittingRefs((prev) => ({ ...prev, [orderId]: true }));
-    try {
-      await paymentApi.submitTransactionRef(orderId, ref);
-      toast.success("Đã gửi mã giao dịch");
-      setRefs((prev) => ({ ...prev, [orderId]: "" }));
-      load();
-    } catch (err) {
-      toast.error(err.message || "Gửi thất bại");
-    } finally {
-      setSubmittingRefs((prev) => ({ ...prev, [orderId]: false }));
     }
   };
 
@@ -247,42 +225,14 @@ const OrderHistoryPage = () => {
                             </span>
                           </div>
 
-                          {paymentMap[order.id]?.transactionId && (
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-[#7A6E71]">Mã giao dịch</span>
-                              <span className="font-mono font-semibold text-[#1A1B1F]">
-                                {paymentMap[order.id].transactionId}
-                              </span>
-                            </div>
-                          )}
-
-                          {["MOMO", "BANK_TRANSFER", "VNPAY"].includes(order.paymentMethod) && order.paymentStatus !== "PAID" && !paymentMap[order.id]?.transactionId && (
-                            <form
-                              onSubmit={(e) => {
-                                e.preventDefault();
-                                handleSubmitRef(order.id);
-                              }}
-                              className="flex gap-2"
-                            >
-                              <input
-                                type="text"
-                                value={refs[order.id] || ""}
-                                onChange={(e) =>
-                                  setRefs((prev) => ({ ...prev, [order.id]: e.target.value }))
-                                }
-                                placeholder="Nhập mã giao dịch..."
-                                className="flex-1 rounded-[10px] border border-[#E3DEE6] bg-white px-3 py-2 text-sm outline-none focus:border-[#BC000A]"
-                              />
-                              <button
-                                type="submit"
-                                disabled={submittingRefs[order.id]}
-                                className="inline-flex items-center gap-2 rounded-[10px] bg-[#BC000A] px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                <Send size={14} />
-                                {submittingRefs[order.id] ? "Đang gửi..." : "Gửi"}
-                              </button>
-                            </form>
-                          )}
+                           {paymentMap[order.id]?.transactionId && (
+                             <div className="flex items-center justify-between text-sm">
+                               <span className="text-[#7A6E71]">Mã giao dịch</span>
+                               <span className="font-mono font-semibold text-[#1A1B1F]">
+                                 {paymentMap[order.id].transactionId}
+                               </span>
+                             </div>
+                           )}
                         </div>
                     )}
                 </article>

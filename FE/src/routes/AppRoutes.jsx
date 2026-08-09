@@ -10,6 +10,7 @@ import MotorcycleDetailPage from "../pages/Motorcycle/MotorcycleDetailPage";
 import CartPage from "../pages/Cart/CartPage";
 import CheckoutPage from "../pages/Order/CheckoutPage";
 import PaymentPage from "../pages/Order/PaymentPage";
+import PaymentReturnPage from "../pages/Order/PaymentReturnPage";
 import OrderHistoryPage from "../pages/Order/OrderHistoryPage";
 import UserProfilePage from "../pages/User/UserProfilePage";
 import AccountSettingsPage from "../pages/User/AccountSettingsPage";
@@ -92,6 +93,14 @@ const AppRoutes = () => {
           element={
             <PrivateRoute>
               <PaymentPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payment-return"
+          element={
+            <PrivateRoute>
+              <PaymentReturnPage />
             </PrivateRoute>
           }
         />

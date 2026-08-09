@@ -11,8 +11,6 @@ public interface PaymentService {
 
     PaymentResponse createQrPayment(Long orderId, Payment.PaymentMethod method);
     PaymentResponse getQrPayment(Long orderId);
-    String getVnpayPaymentUrl(Long orderId);
-    PaymentResponse getBankTransferInfo(Long orderId);
     PaymentResponse submitTransactionRef(Long orderId, String transactionRef);
     PaymentResponse confirmPayment(Long orderId);
 }

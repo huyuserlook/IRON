@@ -20,7 +20,7 @@ public class Payment {
     private BigDecimal amount;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_method", nullable = false)
+    @Column(name = "payment_method", nullable = false, length = 20)
     private PaymentMethod paymentMethod;
 
     @Enumerated(EnumType.STRING)
@@ -36,6 +36,9 @@ public class Payment {
     @Column(name = "payment_url", columnDefinition = "TEXT")
     private String paymentUrl;
 
+    @Column(name = "payos_order_code", length = 50)
+    private String payosOrderCode;
+
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
@@ -46,7 +49,7 @@ public class Payment {
     protected void onCreate() { this.createdAt = LocalDateTime.now(); }
 
     public enum PaymentMethod {
-        CASH, BANK_TRANSFER, CREDIT_CARD, MOMO, VNPAY
+        CASH, CREDIT_CARD, PAYOS
     }
 
     public enum PaymentStatus {
@@ -71,6 +74,8 @@ public class Payment {
     public void setQrCodeUrl(String qrCodeUrl) { this.qrCodeUrl = qrCodeUrl; }
     public String getPaymentUrl() { return paymentUrl; }
     public void setPaymentUrl(String paymentUrl) { this.paymentUrl = paymentUrl; }
+    public String getPayosOrderCode() { return payosOrderCode; }
+    public void setPayosOrderCode(String payosOrderCode) { this.payosOrderCode = payosOrderCode; }
     public LocalDateTime getPaidAt() { return paidAt; }
     public void setPaidAt(LocalDateTime paidAt) { this.paidAt = paidAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }

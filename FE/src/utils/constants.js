@@ -27,10 +27,7 @@ export const MOTORCYCLE_STATUS = {
 
 export const PAYMENT_METHOD = {
   CASH: "Tiền mặt",
-  BANK_TRANSFER: "Chuyển khoản",
-  CREDIT_CARD: "Thẻ tín dụng",
-  MOMO: "MoMo",
-  VNPAY: "VNPay",
+  PAYOS: "PayOS",
 };
 
 export const PAGE_SIZE = 12;

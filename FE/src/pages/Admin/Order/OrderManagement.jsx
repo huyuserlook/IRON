@@ -22,7 +22,6 @@ const OrderManagement = () => {
   const [status, setStatus] = useState("");
   const [page, setPage] = useState(0);
   const [paymentMap, setPaymentMap] = useState({});
-  const [confirmingId, setConfirmingId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
   const load = useCallback(() => {
@@ -59,19 +58,6 @@ const OrderManagement = () => {
       // ignore
     }
   };
-
-  const handleConfirmPayment = async (orderId) => {
-    setConfirmingId(orderId);
-    try {
-      await paymentApi.confirmPayment(orderId);
-      toast.success("Xác nhận thanh toán thành công");
-      load();
-    } catch {
-      toast.error("Xác nhận thất bại");
-    } finally {
-      setConfirmingId(null);
-    }
-   };
 
   const handleDelete = async (id) => {
     if (!window.confirm("Bạn có chắc muốn xóa đơn hàng này?")) return;
@@ -158,32 +144,22 @@ const OrderManagement = () => {
                       {st.label || order.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
-                    {payment ? (
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium text-gray-700">
-                          {PAYMENT_METHOD[payment.paymentMethod] || payment.paymentMethod}
-                        </p>
-                        {payment.transactionId && (
-                          <p className="text-xs text-gray-500 font-mono">
-                            {payment.transactionId}
-                          </p>
-                        )}
-                        {order.status === "PENDING" && ["MOMO", "BANK_TRANSFER", "VNPAY"].includes(payment.paymentMethod) && (
-                          <button
-                            type="button"
-                            onClick={() => handleConfirmPayment(order.id)}
-                            disabled={confirmingId === order.id}
-                            className="text-xs font-semibold text-green-600 hover:text-green-700 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            {confirmingId === order.id ? "Đang xác nhận..." : "Xác nhận TT"}
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <span className="text-xs text-gray-400">-</span>
-                    )}
-                  </td>
+                   <td className="px-4 py-3">
+                     {payment ? (
+                       <div className="space-y-1">
+                         <p className="text-xs font-medium text-gray-700">
+                           {PAYMENT_METHOD[payment.paymentMethod] || payment.paymentMethod}
+                         </p>
+                         {payment.transactionId && (
+                           <p className="text-xs text-gray-500 font-mono">
+                             {payment.transactionId}
+                           </p>
+                         )}
+                       </div>
+                     ) : (
+                       <span className="text-xs text-gray-400">-</span>
+                     )}
+                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {formatDateTime(order.createdAt)}
                   </td>

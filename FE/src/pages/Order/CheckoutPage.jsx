@@ -3,13 +3,12 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Banknote,
-  Building2,
+  CreditCard,
   Lock,
   MapPin,
   MessageSquare,
   Package,
   ShoppingBag,
-  Smartphone,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderApi from "../../api/orderApi";
@@ -41,21 +40,15 @@ const resolveImageUrl = (url) => {
 const PAYMENT_OPTIONS = [
   {
     value: "CASH",
-    label: "Tiền mặt",
-    description: "Thanh toán khi nhận xe tại showroom",
+    label: "Tien mat",
+    description: "Thanh toan khi nhan xe tai showroom",
     icon: Banknote,
   },
   {
-    value: "BANK_TRANSFER",
-    label: "Chuyển khoản",
-    description: "Chuyển khoản ngân hàng — quét mã QR",
-    icon: Building2,
-  },
-  {
-    value: "MOMO",
-    label: "MoMo",
-    description: "Thanh toán qua MoMo — tự động xác nhận",
-    icon: Smartphone,
+    value: "PAYOS",
+    label: "PayOS",
+    description: "Thanh toan qua PayOS — quet ma QR hoac mo link",
+    icon: CreditCard,
   },
 ];
 
@@ -108,7 +101,7 @@ const CheckoutPage = () => {
       const createdOrder = res.data?.data || res.data;
       const newOrderId = createdOrder.id;
 
-      if (form.paymentMethod === "BANK_TRANSFER" || form.paymentMethod === "MOMO") {
+      if (form.paymentMethod === "PAYOS") {
         setSkipCartRedirect(true);
         clear();
         navigate(`/payment?orderId=${newOrderId}&amount=${grandTotal}`);

@@ -1,16 +1,14 @@
 package com.example.IRON.service.impl;
 
-import com.example.IRON.config.VnpayProperties;
+import com.example.IRON.config.PayOSProperties;
 import com.example.IRON.dto.response.PaymentResponse;
 import com.example.IRON.entity.Order;
 import com.example.IRON.entity.Payment;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.repository.OrderRepository;
 import com.example.IRON.repository.PaymentRepository;
-import com.example.IRON.service.MomoService;
+import com.example.IRON.service.PayOSService;
 import com.example.IRON.service.interfaces.PaymentService;
-import com.example.IRON.utils.QrCodeUtils;
-import com.example.IRON.utils.VietQrUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,35 +25,11 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
-    private final VnpayProperties vnpayProperties;
-    private final MomoService momoService;
+    private final PayOSService payOSService;
+    private final PayOSProperties payOSProperties;
 
     @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
-
-    @Value("${payment.qr.momo:/qr/qrmomo.jpg}")
-    private String momoQrPath;
-
-    @Value("${payment.qr.bank-transfer:/qr/qrmb.jpg}")
-    private String bankTransferQrPath;
-
-    @Value("${payment.bank.account:1234567890}")
-    private String bankAccount;
-
-    @Value("${payment.bank.name:Vietcombank}")
-    private String bankName;
-
-    @Value("${payment.bank.branch:Chi nhanh Ha Noi}")
-    private String bankBranch;
-
-    @Value("${payment.vietqr.bank-code:MB}")
-    private String vietQrBankCode;
-
-    @Value("${payment.vietqr.account-no:161220054444}")
-    private String vietQrAccountNo;
-
-    @Value("${payment.vietqr.account-name:HO XUAN HUY}")
-    private String vietQrAccountName;
 
     @Override
     @Transactional
@@ -100,58 +74,36 @@ public class PaymentServiceImpl implements PaymentService {
             throw new IllegalStateException("Thanh toán đã được xử lý");
         }
 
-        String qrCodeUrl = null;
-        String qrDescription = "";
-        String paymentUrl = null;
-
-        switch (method) {
-            case MOMO:
-                Map<String, Object> momoResult;
-                try {
-                    momoResult = momoService.createPayment(
-                            String.valueOf(orderId),
-                            payment.getAmount(),
-                            "Thanh toán don hang " + payment.getOrder().getOrderCode()
-                    );
-                } catch (Exception e) {
-                    throw new RuntimeException("Lỗi tạo thanh toán MoMo", e);
-                }
-                String momoQrUrl = (String) momoResult.get("qrCodeUrl");
-                String momoPayUrl = (String) momoResult.get("payUrl");
-                String momoDeeplink = (String) momoResult.get("deeplink");
-
-                payment.setQrCodeUrl(momoQrUrl);
-                payment.setPaymentUrl(momoPayUrl);
-                paymentRepository.save(payment);
-
-                return toResponse(payment, momoQrUrl, "Mở app MoMo → Quét mã QR", momoPayUrl, null, null, momoDeeplink);
-            case BANK_TRANSFER:
-                qrCodeUrl = VietQrUtils.generateVietQrUrl(
-                        vietQrBankCode, vietQrAccountNo, vietQrAccountName,
+        if (method == Payment.PaymentMethod.PAYOS) {
+            if (payment.getPaymentUrl() != null && !payment.getPaymentUrl().isBlank()) {
+                return toResponse(payment, payment.getQrCodeUrl(), "Quét mã QR hoặc mở link để thanh toán qua PayOS", payment.getPaymentUrl(), null, null, null);
+            }
+            Map<String, Object> payosResult;
+            try {
+                payosResult = payOSService.createPaymentLink(
+                        orderId,
                         payment.getAmount(),
-                        payment.getOrder().getId()
+                        "Thanh toan don hang " + payment.getOrder().getOrderCode()
                 );
-                qrDescription = "Quét mã QR để chuyển khoản ngân hàng";
-                break;
-            case VNPAY:
-                paymentUrl = getVnpayPaymentUrl(orderId);
-                try {
-                    qrCodeUrl = QrCodeUtils.generateQrCodeBase64(paymentUrl, 300, 300);
-                } catch (Exception e) {
-                    throw new RuntimeException("Lỗi tạo QR code VNPay", e);
-                }
-                qrDescription = "Quét mã QR để thanh toán qua VNPay";
-                payment.setPaymentUrl(paymentUrl);
-                paymentRepository.save(payment);
-                return toResponse(payment, qrCodeUrl, qrDescription, paymentUrl, null, null, null);
-            default:
-                throw new IllegalArgumentException("Phương thức thanh toán không hỗ trợ QR: " + method);
+            } catch (Exception e) {
+                throw new RuntimeException("Lỗi tạo thanh toán PayOS: " + e.getMessage(), e);
+            }
+            String payosCheckoutUrl = (String) payosResult.get("checkoutUrl");
+            String payosQrCodeUrl = (String) payosResult.get("qrCodeUrl");
+            String payosQrCode = (String) payosResult.get("qrCode");
+            String payosOrderCode = (String) payosResult.get("orderCode");
+
+            payment.setPaymentUrl(payosCheckoutUrl);
+            payment.setQrCodeUrl(payosQrCodeUrl);
+            payment.setPayosOrderCode(payosOrderCode);
+            paymentRepository.save(payment);
+
+            PaymentResponse payosResponse = toResponse(payment, payosQrCodeUrl, "Quét mã QR hoặc mở link để thanh toán qua PayOS", payosCheckoutUrl, null, null, null);
+            payosResponse.setQrCode(payosQrCode);
+            return payosResponse;
         }
 
-        payment.setQrCodeUrl(qrCodeUrl);
-        paymentRepository.save(payment);
-
-        return toResponse(payment, qrCodeUrl, qrDescription, paymentUrl, bankAccount, bankName, null);
+        throw new IllegalArgumentException("Phương thức thanh toán không hỗ trợ QR: " + method);
     }
 
     @Override
@@ -160,55 +112,24 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Thanh toán", "orderId", orderId));
 
         String qrBase64 = payment.getQrCodeUrl();
+        if (qrBase64 != null && !qrBase64.isBlank() && !qrBase64.startsWith("data:") && !qrBase64.startsWith("http")) {
+            qrBase64 = "data:image/png;base64," + qrBase64;
+        }
         String description = "";
         String paymentUrl = payment.getPaymentUrl();
 
-        switch (payment.getPaymentMethod()) {
-            case MOMO:
-                description = "Quét mã QR MoMo để thanh toán";
-                break;
-            case BANK_TRANSFER:
-                description = "Quét mã QR để chuyển khoản ngân hàng";
-                break;
-            case VNPAY:
-                description = "Quét mã QR để thanh toán qua VNPay";
-                break;
-            default:
-                description = "Thanh toán";
+        if (payment.getPaymentMethod() == Payment.PaymentMethod.PAYOS) {
+            description = "Quét mã QR hoặc mở link để thanh toán qua PayOS";
+            if ((qrBase64 == null || qrBase64.isBlank()) && paymentUrl != null && !paymentUrl.isBlank()) {
+                try {
+                    qrBase64 = "data:image/png;base64," + com.example.IRON.utils.QrCodeUtils.generateQrCodeBase64(paymentUrl, 300, 300);
+                } catch (Exception e) {
+                    qrBase64 = null;
+                }
+            }
         }
 
         return toResponse(payment, qrBase64, description, paymentUrl, null, null, null);
-    }
-
-    @Override
-    public String getVnpayPaymentUrl(Long orderId) {
-        Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Thanh toán", "orderId", orderId));
-
-        Order order = payment.getOrder();
-        String vnpTxnRef = order.getOrderCode();
-        String amount = payment.getAmount().multiply(BigDecimal.valueOf(100)).longValue() + "";
-        String orderInfo = "Thanh toán don hang " + order.getOrderCode();
-        String returnUrl = baseUrl + "/api/payments/callback";
-
-        String vnpayUrl = vnpayProperties.getPaymentUrl()
-                + "?vnp_TmnCode=" + vnpayProperties.getTmnCode()
-                + "&vnp_Amount=" + amount
-                + "&vnp_Command=pay"
-                + "&vnp_CreateDate=" + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
-                + "&vnp_CurrCode=VND"
-                + "&vnp_IpAddr=127.0.0.1"
-                + "&vnp_Locale=" + vnpayProperties.getLocale()
-                + "&vnp_OrderInfo=" + java.net.URLEncoder.encode(orderInfo, java.nio.charset.StandardCharsets.UTF_8)
-                + "&vnp_OrderType=other"
-                + "&vnp_ReturnUrl=" + java.net.URLEncoder.encode(returnUrl, java.nio.charset.StandardCharsets.UTF_8)
-                + "&vnp_TxnRef=" + vnpTxnRef
-                + "&vnp_Version=" + vnpayProperties.getVersion();
-
-        payment.setPaymentUrl(vnpayUrl);
-        paymentRepository.save(payment);
-
-        return vnpayUrl;
     }
 
     @Override
@@ -230,10 +151,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         return toResponse(payment, payment.getQrCodeUrl(),
                 getQrDescription(payment.getPaymentMethod()),
-                payment.getPaymentUrl(),
-                payment.getPaymentMethod() == Payment.PaymentMethod.BANK_TRANSFER ? bankAccount : null,
-                payment.getPaymentMethod() == Payment.PaymentMethod.BANK_TRANSFER ? bankName : null,
-                null);
+                payment.getPaymentUrl(), null, null, null);
     }
 
     @Override
@@ -254,36 +172,14 @@ public class PaymentServiceImpl implements PaymentService {
 
         return toResponse(payment, payment.getQrCodeUrl(),
                 getQrDescription(payment.getPaymentMethod()),
-                payment.getPaymentUrl(),
-                payment.getPaymentMethod() == Payment.PaymentMethod.BANK_TRANSFER ? bankAccount : null,
-                payment.getPaymentMethod() == Payment.PaymentMethod.BANK_TRANSFER ? bankName : null,
-                null);
+                payment.getPaymentUrl(), null, null, null);
     }
 
     private String getQrDescription(Payment.PaymentMethod method) {
-        switch (method) {
-            case MOMO:
-                return "Quét mã QR MoMo để thanh toán";
-            case BANK_TRANSFER:
-                return "Quét mã QR để chuyển khoản ngân hàng";
-            case VNPAY:
-                return "Quét mã QR để thanh toán qua VNPay";
-            default:
-                return "Thanh toán";
+        if (method == Payment.PaymentMethod.PAYOS) {
+            return "Quét mã QR hoặc mở link để thanh toán qua PayOS";
         }
-    }
-
-    @Override
-    public PaymentResponse getBankTransferInfo(Long orderId) {
-        Payment payment = paymentRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Thanh toán", "orderId", orderId));
-
-        return toResponse(payment, payment.getQrCodeUrl(),
-                "Chuyển khoản ngân hàng - " + bankName,
-                payment.getPaymentUrl(),
-                bankAccount,
-                bankName,
-                null);
+        return "Thanh toán";
     }
 
     private PaymentResponse toResponse(Payment payment, String qrCodeUrl, String qrDescription,
@@ -301,7 +197,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .paymentUrl(paymentUrl)
                 .bankAccount(bankAccount)
                 .bankName(bankName)
-                .bankBranch(bankBranch)
+                .bankBranch(null)
                 .qrDescription(qrDescription)
                 .deeplink(deeplink)
                 .paidAt(payment.getPaidAt())
