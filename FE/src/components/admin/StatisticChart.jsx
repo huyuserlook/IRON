@@ -8,30 +8,30 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Legend,
 } from "recharts";
 import { formatCurrency } from "../../utils/formatCurrency";
 
-const RevenueLineChart = ({ data, exportRef }) => {
+const RevenueProfitLineChart = ({ data, exportRef }) => {
   const chartData = (data || []).map((item) => ({
-    name: item.month && item.year && !item.day
-      ? `T${item.month}/${item.year}`
-      : item.day && item.month && item.year
-        ? `Ngày ${item.day}/${item.month}`
-        : item.year
-          ? `${item.year}`
-          : "",
+    name: item.day && item.month && item.year
+      ? `Ngay ${item.day}/${item.month}`
+      : item.month && item.year
+        ? `T${item.month}/${item.year}`
+        : `${item.year}`,
     revenue: Number(item.revenue) || 0,
+    profit: Number(item.profit) || 0,
     orderCount: Number(item.orderCount) || 0,
   }));
 
   return (
     <div ref={exportRef} className="bg-white rounded-xl shadow-sm p-6 mb-6">
       <h2 className="font-semibold text-gray-700 mb-4">
-        Doanh thu theo thời gian
+        Doanh thu va loi nhuan theo thoi gian
       </h2>
       {chartData.length === 0 ? (
         <div className="flex h-72 items-center justify-center rounded-lg border border-dashed border-gray-200 text-sm text-gray-400">
-          Chưa có dữ liệu doanh thu
+          Chua co du lieu doanh thu
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={380}>
@@ -55,6 +55,9 @@ const RevenueLineChart = ({ data, exportRef }) => {
                 if (name === "Doanh thu" || name === "revenue") {
                   return [formatCurrency(value), "Doanh thu"];
                 }
+                if (name === "Loi nhuan" || name === "profit") {
+                  return [formatCurrency(value), "Loi nhuan"];
+                }
                 return [value, name];
               }}
               contentStyle={{
@@ -63,6 +66,7 @@ const RevenueLineChart = ({ data, exportRef }) => {
                 boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
               }}
             />
+            <Legend />
             <Line
               type="monotone"
               dataKey="revenue"
@@ -70,6 +74,15 @@ const RevenueLineChart = ({ data, exportRef }) => {
               stroke="#f97316"
               strokeWidth={3}
               dot={{ fill: "#f97316", strokeWidth: 2, r: 4 }}
+              activeDot={{ r: 6 }}
+            />
+            <Line
+              type="monotone"
+              dataKey="profit"
+              name="Loi nhuan"
+              stroke="#10b981"
+              strokeWidth={3}
+              dot={{ fill: "#10b981", strokeWidth: 2, r: 4 }}
               activeDot={{ r: 6 }}
             />
           </LineChart>
@@ -84,16 +97,17 @@ const TopMotorcyclesBarChart = ({ data, exportRef }) => {
     name: m.motorcycleName || `Xe #${i + 1}`,
     sold: m.soldCount || 0,
     revenue: Number(m.revenue) || 0,
+    profit: Number(m.profit) || 0,
   }));
 
   return (
     <div ref={exportRef} className="bg-white rounded-xl shadow-sm p-6 mb-6">
       <h2 className="font-semibold text-gray-700 mb-4">
-        Top xe bán chạy
+        Top xe ban chay
       </h2>
       {chartData.length === 0 ? (
         <div className="flex h-72 items-center justify-center rounded-lg border border-dashed border-gray-200 text-sm text-gray-400">
-          Chưa có dữ liệu bán hàng
+          Chua co du lieu ban hang
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={360}>
@@ -116,8 +130,8 @@ const TopMotorcyclesBarChart = ({ data, exportRef }) => {
             />
             <Tooltip
               formatter={(value, name) => {
-                if (name === "Số lượng bán" || name === "sold") {
-                  return [`${value} xe`, "Số lượng bán"];
+                if (name === "So luong ban" || name === "sold") {
+                  return [`${value} xe`, "So luong ban"];
                 }
                 return [formatCurrency(value), name];
               }}
@@ -127,9 +141,10 @@ const TopMotorcyclesBarChart = ({ data, exportRef }) => {
                 boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
               }}
             />
+            <Legend />
             <Bar
               dataKey="sold"
-              name="Số lượng bán"
+              name="So luong ban"
               fill="#f97316"
               radius={[4, 4, 0, 0]}
             />
@@ -150,7 +165,7 @@ const StatisticChart = ({ stats, filterType, chartRefs }) => {
 
   return (
     <div className="space-y-6">
-      <RevenueLineChart data={chartData} exportRef={chartRefs?.line} />
+      <RevenueProfitLineChart data={chartData} exportRef={chartRefs?.line} />
       <TopMotorcyclesBarChart data={topMotorcycles} exportRef={chartRefs?.bar} />
     </div>
   );

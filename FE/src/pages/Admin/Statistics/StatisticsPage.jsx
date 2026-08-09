@@ -136,11 +136,12 @@ const StatisticsPage = () => {
     const source = filterType === "month" ? stats.dailyRevenues : stats.monthlyRevenues;
     return (source || []).map((item) => ({
       name: item.day && item.month && item.year
-        ? `Ngày ${item.day}/${item.month}`
+        ? `Ngay ${item.day}/${item.month}`
         : item.month && item.year
           ? `T${item.month}/${item.year}`
           : `${item.year}`,
       revenue: Number(item.revenue) || 0,
+      profit: Number(item.profit) || 0,
       orderCount: Number(item.orderCount) || 0,
       day: item.day,
       month: item.month,
@@ -150,11 +151,13 @@ const StatisticsPage = () => {
 
   const topMotorcycles = stats?.topMotorcycles || [];
   const totalRevenue = Number(stats?.totalRevenue) || 0;
+  const totalProfit = Number(stats?.totalProfit) || 0;
   const totalOrders = Number(stats?.totalOrders) || 0;
   const avgOrderValue = totalOrders > 0 ? Math.round(totalRevenue / totalOrders) : 0;
 
   const summary = {
     totalRevenue: formatCurrency(totalRevenue),
+    totalProfit: formatCurrency(totalProfit),
     totalOrders,
     avgOrderValue: formatCurrency(avgOrderValue),
     totalCustomers: stats?.totalCustomers || 0,
@@ -226,6 +229,7 @@ const StatisticsPage = () => {
       summaryHeader.fill = headerFill;
       wsSummary.addRow(["Khoảng thời gian", filterLabel]);
       wsSummary.addRow(["Tổng doanh thu", summary.totalRevenue]);
+      wsSummary.addRow(["Tổng lợi nhuận", summary.totalProfit]);
       wsSummary.addRow(["Tổng đơn hàng", `${summary.totalOrders} đơn`]);
       wsSummary.addRow(["Giá trị đơn hàng TB", summary.avgOrderValue]);
       wsSummary.addRow(["Tổng khách hàng", `${summary.totalCustomers} người`]);
@@ -237,13 +241,14 @@ const StatisticsPage = () => {
           { header: filterType === "month" ? "Ngày" : "Tháng", key: "name", width: 20 },
           { header: "Năm", key: "year", width: 10 },
           { header: "Doanh thu", key: "revenue", width: 22 },
+          { header: "Lợi nhuận", key: "profit", width: 22 },
           { header: "Số đơn", key: "orderCount", width: 12 },
         ];
         const chartHeader = wsChart.addRow(wsChart.columns.map((c) => c.header));
         chartHeader.font = headerFont;
         chartHeader.fill = headerFill;
         chartData.forEach((item) => {
-          wsChart.addRow([item.name, item.year, item.revenue, `${item.orderCount} đơn`]);
+          wsChart.addRow([item.name, item.year, item.revenue, item.profit, `${item.orderCount} đơn`]);
         });
       }
 
@@ -253,12 +258,13 @@ const StatisticsPage = () => {
           { header: "Xe", key: "name", width: 50 },
           { header: "Số lượng bán", key: "sold", width: 15 },
           { header: "Doanh thu", key: "revenue", width: 22 },
+          { header: "Lợi nhuận", key: "profit", width: 22 },
         ];
         const topHeader = wsTop.addRow(wsTop.columns.map((c) => c.header));
         topHeader.font = headerFont;
         topHeader.fill = headerFill;
         topMotorcycles.forEach((m) => {
-          wsTop.addRow([m.motorcycleName, `${m.soldCount} xe`, formatCurrency(m.revenue)]);
+          wsTop.addRow([m.motorcycleName, `${m.soldCount} xe`, formatCurrency(m.revenue), formatCurrency(m.profit)]);
         });
       }
 
@@ -311,6 +317,7 @@ const StatisticsPage = () => {
         head: [["Chi so", "Gia tri"]],
         body: [
           ["Tong doanh thu", summary.totalRevenue],
+          ["Tong loi nhuan", summary.totalProfit],
           ["Tong don hang", `${summary.totalOrders} don`],
           ["Gia tri don hang TB", summary.avgOrderValue],
           ["Tong khach hang", `${summary.totalCustomers} nguoi`],
@@ -330,7 +337,7 @@ const StatisticsPage = () => {
         }
         doc.setFont("helvetica", "normal");
         doc.setFontSize(11);
-        doc.text("2. Doanh thu theo thoi gian", margin, y);
+        doc.text("2. Doanh thu va loi nhuan theo thoi gian", margin, y);
         y += 8;
         doc.addImage(chartImages.line, "PNG", margin, y, usableWidth, 170);
         y += 180;
@@ -360,11 +367,12 @@ const StatisticsPage = () => {
         y += 6;
         autoTable(doc, {
           startY: y,
-          head: [["Xe", "So luong ban", "Doanh thu"]],
+          head: [["Xe", "So luong ban", "Doanh thu", "Loi nhuan"]],
           body: topMotorcycles.map((m) => [
             m.motorcycleName,
             `${m.soldCount} xe`,
             formatCurrency(m.revenue),
+            formatCurrency(m.profit),
           ]),
           theme: "grid",
           headStyles: { fillColor: [249, 115, 22], fontSize: 10 },
@@ -507,9 +515,9 @@ const StatisticsPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {[
               { label: "Tổng doanh thu", value: summary.totalRevenue },
+              { label: "Tổng lợi nhuận", value: summary.totalProfit },
               { label: "Tổng đơn hàng", value: `${summary.totalOrders} đơn` },
               { label: "Giá trị đơn TB", value: summary.avgOrderValue },
-              { label: "Tổng khách hàng", value: summary.totalCustomers },
             ].map((s) => (
               <div key={s.label} className="rounded-xl bg-white p-4 shadow-sm">
                 <p className="text-xs text-gray-400">{s.label}</p>
@@ -537,6 +545,7 @@ const StatisticsPage = () => {
                       <th className="px-4 py-3 text-left">Xe</th>
                       <th className="px-4 py-3 text-center">Số lượng bán</th>
                       <th className="px-4 py-3 text-right">Doanh thu</th>
+                      <th className="px-4 py-3 text-right">Lợi nhuận</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
@@ -560,6 +569,9 @@ const StatisticsPage = () => {
                         </td>
                         <td className="px-4 py-3 text-right font-semibold text-orange-600">
                           {formatCurrency(m.revenue)}
+                        </td>
+                        <td className="px-4 py-3 text-right font-semibold text-emerald-600">
+                          {formatCurrency(m.profit)}
                         </td>
                       </tr>
                     ))}

@@ -100,7 +100,8 @@ const MotorcycleManagement = () => {
             <tr>
               <th className="px-4 py-3 text-left">Xe</th>
               <th className="px-4 py-3 text-left">Hãng / Dòng</th>
-              <th className="px-4 py-3 text-right">Giá</th>
+              <th className="px-4 py-3 text-right">Giá bán</th>
+              <th className="px-4 py-3 text-right">Giá vốn</th>
               <th className="px-4 py-3 text-center">Trạng thái</th>
               <th className="px-4 py-3 text-center">Đánh giá</th>
               <th className="px-4 py-3 text-center">Thao tác</th>
@@ -112,7 +113,7 @@ const MotorcycleManagement = () => {
                   .fill(0)
                   .map((_, i) => (
                     <tr key={i}>
-                      <td colSpan={6} className="px-4 py-4">
+                      <td colSpan={7} className="px-4 py-4">
                         <div className="h-4 bg-gray-100 rounded animate-pulse" />
                       </td>
                     </tr>
@@ -148,6 +149,9 @@ const MotorcycleManagement = () => {
                     </td>
                     <td className="px-4 py-3 text-right font-semibold text-orange-600">
                       {formatCurrency(moto.price)}
+                    </td>
+                    <td className="px-4 py-3 text-right text-gray-500">
+                      {moto.costPrice ? formatCurrency(moto.costPrice) : "-"}
                     </td>
                     <td className="px-4 py-3 text-center">
                       <span

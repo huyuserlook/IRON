@@ -54,6 +54,7 @@ const MotorcycleForm = () => {
     brandId: "",
     categoryId: "",
     price: "",
+    costPrice: "",
     engineCc: "",
     horsepower: "",
     torque: "",
@@ -84,6 +85,7 @@ const MotorcycleForm = () => {
           brandId: m.brand?.id,
           categoryId: m.category?.id,
           price: m.price,
+          costPrice: m.costPrice || "",
           engineCc: m.engineCc || "",
           horsepower: m.horsepower || "",
           torque: m.torque || "",
@@ -165,6 +167,7 @@ const MotorcycleForm = () => {
       const payload = {
         ...form,
         price: Number(form.price),
+        costPrice: form.costPrice ? Number(form.costPrice) : null,
         engineCc: form.engineCc ? Number(form.engineCc) : null,
         horsepower: form.horsepower ? Number(form.horsepower) : null,
         torque: form.torque ? Number(form.torque) : null,
@@ -281,6 +284,28 @@ const MotorcycleForm = () => {
               className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Giá vốn (VNĐ)
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={form.costPrice}
+              onChange={(e) => set("costPrice", e.target.value)}
+              placeholder="0"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-300"
+            />
+            {form.costPrice && Number(form.costPrice) > Number(form.price) && (
+              <p className="mt-1 text-xs text-red-500">
+                Giá vốn đang cao hơn giá bán, xe này sẽ lỗ
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Phân khối */}
+        <div className="grid grid-cols-1 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Phân khối (cc)
