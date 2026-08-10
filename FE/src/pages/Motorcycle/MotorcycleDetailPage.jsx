@@ -162,7 +162,13 @@ const MotorcycleDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [imgAnimKey, setImgAnimKey] = useState(0);
+  const [prevIndex, setPrevIndex] = useState(null);
+  const [slideDir, setSlideDir] = useState(null);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const autoTimerRef = useRef(null);
+  const animTimerRef = useRef(null);
+  const selectedIndexRef = useRef(selectedIndex);
   const [relatedMotorcycles, setRelatedMotorcycles] = useState([]);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewForm, setReviewForm] = useState({
@@ -212,15 +218,34 @@ const MotorcycleDetailPage = () => {
   const totalReviews = reviewItems.length;
 
   const goToImage = useCallback(
-    (index) => {
-      if (!galleryImages.length) return;
+    (index, direction = "right") => {
+      if (!galleryImages.length || isAnimating) return;
       const next =
         ((index % galleryImages.length) + galleryImages.length) %
         galleryImages.length;
+      if (next === selectedIndex) return;
+
+      if (autoTimerRef.current) {
+        clearInterval(autoTimerRef.current);
+        autoTimerRef.current = null;
+      }
+      if (animTimerRef.current) {
+        clearTimeout(animTimerRef.current);
+        animTimerRef.current = null;
+      }
+
+      setPrevIndex(selectedIndex);
+      setSlideDir(direction);
+      setIsAnimating(true);
       setSelectedIndex(next);
-      setImgAnimKey((key) => key + 1);
+
+      animTimerRef.current = setTimeout(() => {
+        setPrevIndex(null);
+        setSlideDir(null);
+        setIsAnimating(false);
+      }, 520);
     },
-    [galleryImages.length],
+    [galleryImages.length, selectedIndex, isAnimating],
   );
 
   useEffect(() => {
@@ -264,8 +289,8 @@ const MotorcycleDetailPage = () => {
 
     const onKeyDown = (event) => {
       if (event.key === "Escape") setLightboxOpen(false);
-      if (event.key === "ArrowRight") goToImage(selectedIndex + 1);
-      if (event.key === "ArrowLeft") goToImage(selectedIndex - 1);
+      if (event.key === "ArrowRight") goToImage(selectedIndex + 1, "right");
+      if (event.key === "ArrowLeft") goToImage(selectedIndex - 1, "left");
     };
 
     document.body.style.overflow = "hidden";
@@ -275,6 +300,24 @@ const MotorcycleDetailPage = () => {
       window.removeEventListener("keydown", onKeyDown);
     };
   }, [lightboxOpen, goToImage, selectedIndex]);
+
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  }, [selectedIndex]);
+
+  useEffect(() => {
+    if (galleryImages.length <= 1) return;
+    autoTimerRef.current = setInterval(() => {
+      const next = (selectedIndexRef.current + 1) % galleryImages.length;
+      goToImage(next, "right");
+    }, 4000);
+    return () => {
+      if (autoTimerRef.current) {
+        clearInterval(autoTimerRef.current);
+        autoTimerRef.current = null;
+      }
+    };
+  }, [galleryImages.length, goToImage]);
 
   const handleAddToCart = () => {
     const totalStock = (moto?.inventories || []).reduce(
@@ -417,6 +460,34 @@ const MotorcycleDetailPage = () => {
           0% { transform: scale(0.94); }
           100% { transform: scale(1); }
         }
+        @keyframes gallerySlideInRight {
+          0% { opacity: 0; transform: translateX(80px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes gallerySlideInLeft {
+          0% { opacity: 0; transform: translateX(-80px); }
+          100% { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes galleryFadeIn {
+          0% { opacity: 0; }
+          100% { opacity: 1; }
+        }
+        @keyframes gallerySlideOutLeft {
+          0% { opacity: 1; transform: translateX(0); }
+          100% { opacity: 0; transform: translateX(-80px); }
+        }
+        @keyframes gallerySlideOutRight {
+          0% { opacity: 1; transform: translateX(0); }
+          100% { opacity: 0; transform: translateX(80px); }
+        }
+        @keyframes galleryFadeOut {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+        @keyframes counterFadeIn {
+          0% { opacity: 0; transform: translateY(8px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
         .detail-rise {
           animation: detailRise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
@@ -429,11 +500,39 @@ const MotorcycleDetailPage = () => {
         .detail-thumb-active {
           animation: detailThumbPop 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
         }
+        .gallery-enter-right {
+          animation: gallerySlideInRight 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+        }
+        .gallery-enter-left {
+          animation: gallerySlideInLeft 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+        }
+        .gallery-enter-fade {
+          animation: galleryFadeIn 0.5s ease-out both;
+        }
+        .gallery-exit-right {
+          animation: gallerySlideOutRight 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+        }
+        .gallery-exit-left {
+          animation: gallerySlideOutLeft 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+        }
+        .gallery-exit-fade {
+          animation: galleryFadeOut 0.5s ease-out both;
+        }
+        .gallery-counter-enter {
+          animation: counterFadeIn 0.45s ease-out both;
+        }
         @media (prefers-reduced-motion: reduce) {
           .detail-rise,
           .detail-img-enter,
           .detail-lightbox-enter,
-          .detail-thumb-active {
+          .detail-thumb-active,
+          .gallery-enter-right,
+          .gallery-enter-left,
+          .gallery-enter-fade,
+          .gallery-exit-right,
+          .gallery-exit-left,
+          .gallery-exit-fade,
+          .gallery-counter-enter {
             animation: none !important;
           }
         }
@@ -456,19 +555,41 @@ const MotorcycleDetailPage = () => {
           >
             <div className="group/gallery relative overflow-hidden rounded-[24px] border border-[#E3DEE6] bg-white shadow-[0_24px_60px_-36px_rgba(0,0,0,0.18)]">
               <div className="relative aspect-[4/3] overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#F6F4F8_100%)]">
-                {activeImage ? (
+                {galleryImages.length > 0 ? (
                   <button
                     type="button"
                     onClick={() => setLightboxOpen(true)}
                     className="relative h-full w-full cursor-zoom-in"
                     aria-label="Phóng to ảnh"
                   >
-                    <img
-                      key={imgAnimKey}
-                      src={activeImage.imageUrl}
-                      alt={moto.name}
-                      className="detail-img-enter absolute inset-0 h-full w-full object-contain p-6 sm:p-8"
-                    />
+                    {prevIndex !== null && galleryImages[prevIndex] && (
+                      <img
+                        key={`gallery-exit-${prevIndex}`}
+                        src={galleryImages[prevIndex].imageUrl}
+                        alt=""
+                        className={`absolute inset-0 h-full w-full object-contain p-6 sm:p-8 will-change-transform ${
+                          slideDir === "left"
+                            ? "gallery-exit-right"
+                            : slideDir === "fade"
+                              ? "gallery-exit-fade"
+                              : "gallery-exit-left"
+                        }`}
+                      />
+                    )}
+                    {activeImage && (
+                      <img
+                        key={`gallery-enter-${selectedIndex}`}
+                        src={activeImage.imageUrl}
+                        alt={moto.name}
+                        className={`absolute inset-0 h-full w-full object-contain p-6 sm:p-8 will-change-transform ${
+                          slideDir === "left"
+                            ? "gallery-enter-left"
+                            : slideDir === "fade"
+                              ? "gallery-enter-fade"
+                              : "gallery-enter-right"
+                        }`}
+                      />
+                    )}
                   </button>
                 ) : (
                   <div className="flex h-full items-center justify-center text-[#9A9196]">
@@ -478,27 +599,30 @@ const MotorcycleDetailPage = () => {
 
                 {galleryImages.length > 1 ? (
                   <>
-                    <button
-                      type="button"
-                      onClick={() => goToImage(selectedIndex - 1)}
-                      className="absolute left-3 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/90 text-[#1A1B1F] opacity-0 shadow-lg backdrop-blur transition-all duration-300 hover:bg-white group-hover/gallery:opacity-100 sm:left-4"
-                      aria-label="Ảnh trước"
-                    >
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => goToImage(selectedIndex + 1)}
-                      className="absolute right-3 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/90 text-[#1A1B1F] opacity-0 shadow-lg backdrop-blur transition-all duration-300 hover:bg-white group-hover/gallery:opacity-100 sm:right-4"
-                      aria-label="Ảnh sau"
-                    >
-                      <ChevronRight size={18} />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => goToImage(selectedIndex - 1, "left")}
+                        className="absolute left-3 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/90 text-[#1A1B1F] opacity-0 shadow-lg backdrop-blur transition-all duration-300 hover:bg-white group-hover/gallery:opacity-100 sm:left-4"
+                        aria-label="Ảnh trước"
+                      >
+                        <ChevronLeft size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => goToImage(selectedIndex + 1, "right")}
+                        className="absolute right-3 top-1/2 z-10 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/70 bg-white/90 text-[#1A1B1F] opacity-0 shadow-lg backdrop-blur transition-all duration-300 hover:bg-white group-hover/gallery:opacity-100 sm:right-4"
+                        aria-label="Ảnh sau"
+                      >
+                        <ChevronRight size={18} />
+                      </button>
                   </>
                 ) : null}
 
                 {galleryImages.length > 0 ? (
-                  <div className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[#1A1B1F]/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+                  <div
+                    key={`counter-${selectedIndex}`}
+                    className="gallery-counter-enter absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[#1A1B1F]/75 px-3 py-1 text-xs font-semibold text-white backdrop-blur will-change-transform"
+                  >
                     {selectedIndex + 1} / {galleryImages.length}
                   </div>
                 ) : null}
@@ -514,7 +638,7 @@ const MotorcycleDetailPage = () => {
                       <button
                         key={img.id ?? `${img.imageUrl}-${index}`}
                         type="button"
-                        onClick={() => goToImage(index)}
+                        onClick={() => goToImage(index, "fade")}
                         className={`detail-rise relative h-[76px] w-[76px] shrink-0 overflow-hidden rounded-[14px] border-2 bg-white transition-all duration-300 sm:h-[84px] sm:w-[84px] ${
                           active
                             ? "detail-thumb-active border-[#BC000A] shadow-[0_12px_28px_-16px_rgba(188,0,10,0.55)]"
@@ -552,7 +676,7 @@ const MotorcycleDetailPage = () => {
                       key={`grid-${img.id ?? index}`}
                       type="button"
                       onClick={() => {
-                        goToImage(index);
+                        goToImage(index, "fade");
                         window.scrollTo({ top: 0, behavior: "smooth" });
                       }}
                       className="group relative aspect-[4/3] overflow-hidden rounded-[14px] border border-[#EEEAF1] bg-[#FAF8FC]"
@@ -966,7 +1090,7 @@ const MotorcycleDetailPage = () => {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  goToImage(selectedIndex - 1);
+                  goToImage(selectedIndex - 1, "left");
                 }}
                 className="absolute left-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:left-6"
                 aria-label="Ảnh trước"
@@ -977,7 +1101,7 @@ const MotorcycleDetailPage = () => {
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  goToImage(selectedIndex + 1);
+                  goToImage(selectedIndex + 1, "right");
                 }}
                 className="absolute right-3 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20 sm:right-6"
                 aria-label="Ảnh sau"
@@ -995,7 +1119,10 @@ const MotorcycleDetailPage = () => {
             onClick={(e) => e.stopPropagation()}
           />
 
-          <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-sm font-medium text-white/80">
+          <p
+            key={`lb-counter-${selectedIndex}`}
+            className="gallery-counter-enter absolute bottom-6 left-1/2 -translate-x-1/2 text-sm font-medium text-white/80 will-change-transform"
+          >
             {selectedIndex + 1} / {galleryImages.length}
           </p>
         </div>

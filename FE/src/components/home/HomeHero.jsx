@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { Facebook, Instagram } from "lucide-react";
 import ducatiImg from "../../assets/img/ducati.png";
@@ -55,25 +55,87 @@ const HomeHero = ({ resetTrigger }) => {
   const [animKey, setAnimKey] = useState(0);
   const [paused, setPaused] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [slideDir, setSlideDir] = useState("right");
+  const [isAnimating, setIsAnimating] = useState(false);
   const slide = SLIDES[index];
   const total = SLIDES.length;
+  const autoTimerRef = useRef(null);
+  const resumeTimerRef = useRef(null);
+  const indexRef = useRef(index);
+
+  useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
 
   const ink = slide.light ? "text-gray-900" : "text-white";
   const inkMuted = slide.light ? "text-gray-600" : "text-white/70";
 
   const goTo = useCallback(
-    (next) => {
-      setIndex(((next % total) + total) % total);
+    (next, direction = "right") => {
+      if (isAnimating) return;
+      const normalizedNext = ((next % total) + total) % total;
+      if (normalizedNext === index) return;
+
+      if (autoTimerRef.current) {
+        clearInterval(autoTimerRef.current);
+        autoTimerRef.current = null;
+      }
+      if (resumeTimerRef.current) {
+        clearTimeout(resumeTimerRef.current);
+        resumeTimerRef.current = null;
+      }
+
+      setSlideDir(direction);
+      setIsAnimating(true);
+      setIndex(normalizedNext);
       setAnimKey((k) => k + 1);
+
+      setTimeout(() => {
+        setIsAnimating(false);
+      }, 620);
     },
-    [total],
+    [total, index, isAnimating],
   );
 
   useEffect(() => {
-    if (paused) return undefined;
-    const timer = setInterval(() => goTo(index + 1), 5000);
-    return () => clearInterval(timer);
-  }, [paused, goTo, index]);
+    if (paused || isAnimating) return undefined;
+    autoTimerRef.current = setInterval(() => {
+      const next = (indexRef.current + 1) % total;
+      goTo(next, "right");
+    }, 4500);
+    return () => {
+      if (autoTimerRef.current) {
+        clearInterval(autoTimerRef.current);
+        autoTimerRef.current = null;
+      }
+    };
+  }, [paused, goTo, total, isAnimating]);
+
+  const pauseTemporarily = useCallback(() => {
+    setPaused(true);
+    if (autoTimerRef.current) {
+      clearInterval(autoTimerRef.current);
+      autoTimerRef.current = null;
+    }
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+    }
+    resumeTimerRef.current = setTimeout(() => {
+      setPaused(false);
+      resumeTimerRef.current = null;
+    }, 3000);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (autoTimerRef.current) {
+        clearInterval(autoTimerRef.current);
+      }
+      if (resumeTimerRef.current) {
+        clearTimeout(resumeTimerRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -94,7 +156,7 @@ const HomeHero = ({ resetTrigger }) => {
     <section
       className="relative min-h-screen overflow-hidden transition-[background-color] duration-700 ease-out"
       style={{ backgroundColor: slide.bg }}
-      onMouseEnter={() => setPaused(true)}
+      onMouseEnter={pauseTemporarily}
       onMouseLeave={() => setPaused(false)}
     >
       <div
@@ -131,7 +193,13 @@ const HomeHero = ({ resetTrigger }) => {
       <div className="relative z-10 flex min-h-[calc(100vh-130px)] flex-col items-center justify-center px-4 pb-28 pt-24">
         <div
           key={`brand-${animKey}`}
-          className="pointer-events-none absolute inset-x-0 top-[12%] sm:top-[10%] flex justify-center overflow-hidden select-none animate-brand-in"
+          className={`pointer-events-none absolute inset-x-0 top-[12%] sm:top-[10%] flex justify-center overflow-hidden select-none will-change-transform ${
+            slideDir === "left"
+              ? "animate-hero-slide-in-left"
+              : slideDir === "fade"
+                ? "animate-hero-fade-in"
+                : "animate-hero-slide-in-right"
+          }`}
         >
           <p
             className="font-teko font-bold uppercase leading-none tracking-tight text-[clamp(5rem,22vw,28rem)] text-transparent bg-clip-text"
@@ -145,7 +213,16 @@ const HomeHero = ({ resetTrigger }) => {
         </div>
 
         <div className="relative z-20 flex w-full max-w-5xl flex-1 items-center justify-center">
-          <div key={`bike-${animKey}`} className="animate-slide-bike">
+          <div
+            key={`bike-${animKey}`}
+            className={`will-change-transform ${
+              slideDir === "left"
+                ? "animate-hero-slide-in-left"
+                : slideDir === "fade"
+                  ? "animate-hero-fade-in"
+                  : "animate-hero-slide-in-right"
+            }`}
+          >
             <img
               src={slide.image}
               alt={slide.brand}
@@ -167,7 +244,9 @@ const HomeHero = ({ resetTrigger }) => {
               <button
                 key={s.brand}
                 type="button"
-                onClick={() => goTo(i)}
+                onClick={() => goTo(i, "fade")}
+                onMouseEnter={pauseTemporarily}
+                onFocus={pauseTemporarily}
                 className={`relative h-[28px] w-[28px] rounded-full border border-[#24282B] transition-transform duration-200 ${
                   i === index
                     ? "scale-110 ring-2 ring-offset-1 ring-black/30"
@@ -220,11 +299,11 @@ const HomeHero = ({ resetTrigger }) => {
         </div>
         <button
           type="button"
-          onClick={() => goTo(index + 1)}
+          onClick={() => goTo(index + 1, "right")}
           className="font-teko group text-right"
           aria-label="Slide tiếp"
         >
-          <span className="inline-flex items-baseline">
+          <span key={`counter-${animKey}`} className="animate-hero-counter-fade inline-flex items-baseline will-change-transform">
             <span
               className={`text-5xl sm:text-[88px] leading-none transition-transform group-hover:scale-105 ${ink}`}
             >
