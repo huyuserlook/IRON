@@ -16,13 +16,16 @@ import {
   XCircle,
   Zap,
   Camera,
+  ShieldCheck,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import motorcycleApi from "../../api/motorcycleApi";
 import reviewApi from "../../api/reviewApi";
+import orderApi from "../../api/orderApi";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { formatCurrency } from "../../utils/formatCurrency";
+import DepositModal from "../../components/deposit/DepositModal";
 
 const API_ROOT = (
   import.meta.env.VITE_API_URL || "http://localhost:8080/api"
@@ -179,6 +182,9 @@ const MotorcycleDetailPage = () => {
   const [previewReviewImage, setPreviewReviewImage] = useState(null);
   const fileInputRef = useRef(null);
   const [relatedLoading, setRelatedLoading] = useState(false);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [depositOrderId, setDepositOrderId] = useState(null);
+  const [creatingDepositOrder, setCreatingDepositOrder] = useState(false);
 
   const galleryImages = useMemo(() => buildGallery(moto), [moto]);
   const activeImage = galleryImages[selectedIndex] || null;
@@ -347,6 +353,35 @@ const MotorcycleDetailPage = () => {
     }
   };
 
+  const handleDepositClick = async () => {
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để đặt cọc");
+      navigate("/login");
+      return;
+    }
+
+    if (stock <= 0) {
+      toast.error("Xe đã hết hàng, không thể đặt cọc");
+      return;
+    }
+
+    setCreatingDepositOrder(true);
+    try {
+      const res = await orderApi.create({
+        items: [{ motorcycleId: moto.id, quantity: 1 }],
+        shippingAddress: user?.address || "Showroom IRON",
+        paymentMethod: "CASH",
+      });
+      const createdOrder = res.data?.data || res.data;
+      setDepositOrderId(createdOrder.id);
+      setShowDepositModal(true);
+    } catch (err) {
+      toast.error(err?.message || "Không thể tạo đơn đặt cọc");
+    } finally {
+      setCreatingDepositOrder(false);
+    }
+  };
+
   const handleReviewChange = (field) => (e) => {
     const value = e?.target ? e.target.value : e;
     setReviewForm((s) => ({ ...s, [field]: value }));
@@ -423,7 +458,7 @@ const MotorcycleDetailPage = () => {
   if (!moto) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center bg-[#F7F5FA] px-4 text-center">
-        <p className="font-teko text-4xl font-bold text-[#1A1B1F]">
+        <p className="font-heading text-4xl font-bold text-[#1A1B1F]">
           Không tìm thấy xe
         </p>
         <Link
@@ -704,7 +739,7 @@ const MotorcycleDetailPage = () => {
                 {moto.brand?.name || moto.brandName} ·{" "}
                 {moto.category?.name || moto.categoryName}
               </p>
-              <h1 className="mt-3 font-teko text-[clamp(2.2rem,5vw,3.4rem)] font-bold leading-[0.95] tracking-[-0.03em]">
+              <h1 className="mt-3 font-heading text-[clamp(2.2rem,5vw,3.4rem)] font-bold leading-[0.95] tracking-[-0.03em]">
                 {moto.name}
               </h1>
 
@@ -726,7 +761,7 @@ const MotorcycleDetailPage = () => {
                 ) : null}
               </div>
 
-              <p className="mt-5 font-teko text-[clamp(2rem,4vw,2.8rem)] font-bold leading-none text-[#BC000A]">
+              <p className="mt-5 font-heading text-[clamp(2rem,4vw,2.8rem)] font-bold leading-none text-[#BC000A]">
                 {formatCurrency(moto.price)}
               </p>
             </div>
@@ -782,6 +817,15 @@ const MotorcycleDetailPage = () => {
                 <ShoppingCart size={18} />
                 {stock <= 0 ? "Hết hàng" : "Thêm vào giỏ"}
               </button>
+              <button
+                type="button"
+                onClick={handleDepositClick}
+                disabled={stock <= 0 || creatingDepositOrder}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-[12px] border-2 border-orange-500 bg-orange-50 px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-orange-600 transition-all duration-300 hover:-translate-y-0.5 hover:bg-orange-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <ShieldCheck size={18} />
+                {creatingDepositOrder ? "Đang xử lý..." : "Đặt cọc giữ xe"}
+              </button>
               <Link
                 to={`/booking?motorcycleId=${moto.id}`}
                 className="inline-flex flex-1 items-center justify-center gap-2 rounded-[12px] border-2 border-[#1A1B1F] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[#1A1B1F] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1A1B1F] hover:text-white"
@@ -798,7 +842,7 @@ const MotorcycleDetailPage = () => {
             className="detail-rise mt-12 rounded-[24px] border border-[#E3DEE6] bg-white p-6 shadow-[0_20px_50px_-34px_rgba(0,0,0,0.14)] sm:p-8"
             style={{ animationDelay: "240ms" }}
           >
-            <h2 className="font-teko text-3xl font-bold tracking-[-0.02em]">
+            <h2 className="font-heading text-3xl font-bold tracking-[-0.02em]">
               Mô tả sản phẩm
             </h2>
             <p className="mt-4 whitespace-pre-line text-sm leading-8 text-[#5E3F3B] sm:text-[15px]">
@@ -813,7 +857,7 @@ const MotorcycleDetailPage = () => {
         >
           <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="font-teko text-3xl font-bold tracking-[-0.02em]">
+            <h2 className="font-heading text-3xl font-bold tracking-[-0.02em]">
                 Đánh giá sản phẩm
               </h2>
               <p className="mt-2 text-sm text-[#5E3F3B]">
@@ -977,7 +1021,7 @@ const MotorcycleDetailPage = () => {
             className="detail-rise mt-6 rounded-[24px] border border-[#E3DEE6] bg-[#FAF8FC] p-6 sm:p-8"
             style={{ animationDelay: "360ms" }}
           >
-            <h2 className="font-teko text-3xl font-bold tracking-[-0.02em]">
+            <h2 className="font-heading text-3xl font-bold tracking-[-0.02em]">
               Thông số kỹ thuật
             </h2>
             <pre className="mt-4 overflow-x-auto whitespace-pre-wrap font-sans text-sm leading-8 text-[#5E3F3B]">
@@ -995,7 +1039,7 @@ const MotorcycleDetailPage = () => {
               <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
                 GỢI Ý THÊM
               </p>
-              <h2 className="mt-2 font-teko text-3xl font-bold leading-none tracking-[-0.02em] text-[#1A1B1F] sm:text-4xl">
+              <h2 className="mt-2 font-heading text-3xl font-bold leading-none tracking-[-0.02em] text-[#1A1B1F] sm:text-4xl">
                 Sản phẩm gợi ý
               </h2>
             </div>
@@ -1153,6 +1197,15 @@ const MotorcycleDetailPage = () => {
           />
         </div>
       ) : null}
+
+      {showDepositModal && (
+        <DepositModal
+          isOpen={showDepositModal}
+          onClose={() => setShowDepositModal(false)}
+          motorcycle={moto}
+          orderId={depositOrderId}
+        />
+      )}
     </div>
   );
 };

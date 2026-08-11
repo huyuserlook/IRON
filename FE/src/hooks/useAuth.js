@@ -15,7 +15,9 @@ export const useAuth = () => {
     const result = await dispatch(login(data));
     if (login.fulfilled.match(result)) {
       const role = result.payload.role;
-      navigate(role === "ROLE_ADMIN" ? "/admin/dashboard" : redirectTo);
+      if (role === "ROLE_ADMIN") navigate("/admin/dashboard");
+      else if (role === "ROLE_STAFF") navigate("/staff/dashboard");
+      else navigate(redirectTo);
       return true;
     }
     return false;
@@ -34,7 +36,9 @@ export const useAuth = () => {
     const result = await dispatch(socialLogin(data));
     if (socialLogin.fulfilled.match(result)) {
       const role = result.payload.role;
-      navigate(role === "ROLE_ADMIN" ? "/admin/dashboard" : redirectTo);
+      if (role === "ROLE_ADMIN") navigate("/admin/dashboard");
+      else if (role === "ROLE_STAFF") navigate("/staff/dashboard");
+      else navigate(redirectTo);
       return true;
     }
     return false;
@@ -89,6 +93,7 @@ export const useAuth = () => {
     error,
     isAuthenticated: !!effectiveToken,
     isAdmin: user?.role === "ROLE_ADMIN",
+    isStaff: user?.role === "ROLE_STAFF",
     handleLogin,
     handleRegister,
     handleSocialLogin,

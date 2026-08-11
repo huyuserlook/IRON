@@ -20,10 +20,10 @@ import java.util.Map;
 @ConfigurationProperties(prefix = "esms")
 public class EsmsService {
 
-    @Value("${esms.api-key}")
+    @Value("${esms.api-key:}")
     private String apiKey;
 
-    @Value("${esms.secret-key}")
+    @Value("${esms.secret-key:}")
     private String secretKey;
 
     @Value("${esms.brand-name:IRON}")

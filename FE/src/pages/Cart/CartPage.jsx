@@ -49,7 +49,7 @@ const CartPage = () => {
   const [suggested, setSuggested] = useState([]);
   const [totalPulse, setTotalPulse] = useState(false);
   const [stockMap, setStockMap] = useState({});
-  const [loadingStock, setLoadingStock] = useState(false);
+  const [, setLoadingStock] = useState(false);
   const [adjustedItems, setAdjustedItems] = useState({});
 
   const cartIds = useMemo(
@@ -181,7 +181,7 @@ const CartPage = () => {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-[#F7F5FA] text-[#1A1B1F]">
+      <div className="min-h-screen bg-[#F7F5FA] text-[#1A1B1F] pb-16">
         <style>{`
           @keyframes cartEmptyIn {
             0% { opacity: 0; transform: translateY(20px) scale(0.98); }
@@ -202,7 +202,7 @@ const CartPage = () => {
           <div className="cart-empty-in cart-empty-float flex h-24 w-24 items-center justify-center rounded-full bg-white shadow-[0_24px_60px_-34px_rgba(0,0,0,0.18)]">
             <ShoppingCart size={40} className="text-[#BC000A]" strokeWidth={1.6} />
           </div>
-          <h1 className="cart-empty-in mt-8 font-teko text-5xl font-bold leading-none tracking-[-0.03em]">
+          <h1 className="cart-empty-in mt-8 font-heading text-5xl font-bold leading-none tracking-[-0.03em]">
             Giỏ hàng trống
           </h1>
           <p
@@ -271,7 +271,7 @@ const CartPage = () => {
 
       <div className="mx-auto max-w-[1240px] px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
         <header className="cart-rise mb-8 lg:mb-10">
-          <h1 className="font-teko text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-none tracking-[-0.03em] text-[#1A1B1F]">
+          <h1 className="font-heading text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-none tracking-[-0.03em] text-[#1A1B1F]">
             Giỏ hàng của bạn
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#7A6E71] sm:text-[15px]">
@@ -323,7 +323,7 @@ const CartPage = () => {
                       <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[#9A9196]">
                         Dòng xe
                       </p>
-                      <h2 className="mt-1 font-teko text-[1.35rem] font-bold leading-[0.95] tracking-[-0.02em] text-[#1A1B1F] sm:text-[1.5rem]">
+                      <h2 className="mt-1 font-heading text-[1.35rem] font-bold leading-[0.95] tracking-[-0.02em] text-[#1A1B1F] sm:text-[1.5rem]">
                         {item.name}
                       </h2>
                       {item.colorName ? (
@@ -441,7 +441,7 @@ const CartPage = () => {
                     Tổng cộng
                   </p>
                   <p
-                    className={`text-right font-teko text-[2rem] font-bold leading-none text-[#BC000A] ${
+                    className={`text-right font-heading text-[2rem] font-bold leading-none text-[#BC000A] ${
                       totalPulse ? "cart-total-pulse" : ""
                     }`}
                   >
@@ -505,7 +505,7 @@ const CartPage = () => {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
                   Gợi ý thêm
                 </p>
-                <h2 className="mt-2 font-teko text-3xl font-bold leading-none tracking-[-0.02em] text-[#1A1B1F] sm:text-4xl">
+                <h2 className="mt-2 font-heading text-3xl font-bold leading-none tracking-[-0.02em] text-[#1A1B1F] sm:text-4xl">
                   Sản phẩm gợi ý
                 </h2>
               </div>

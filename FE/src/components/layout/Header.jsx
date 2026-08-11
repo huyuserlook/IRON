@@ -18,7 +18,7 @@ const PRESS_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 const SCROLL_EASE = "ease-[cubic-bezier(0.22,1,0.36,1)]";
 
 const Header = () => {
-  const { user, isAuthenticated, isAdmin, handleLogout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isStaff, handleLogout } = useAuth();
   const { count } = useCart();
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,13 +80,13 @@ const Header = () => {
   const buttonOutline = "border-transparent";
 
   const NAV_GAP = scrolled
-    ? "gap-3 lg:gap-4 xl:gap-5"
-    : "gap-4 lg:gap-5 xl:gap-6";
+    ? "gap-6 lg:gap-7 xl:gap-8"
+    : "gap-7 lg:gap-8 xl:gap-8";
   const NAV_FONT = scrolled
     ? "text-sm lg:text-sm xl:text-sm"
     : "text-sm lg:text-base xl:text-base";
   const NAV_PY = "py-1";
-  const NAV_TRACK = scrolled ? "tracking-[0.04em]" : "tracking-[0.05em]";
+  const NAV_TRACK = scrolled ? "tracking-[0.05em]" : "tracking-[0.06em]";
 
   const BTN_SCALE = "scale-[0.96]";
   const ICON_SIZE = 18;
@@ -106,7 +106,7 @@ const Header = () => {
       className={`${headerPosition} z-50 transition-all duration-500 ${SCROLL_EASE} ${headerSurface}`}
     >
       <div
-        className={`max-w-7xl mx-auto px-3 sm:px-4 flex items-center justify-between transition-all duration-500 ${SCROLL_EASE} ${
+        className={`max-w-7xl mx-auto px-3 sm:px-4 flex items-center gap-10 transition-all duration-500 ${SCROLL_EASE} ${
           scrolled ? "h-10 sm:h-12" : "h-14 sm:h-16 md:h-[68px]"
         }`}
       >
@@ -117,73 +117,78 @@ const Header = () => {
         >
           <IronLogo size="sm" onClick={handleHomeClick} />
         </div>
-        <nav
-          className={`hidden md:flex items-center ${NAV_GAP} font-teko ${NAV_FONT} uppercase ${NAV_TRACK} ${navTextColor} transition-all duration-500 ${SCROLL_EASE}`}
-        >
-          {NAV_LINKS.map((item) => {
-            if (item.isAnchor) {
-              const isContact = item.label === "Liên hệ";
-              const IconComp = isContact ? Phone : Info;
-              return (
-                <a
-                  key={item.to}
-                  href={item.to}
-                  onClick={(e) => handleAnchorClick(e, item.to)}
-                  className={`group relative ${NAV_PY} select-none cursor-pointer transition-[transform,color,filter] duration-250 ${PRESS_EASE} active:scale-[0.94] ${navTextColor} ${navHoverColor}`}
-                >
-                  <span className="inline-block transition-transform duration-250 ease-out group-hover:-translate-y-0.5">
-                    <IconComp
-                      size={14}
-                      className="inline -mt-1 mr-1.5 opacity-80"
-                      strokeWidth={2}
-                    />
-                    {item.label}
-                  </span>
-                  <span className="absolute left-0 -bottom-0.5 h-0.5 bg-iron-yellow rounded-full transition-[width,transform] duration-350 ease-out origin-left w-0 group-hover:w-full" />
-                </a>
-              );
-            }
-            return (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end}
-                onClick={(e) => {
-                  if (item.to === "/" && location.pathname === "/") {
-                    e.preventDefault();
-                    handleHomeClick();
-                  }
-                }}
-                className={({ isActive }) =>
-                  `group relative ${NAV_PY} select-none cursor-pointer transition-[transform,color,filter] duration-250 ${PRESS_EASE} active:scale-[0.94] ${
-                    isActive
-                      ? "text-iron-yellow"
-                      : `${navTextColor} ${navHoverColor}`
-                  }`
-                }
-              >
-                {({ isActive }) => (
-                  <>
-                    <span
-                      className={`inline-block transition-transform duration-250 ease-out ${
-                        isActive ? "" : "group-hover:-translate-y-0.5"
-                      }`}
-                    >
+
+        <div className="hidden md:flex flex-1 items-center justify-center gap-6 lg:gap-8">
+          <nav
+            className={`flex items-center ${NAV_GAP} font-body ${NAV_FONT} uppercase ${NAV_TRACK} ${navTextColor} transition-all duration-500 ${SCROLL_EASE} flex-shrink-0`}
+          >
+            {NAV_LINKS.map((item) => {
+              if (item.isAnchor) {
+                const isContact = item.label === "Liên hệ";
+                const IconComp = isContact ? Phone : Info;
+                return (
+                  <a
+                    key={item.to}
+                    href={item.to}
+                    onClick={(e) => handleAnchorClick(e, item.to)}
+                    className={`group relative ${NAV_PY} select-none cursor-pointer transition-[transform,color,filter] duration-250 ${PRESS_EASE} active:scale-[0.94] ${navTextColor} ${navHoverColor} whitespace-nowrap`}
+                  >
+                    <span className="inline-block transition-transform duration-250 ease-out group-hover:-translate-y-0.5">
+                      <IconComp
+                        size={14}
+                        className="inline -mt-1 mr-1.5 opacity-80"
+                        strokeWidth={2}
+                      />
                       {item.label}
                     </span>
-                    <span
-                      className={`absolute left-0 -bottom-0.5 h-0.5 bg-iron-yellow rounded-full transition-[width,transform] duration-350 ease-out origin-left ${
-                        isActive ? "w-full" : "w-0 group-hover:w-full"
-                      }`}
-                    />
-                  </>
-                )}
-              </NavLink>
-            );
-          })}
-        </nav>
+                    <span className="absolute left-0 -bottom-0.5 h-0.5 bg-iron-yellow rounded-full transition-[width,transform] duration-350 ease-out origin-left w-0 group-hover:w-full" />
+                  </a>
+                );
+              }
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  onClick={(e) => {
+                    if (item.to === "/" && location.pathname === "/") {
+                      e.preventDefault();
+                      handleHomeClick();
+                    }
+                  }}
+                  className={({ isActive }) =>
+                    `group relative ${NAV_PY} select-none cursor-pointer transition-[transform,color,filter] duration-250 ${PRESS_EASE} active:scale-[0.94] whitespace-nowrap ${
+                      isActive
+                        ? "text-iron-yellow"
+                        : `${navTextColor} ${navHoverColor}`
+                    }`
+                  }
+                >
+                  {({ isActive }) => (
+                    <>
+                      <span
+                        className={`inline-block transition-transform duration-250 ease-out ${
+                          isActive ? "" : "group-hover:-translate-y-0.5"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                      <span
+                        className={`absolute left-0 -bottom-0.5 h-0.5 bg-iron-yellow rounded-full transition-[width,transform] duration-350 ease-out origin-left ${
+                          isActive ? "w-full" : "w-0 group-hover:w-full"
+                        }`}
+                      />
+                    </>
+                  )}
+                </NavLink>
+              );
+            })}
+          </nav>
 
-        <SearchBar />
+          <div className="max-w-xs lg:max-w-sm w-full">
+            <SearchBar />
+          </div>
+        </div>
 
         <div
           className={`flex items-center gap-2 sm:gap-3 transition-transform duration-500 ${SCROLL_EASE} ${BTN_SCALE} origin-right`}
@@ -217,6 +222,14 @@ const Header = () => {
                   className={`select-none cursor-pointer text-xs sm:text-sm bg-black/30 hover:bg-black/50 ${LOGIN_PX} rounded-lg transition-[transform,background-color,box-shadow,filter] duration-250 ease-out hover:scale-[1.05] active:scale-[0.93] active:brightness-90 hover:shadow-lg hover:shadow-black/30 font-medium whitespace-nowrap`}
                 >
                   Admin
+                </Link>
+              )}
+              {isStaff && !isAdmin && (
+                <Link
+                  to="/staff/dashboard"
+                  className={`select-none cursor-pointer text-xs sm:text-sm bg-black/30 hover:bg-black/50 ${LOGIN_PX} rounded-lg transition-[transform,background-color,box-shadow,filter] duration-250 ease-out hover:scale-[1.05] active:scale-[0.93] active:brightness-90 hover:shadow-lg hover:shadow-black/30 font-medium whitespace-nowrap`}
+                >
+                  Nhân viên
                 </Link>
               )}
               <Link
@@ -262,7 +275,7 @@ const Header = () => {
               <Link
                 to="/login"
                 state={{ from: location }}
-                className={`select-none cursor-pointer bg-iron-yellow text-black ${LOGIN_PX} rounded-lg transition-[transform,box-shadow,filter] duration-250 ease-out font-teko ${LOGIN_TEXT} hover:brightness-110 hover:scale-[1.05] active:scale-[0.93] active:brightness-95 hover:shadow-[0_6px_20px_-4px_rgba(255,235,0,0.6)] whitespace-nowrap ${LOGIN_ICON}`}
+                className={`select-none cursor-pointer bg-iron-yellow text-black ${LOGIN_PX} rounded-lg transition-[transform,box-shadow,filter] duration-250 ease-out font-body ${LOGIN_TEXT} hover:brightness-110 hover:scale-[1.05] active:scale-[0.93] active:brightness-95 hover:shadow-[0_6px_20px_-4px_rgba(255,235,0,0.6)] whitespace-nowrap ${LOGIN_ICON}`}
               >
                 Đăng nhập
               </Link>
@@ -312,7 +325,7 @@ const Header = () => {
         }`}
       >
         <div
-          className={`px-4 pb-5 pt-2 flex flex-col gap-2 font-teko text-lg uppercase bg-iron-accent/95 backdrop-blur-xl border-t border-white/10 transition-all duration-500 ${
+          className={`px-4 pb-5 pt-2 flex flex-col gap-2 font-body text-lg uppercase bg-iron-accent/95 backdrop-blur-xl border-t border-white/10 transition-all duration-500 ${
             menuOpen ? "translate-y-0" : "-translate-y-4"
           }`}
         >
@@ -437,7 +450,7 @@ const Header = () => {
                 to="/login"
                 state={{ from: location }}
                 onClick={() => setMenuOpen(false)}
-                className="w-full text-center select-none cursor-pointer bg-iron-yellow text-black px-5 py-3 rounded-xl font-teko text-2xl transition-[transform,filter,box-shadow] duration-250 ease-out hover:brightness-110 active:scale-[0.97] active:brightness-95 active:translate-y-px hover:shadow-[0_6px_24px_-4px_rgba(255,235,0,0.55)]"
+                className="w-full text-center select-none cursor-pointer bg-iron-yellow text-black px-5 py-3 rounded-xl font-body text-2xl transition-[transform,filter,box-shadow] duration-250 ease-out hover:brightness-110 active:scale-[0.97] active:brightness-95 active:translate-y-px hover:shadow-[0_6px_24px_-4px_rgba(255,235,0,0.55)]"
               >
                 Đăng nhập
               </Link>

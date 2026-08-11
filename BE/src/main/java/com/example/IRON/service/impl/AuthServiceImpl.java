@@ -84,11 +84,16 @@ public class AuthServiceImpl implements AuthService {
                     return roleRepository.save(newRole);
                 });
 
-        // Đảm bảo ROLE_ADMIN cũng tồn tại nếu cần
+        // Đảm bảo ROLE_ADMIN và ROLE_STAFF cũng tồn tại nếu cần
         if (roleRepository.findByName(Role.RoleName.ROLE_ADMIN).isEmpty()) {
             Role adminRole = new Role();
             adminRole.setName(Role.RoleName.ROLE_ADMIN);
             roleRepository.save(adminRole);
+        }
+        if (roleRepository.findByName(Role.RoleName.ROLE_STAFF).isEmpty()) {
+            Role staffRole = new Role();
+            staffRole.setName(Role.RoleName.ROLE_STAFF);
+            roleRepository.save(staffRole);
         }
 
         User user = new User();
@@ -139,13 +144,23 @@ public class AuthServiceImpl implements AuthService {
                     newUser.setProviderId(request.getProviderId());
                     newUser.setEnabled(true);
 
-                    Role userRole = roleRepository.findByName(Role.RoleName.ROLE_USER)
-                            .orElseGet(() -> {
-                                Role newRole = new Role();
-                                newRole.setName(Role.RoleName.ROLE_USER);
-                                return roleRepository.save(newRole);
-                            });
-                     newUser.setRoles(Set.of(userRole));
+                     Role userRole = roleRepository.findByName(Role.RoleName.ROLE_USER)
+                             .orElseGet(() -> {
+                                 Role newRole = new Role();
+                                 newRole.setName(Role.RoleName.ROLE_USER);
+                                 return roleRepository.save(newRole);
+                             });
+                     if (roleRepository.findByName(Role.RoleName.ROLE_STAFF).isEmpty()) {
+                         Role staffRole = new Role();
+                         staffRole.setName(Role.RoleName.ROLE_STAFF);
+                         roleRepository.save(staffRole);
+                     }
+                     if (roleRepository.findByName(Role.RoleName.ROLE_ADMIN).isEmpty()) {
+                         Role adminRole = new Role();
+                         adminRole.setName(Role.RoleName.ROLE_ADMIN);
+                         roleRepository.save(adminRole);
+                     }
+                      newUser.setRoles(Set.of(userRole));
                       return userRepository.save(newUser);
                  });
 

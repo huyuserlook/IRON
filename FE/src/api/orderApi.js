@@ -7,6 +7,9 @@ const orderApi = {
   cancel: (id) => axiosClient.patch(`/orders/${id}/cancel`),
   getStatus: (id) => axiosClient.get(`/orders/${id}/status`),
 
+  // Deposit
+  getDepositByOrderId: (orderId) => axiosClient.get(`/deposits/order/${orderId}`),
+
   // Admin
   getAllAdmin: (params) => axiosClient.get("/admin/orders", { params }),
   getByIdAdmin: (id) => axiosClient.get(`/admin/orders/${id}`),

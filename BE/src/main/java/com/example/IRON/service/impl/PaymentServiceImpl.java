@@ -37,12 +37,14 @@ public class PaymentServiceImpl implements PaymentService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
 
-        Payment payment = new Payment();
-        payment.setOrder(order);
+        Payment payment = paymentRepository.findByOrderId(orderId).orElse(null);
+        if (payment == null) {
+            payment = new Payment();
+            payment.setOrder(order);
+        }
         payment.setAmount(order.getTotalAmount());
         payment.setPaymentMethod(Payment.PaymentMethod.valueOf(method));
         payment.setStatus(Payment.PaymentStatus.PENDING);
-
         return paymentRepository.save(payment);
     }
 
@@ -145,7 +147,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Order order = payment.getOrder();
         if (order != null && order.getStatus() == Order.OrderStatus.PENDING) {
-            order.setStatus(Order.OrderStatus.CONFIRMED);
+            order.setStatus(Order.OrderStatus.COMPLETED);
             orderRepository.save(order);
         }
 
@@ -166,7 +168,7 @@ public class PaymentServiceImpl implements PaymentService {
 
         Order order = payment.getOrder();
         if (order != null && order.getStatus() == Order.OrderStatus.PENDING) {
-            order.setStatus(Order.OrderStatus.CONFIRMED);
+            order.setStatus(Order.OrderStatus.COMPLETED);
             orderRepository.save(order);
         }
 

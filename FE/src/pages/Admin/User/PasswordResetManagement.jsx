@@ -2,11 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import userApi from "../../../api/userApi";
 import { formatDateTime } from "../../../utils/formatDate";
 import toast from "react-hot-toast";
-import { ShieldCheck, ShieldX } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 const PasswordResetManagement = () => {
   const [data, setData] = useState({ content: [], totalPages: 0 });
-  const [page, setPage] = useState(0);
+  const [page] = useState(0);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null);
 

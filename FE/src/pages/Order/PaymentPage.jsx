@@ -70,7 +70,7 @@ const PaymentPage = () => {
       try {
         const res = await orderApi.getStatus(orderId);
         const data = res.data?.data || res.data;
-        if (data?.status === "CONFIRMED" || data?.paymentStatus === "PAID" || data?.status === "paid") {
+        if (data?.status === "CONFIRMED" || data?.status === "COMPLETED" || data?.paymentStatus === "PAID" || data?.status === "paid") {
           setPaid(true);
           setPolling(false);
           setFallbackPolling(false);

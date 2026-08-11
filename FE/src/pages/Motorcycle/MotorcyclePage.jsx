@@ -391,7 +391,7 @@ const MotorcyclePage = () => {
               <p className="text-[11px] font-semibold uppercase tracking-[0.34em] text-[#BC000A]">
                 BỘ SƯU TẬP
               </p>
-              <h1 className="mt-3 font-teko text-[clamp(3.2rem,7vw,5.4rem)] font-bold leading-[0.88] tracking-[-0.04em] text-[#1A1B1F]">
+              <h1 className="mt-3 font-heading text-[clamp(3.2rem,7vw,5.4rem)] font-bold leading-[0.95] tracking-[-0.02em] text-[#1A1B1F]">
                 DÒNG XE IRON
               </h1>
               <p className="mt-4 max-w-[760px] text-sm leading-7 text-[#7A6E71] sm:text-[15px]">

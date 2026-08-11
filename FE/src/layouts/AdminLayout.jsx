@@ -28,6 +28,10 @@ const AdminLayout = () => {
   const notifRef = useRef(null);
   const { user, handleLogout } = useAuth();
 
+  const isAdmin = user?.role === "ROLE_ADMIN";
+  const isStaff = user?.role === "ROLE_STAFF";
+  const roleLabel = isAdmin ? "Quản trị viên" : isStaff ? "Nhân viên" : "Người dùng";
+
   const loadNewCount = () => {
     notificationApi
       .getCount()
@@ -212,7 +216,7 @@ const AdminLayout = () => {
               <span className="text-sm font-medium text-slate-700">
                 {user?.fullName}
               </span>
-              <span className="text-xs text-slate-500">Quản trị viên</span>
+              <span className="text-xs text-slate-500">{roleLabel}</span>
             </div>
             <button
               onClick={handleLogout}

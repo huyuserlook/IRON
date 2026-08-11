@@ -37,4 +37,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.resetToken IS NOT NULL AND u.resetTokenApproved = false AND u.deleted = false ORDER BY u.passwordResetRequestedAt DESC")
     Page<User> findPendingPasswordResetRequests(Pageable pageable);
+
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = com.example.IRON.entity.Role.RoleName.ROLE_STAFF AND u.deleted = false")
+    Page<User> findStaffUsers(Pageable pageable);
 }

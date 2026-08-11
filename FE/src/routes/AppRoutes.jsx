@@ -38,6 +38,12 @@ import PasswordResetManagement from "../pages/Admin/User/PasswordResetManagement
 import ReviewManagement from "../pages/Admin/Review/ReviewManagement";
 import ContactManagement from "../pages/Admin/Contact/ContactManagement";
 import StatisticsPage from "../pages/Admin/Statistics/StatisticsPage";
+import StaffManagement from "../pages/Admin/Staff/StaffManagement";
+import DepositManagement from "../pages/Admin/Deposit/DepositManagement";
+
+// Staff pages
+import StaffLayout from "../layouts/StaffLayout";
+import StaffDashboard from "../pages/Staff/StaffDashboard";
 
 const AppRoutes = () => {
   return (
@@ -122,6 +128,22 @@ const AppRoutes = () => {
         />
       </Route>
 
+      {/* Staff routes */}
+      <Route
+        path="/staff"
+        element={
+          <PrivateRoute staffOnly>
+            <StaffLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<StaffDashboard />} />
+        <Route path="orders" element={<OrderManagement />} />
+        <Route path="bookings" element={<BookingManagement />} />
+        <Route path="motorcycles" element={<MotorcycleManagement />} />
+      </Route>
+
       {/* Admin routes */}
       <Route
         path="/admin"
@@ -145,6 +167,8 @@ const AppRoutes = () => {
         <Route path="orders" element={<OrderManagement />} />
         <Route path="bookings" element={<BookingManagement />} />
         <Route path="users" element={<UserManagement />} />
+        <Route path="staff" element={<StaffManagement />} />
+        <Route path="deposits" element={<DepositManagement />} />
         <Route path="password-reset-requests" element={<PasswordResetManagement />} />
         <Route path="reviews" element={<ReviewManagement />} />
         <Route path="contacts" element={<ContactManagement />} />

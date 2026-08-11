@@ -258,13 +258,13 @@ const HomePage = () => {
         className="relative overflow-hidden bg-[#121212] py-32 text-white"
       >
         <div className="absolute inset-y-0 right-0 hidden w-1/2 overflow-hidden lg:block">
-          <p className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[180px] font-teko uppercase tracking-[-0.08em] text-white/10 leading-[0.8] select-none">
+          <p className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[180px] font-heading uppercase tracking-[-0.03em] text-white/10 leading-[0.9] select-none">
             IRON
           </p>
         </div>
         <div className="relative mx-auto max-w-5xl px-4">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="font-teko text-5xl md:text-[5.5rem] font-semibold tracking-[-0.05em] leading-tight">
+            <h2 className="font-heading text-5xl md:text-[5.5rem] font-semibold tracking-[-0.03em] leading-tight">
               Hành trình bắt đầu tại đây
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-base text-white/70 leading-7">

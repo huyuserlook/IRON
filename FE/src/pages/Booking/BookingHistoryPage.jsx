@@ -71,7 +71,7 @@ const BookingHistoryPage = () => {
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
             Tài khoản
           </p>
-          <h1 className="mt-2 font-teko text-[clamp(2.4rem,5vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
+          <h1 className="mt-2 font-heading text-[clamp(2.4rem,5vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
             Lịch sử đặt lái thử
           </h1>
           <p className="mt-3 text-sm leading-7 text-[#7A6E71]">
@@ -93,7 +93,7 @@ const BookingHistoryPage = () => {
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#FAF8FC] text-[#BC000A]">
               <CalendarClock size={34} strokeWidth={1.6} />
             </div>
-            <h2 className="mt-6 font-teko text-4xl font-bold leading-none">
+            <h2 className="mt-6 font-heading text-4xl font-bold leading-none">
               Chưa có lịch đặt lái thử
             </h2>
             <p className="mt-3 max-w-sm text-sm leading-7 text-[#7A6E71]">
@@ -161,7 +161,7 @@ const BookingHistoryPage = () => {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-teko text-xl font-semibold leading-none text-[#1A1B1F]">
+                      <h3 className="font-heading text-xl font-semibold leading-none text-[#1A1B1F]">
                         {booking.motorcycleName}
                       </h3>
                       <p className="mt-1 text-xs text-[#7A6E71]">

@@ -4,7 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        teko: ["Teko", "Inter", "sans-serif"],
+        heading: ['"Barlow Condensed"', 'sans-serif'],
+        body: ['Barlow', 'sans-serif'],
       },
       colors: {
         iron: {

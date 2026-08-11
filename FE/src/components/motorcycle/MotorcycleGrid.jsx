@@ -1,4 +1,4 @@
-import { Bike, ChevronDown, ChevronLeft, ChevronRight, Search, Sparkles } from "lucide-react";
+import { Bike, ChevronDown, ChevronLeft, ChevronRight, Search } from "lucide-react";
 import MotorcycleCard from "./MotorcycleCard";
 
 const MotorcycleGrid = ({
@@ -183,7 +183,7 @@ const MotorcycleGrid = ({
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#F0EDF4] text-[#BC000A]">
               <Bike size={30} />
             </div>
-            <h2 className="mt-5 font-teko text-4xl font-bold leading-none text-[#1A1B1F]">
+            <h2 className="mt-5 font-heading text-4xl font-bold leading-none text-[#1A1B1F]">
               Không có xe phù hợp
             </h2>
             <p className="mt-3 text-sm leading-6 text-[#7A6E71]">

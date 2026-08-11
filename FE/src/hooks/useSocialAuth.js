@@ -77,7 +77,7 @@ export const useSocialAuth = (redirectTo = "/") => {
     }
     setLoadingProvider("google");
     googleLogin();
-  }, [googleLogin, loadingProvider]);
+  }, [googleLogin, loadingProvider, googleClientId]);
 
   return {
     handleGoogleLogin,

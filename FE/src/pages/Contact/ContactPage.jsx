@@ -128,7 +128,7 @@ const ContactPage = () => {
                 <span className="font-semibold text-white">Liên hệ</span>
               </nav>
 
-              <h1 className="contact-rise font-teko text-[clamp(3.1rem,8vw,5.6rem)] font-bold uppercase leading-[0.9] tracking-[-0.04em] text-white">
+              <h1 className="contact-rise font-heading text-[clamp(3.1rem,8vw,5.6rem)] font-bold uppercase leading-[0.9] tracking-[-0.02em] text-white">
                 Liên Hệ Với Chúng Tôi
               </h1>
               <p
@@ -154,7 +154,7 @@ const ContactPage = () => {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
                   Gửi tin nhắn
                 </p>
-                <h2 className="mt-3 font-teko text-4xl font-semibold leading-none text-[#1A1B1F] sm:text-5xl">
+                <h2 className="mt-3 font-heading text-4xl font-semibold leading-none text-[#1A1B1F] sm:text-5xl">
                   Chúng tôi luôn sẵn sàng lắng nghe
                 </h2>
               </div>
@@ -233,7 +233,7 @@ const ContactPage = () => {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
                   Chi nhánh showroom
                 </p>
-                <h2 className="mt-3 font-teko text-4xl font-semibold leading-none text-[#1A1B1F]">
+                <h2 className="mt-3 font-heading text-4xl font-semibold leading-none text-[#1A1B1F]">
                   Kết nối cùng IRON
                 </h2>
               </div>

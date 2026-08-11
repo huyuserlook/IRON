@@ -14,7 +14,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_code", unique = true, length = 20)
+    @Column(name = "order_code", unique = true, length = 100)
     private String orderCode;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -55,7 +55,8 @@ public class Order {
     protected void onUpdate() { this.updatedAt = LocalDateTime.now(); }
 
     public enum OrderStatus {
-        PENDING, CONFIRMED, PROCESSING, SHIPPING, DELIVERED, CANCELLED, REFUNDED
+        PENDING, CONFIRMED, PROCESSING, SHIPPING, DELIVERED, CANCELLED, REFUNDED,
+        DEPOSITED, AWAITING_FINAL_PAYMENT, COMPLETED
     }
 
     public Order() {}

@@ -76,9 +76,11 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderDetails(details);
         Order saved = orderRepository.save(order);
 
-        saved.setOrderCode(String.format("ORD-%s-%04d",
+        String orderCode = String.format("ORD-%s-%04d",
                 saved.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyyMMdd")),
-                saved.getId()));
+                saved.getId());
+        log.warn("[ORDER_CODE_GEN] orderId={}, orderCode length={}, orderCode={}", saved.getId(), orderCode.length(), orderCode);
+        saved.setOrderCode(orderCode);
         orderRepository.save(saved);
 
         Payment payment = new Payment();
@@ -166,7 +168,7 @@ public class OrderServiceImpl implements OrderService {
         OrderResponse response = toResponse(orderRepository.save(order));
         log.info("[STOCK][UPDATE_STATUS] orderId={}, oldStatus={}, newStatus={}", id, oldStatus, status);
 
-        if (oldStatus == Order.OrderStatus.CONFIRMED && status == Order.OrderStatus.CANCELLED) {
+        if ((oldStatus == Order.OrderStatus.CONFIRMED || oldStatus == Order.OrderStatus.COMPLETED) && status == Order.OrderStatus.CANCELLED) {
             for (OrderResponse.OrderItemResponse item : response.getItems()) {
                 log.info("[STOCK][RESTORE] orderId={}, productId={}, qty={}", id, item.getMotorcycleId(), item.getQuantity());
                 motorcycleRepository.restoreStock(item.getMotorcycleId(), item.getQuantity());
@@ -219,7 +221,7 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.deleteById(id);
     }
 
-    private OrderResponse toResponse(Order order) {
+    public OrderResponse toResponse(Order order) {
         List<OrderResponse.OrderItemResponse> items = order.getOrderDetails().stream()
                 .map(d -> OrderResponse.OrderItemResponse.builder()
                         .motorcycleId(d.getMotorcycle().getId())

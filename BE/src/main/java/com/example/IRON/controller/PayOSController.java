@@ -87,8 +87,8 @@ public class PayOSController {
                 }
 
                 if (isPaid && order.getStatus() == Order.OrderStatus.PENDING) {
-                    log.warn("[PayOS return] Order update via OrderService to CONFIRMED. orderId={}", order.getId());
-                    orderService.updateStatus(order.getId(), Order.OrderStatus.CONFIRMED);
+                    log.warn("[PayOS return] Order update via OrderService to COMPLETED. orderId={}", order.getId());
+                    orderService.updateStatus(order.getId(), Order.OrderStatus.COMPLETED);
                 } else {
                     log.warn("[PayOS return] Order update skipped: orderStatus={}, isPaid={}", order.getStatus(), isPaid);
                 }
@@ -151,8 +151,8 @@ public class PayOSController {
                     }
 
                     if (order.getStatus() == Order.OrderStatus.PENDING) {
-                        log.warn("[PayOS check-status] Order update via OrderService to CONFIRMED. orderId={}", order.getId());
-                        orderService.updateStatus(order.getId(), Order.OrderStatus.CONFIRMED);
+                        log.warn("[PayOS check-status] Order update via OrderService to COMPLETED. orderId={}", order.getId());
+                        orderService.updateStatus(order.getId(), Order.OrderStatus.COMPLETED);
                     }
                 } else {
                     log.warn("[PayOS check-status] Order not found for orderCode={}", orderCode);

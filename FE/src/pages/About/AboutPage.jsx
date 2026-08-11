@@ -177,7 +177,7 @@ const AboutPage = () => {
                 </span>
               </nav>
 
-              <h1 className="about-hero-title font-teko text-[clamp(2.4rem,6.5vw,4.8rem)] font-bold uppercase leading-[0.95] text-[#1A1B1F]">
+              <h1 className="about-hero-title font-heading text-[clamp(2.4rem,6.5vw,4.8rem)] font-bold uppercase leading-[0.95] text-[#1A1B1F]">
                 Về Chúng Tôi - IRON Motor
               </h1>
               <span className="about-hero-line mx-auto mt-5 block h-1 w-16 origin-center rounded-full bg-[#BC000A]" />
@@ -191,7 +191,7 @@ const AboutPage = () => {
         <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
           <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-16 xl:gap-24">
             <Reveal direction="left">
-              <h2 className="font-teko text-[clamp(2rem,4.5vw,3.4rem)] font-bold uppercase leading-[1.05] tracking-[-0.02em] text-[#1A1B1F]">
+              <h2 className="font-heading text-[clamp(2rem,4.5vw,3.4rem)] font-bold uppercase leading-[1.05] tracking-[-0.02em] text-[#1A1B1F]">
                 Hành trình của
                 <br />
                 <span className="text-[#BC000A]">độ chính xác</span>
@@ -227,7 +227,7 @@ const AboutPage = () => {
 
         <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-12">
           <Reveal className="text-center">
-            <h2 className="font-teko text-[clamp(2.2rem,5vw,3.6rem)] font-bold uppercase tracking-[-0.02em] text-[#1A1B1F]">
+            <h2 className="font-heading text-[clamp(2.2rem,5vw,3.6rem)] font-bold uppercase tracking-[-0.02em] text-[#1A1B1F]">
               Giá trị cốt lõi
             </h2>
             <span className="mx-auto mt-4 block h-1 w-14 rounded-full bg-[#BC000A]" />
@@ -260,7 +260,7 @@ const AboutPage = () => {
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#FFEB00]">
             Sẵn sàng trải nghiệm
           </p>
-          <h2 className="mt-4 font-teko text-[clamp(2.2rem,5vw,3.8rem)] font-semibold uppercase leading-tight tracking-[-0.03em]">
+          <h2 className="mt-4 font-heading text-[clamp(2.2rem,5vw,3.8rem)] font-semibold uppercase leading-tight tracking-[-0.03em]">
             Khám phá dòng xe IRON
           </h2>
           <p className="mx-auto mt-5 max-w-xl text-base leading-7 text-white/70">

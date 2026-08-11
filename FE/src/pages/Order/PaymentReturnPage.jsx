@@ -16,29 +16,9 @@ const PaymentReturnPage = () => {
     }
 
     const resolveOrderId = async () => {
-      try {
-        const res = await fetch(`/api/payments/payos/order-code/${encodeURIComponent(payosOrderCode)}`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error("Không tìm thấy đơn hàng");
-        }
-
-        const result = await res.json();
-        const orderId = result?.data?.orderId;
-        if (!orderId) {
-          throw new Error("Thiếu orderId");
-        }
-
-        setTimeout(() => {
-          navigate(`/payment?orderId=${orderId}`, { replace: true });
-        }, 800);
-      } catch (err) {
-        setError(err.message || "Lỗi khi xử lý thanh toán");
-      }
+      setTimeout(() => {
+        navigate("/my-orders", { replace: true });
+      }, 800);
     };
 
     resolveOrderId();

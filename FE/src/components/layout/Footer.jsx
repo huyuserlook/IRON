@@ -22,7 +22,7 @@ const Footer = () => {
             >
               <IronLogo size="lg" className="animate-float" asLink={false} />
             </button>
-            <p className="max-w-md text-base leading-7 font-inter text-[#5F5E5E]">
+            <p className="max-w-md text-base leading-7 font-body text-[#5F5E5E]">
               Showroom phân phối mô tô phân khối lớn cao cấp hàng đầu Việt Nam.
               Nơi niềm đam mê và kỹ thuật hội tụ.
             </p>
@@ -55,7 +55,7 @@ const Footer = () => {
             <p className="text-[#1A1B1F] font-jetBrainsMono text-xs font-bold uppercase tracking-[0.1em]">
               LIÊN KẾT NHANH
             </p>
-            <div className="grid gap-4 text-base font-inter">
+            <div className="grid gap-4 text-base font-body">
               <Link
                 to="/motorcycles"
                 className="transition-colors hover:text-[#BC000A]"
@@ -87,7 +87,7 @@ const Footer = () => {
             <p className="text-[#1A1B1F] font-jetBrainsMono text-xs font-bold uppercase tracking-[0.1em]">
               HỖ TRỢ
             </p>
-            <div className="grid gap-4 text-base font-inter">
+            <div className="grid gap-4 text-base font-body">
               <Link
                 to="/warranty"
                 className="transition-colors hover:text-[#BC000A]"
@@ -119,7 +119,7 @@ const Footer = () => {
             <p className="text-[#1A1B1F] font-jetBrainsMono text-xs font-bold uppercase tracking-[0.1em]">
               ĐỊA CHỈ SHOWROOM
             </p>
-            <div className="grid gap-4 text-base font-inter">
+            <div className="grid gap-4 text-base font-body">
               <p className="text-[#5F5E5E] leading-6">
                 123 Racing District, Hanoi, VN
               </p>
@@ -132,7 +132,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-[#F1D98A] pt-12">
-          <div className="flex flex-col items-center justify-between gap-4 text-sm font-inter text-[#5F5E5E] sm:flex-row">
+          <div className="flex flex-col items-center justify-between gap-4 text-sm font-body text-[#5F5E5E] sm:flex-row">
             <p className="text-center sm:text-left">
               © 2024 IRON MOTORCYCLES. ALL RIGHTS RESERVED.
             </p>

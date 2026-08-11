@@ -15,7 +15,7 @@ public class Role {
     private RoleName name;
 
     public enum RoleName {
-        ROLE_USER, ROLE_ADMIN
+        ROLE_USER, ROLE_ADMIN, ROLE_STAFF
     }
 
     public Role() {}

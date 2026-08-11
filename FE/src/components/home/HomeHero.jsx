@@ -202,7 +202,7 @@ const HomeHero = ({ resetTrigger }) => {
           }`}
         >
           <p
-            className="font-teko font-bold uppercase leading-none tracking-tight text-[clamp(5rem,22vw,28rem)] text-transparent bg-clip-text"
+            className="font-heading font-bold uppercase leading-none tracking-tight text-[clamp(5rem,22vw,28rem)] text-transparent bg-clip-text"
             style={{
               backgroundImage:
                 "linear-gradient(180deg, rgba(255,255,255,0.38) 0%, rgba(255,255,255,0.02) 100%)",
@@ -234,7 +234,7 @@ const HomeHero = ({ resetTrigger }) => {
         <div className="relative z-20 mt-2 flex flex-col items-center gap-5 sm:gap-6">
           <Link
             to="/motorcycles"
-            className="group inline-flex items-center justify-center rounded-xl bg-white px-8 py-3.5 sm:px-10 sm:py-4 font-teko text-2xl sm:text-[36px] font-medium leading-none tracking-wide text-iron-dark shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
+            className="group inline-flex items-center justify-center rounded-xl bg-white px-8 py-3.5 sm:px-10 sm:py-4 font-body text-2xl sm:text-[36px] font-medium leading-none tracking-wide text-iron-dark shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl"
           >
             XEM CHI TIẾT
           </Link>
@@ -300,7 +300,7 @@ const HomeHero = ({ resetTrigger }) => {
         <button
           type="button"
           onClick={() => goTo(index + 1, "right")}
-          className="font-teko group text-right"
+          className="font-heading group text-right"
           aria-label="Slide tiếp"
         >
           <span key={`counter-${animKey}`} className="animate-hero-counter-fade inline-flex items-baseline will-change-transform">

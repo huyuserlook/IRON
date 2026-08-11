@@ -71,7 +71,7 @@ const UserProfilePage = () => {
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
             Tài khoản
           </p>
-          <h1 className="mt-2 font-teko text-[clamp(2.4rem,5vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
+          <h1 className="mt-2 font-heading text-[clamp(2.4rem,5vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
             Trang cá nhân
           </h1>
           <p className="mt-3 text-sm leading-7 text-[#7A6E71]">
@@ -111,12 +111,12 @@ const UserProfilePage = () => {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <h2 className="font-teko text-[2rem] font-bold leading-none tracking-[-0.02em]">
+                    <h2 className="font-heading text-[2rem] font-bold leading-none tracking-[-0.02em]">
                       {displayUser?.fullName || "Người dùng"}
                     </h2>
                     {displayUser?.role && (
                       <span className="mt-1 inline-flex rounded-full bg-[#BC000A]/10 px-3 py-1 text-xs font-semibold text-[#BC000A]">
-                        {displayUser.role === "ADMIN" ? "Quản trị viên" : "Khách hàng"}
+                        {displayUser.role === "ROLE_ADMIN" ? "Quản trị viên" : displayUser.role === "ROLE_STAFF" ? "Nhân viên" : "Khách hàng"}
                       </span>
                     )}
                   </div>
@@ -158,7 +158,7 @@ const UserProfilePage = () => {
                   <Package size={22} strokeWidth={1.8} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-teko text-lg font-bold leading-none">Đơn hàng</p>
+                  <p className="text-lg font-bold leading-none">Đơn hàng</p>
                   <p className="mt-1 text-xs text-[#7A6E71]">Xem lịch sử mua xe</p>
                 </div>
                 <ChevronRight size={16} className="shrink-0 text-[#7A6E71] transition-transform duration-300 group-hover:translate-x-1" />
@@ -173,7 +173,7 @@ const UserProfilePage = () => {
                   <CalendarClock size={22} strokeWidth={1.8} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-teko text-lg font-bold leading-none">Lái thử</p>
+                  <p className="text-lg font-bold leading-none">Lái thử</p>
                   <p className="mt-1 text-xs text-[#7A6E71]">Lịch sử đặt lái thử</p>
                 </div>
                 <ChevronRight size={16} className="shrink-0 text-[#7A6E71] transition-transform duration-300 group-hover:translate-x-1" />
@@ -188,7 +188,7 @@ const UserProfilePage = () => {
                   <Settings size={22} strokeWidth={1.8} />
                 </div>
                 <div className="min-w-0">
-                  <p className="font-teko text-lg font-bold leading-none">Cài đặt tài khoản</p>
+                  <p className="text-lg font-bold leading-none">Cài đặt tài khoản</p>
                   <p className="mt-1 text-xs text-[#7A6E71]">Thay đổi thông tin cá nhân</p>
                 </div>
                 <ChevronRight size={16} className="shrink-0 text-[#7A6E71] transition-transform duration-300 group-hover:translate-x-1" />
@@ -200,7 +200,7 @@ const UserProfilePage = () => {
               style={{ animationDelay: "320ms" }}
             >
               <div className="border-b border-[#EEEAF1] px-6 py-4 sm:px-8">
-                <h3 className="font-teko text-xl font-bold">Hoạt động gần đây</h3>
+                <h3 className="font-heading text-xl font-bold">Hoạt động gần đây</h3>
               </div>
               <div className="space-y-3 px-6 py-4 sm:px-8">
                 <div className="flex items-start gap-3 rounded-[12px] bg-[#FAF8FC] px-4 py-3">

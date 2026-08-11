@@ -13,6 +13,7 @@ const STATUSES = [
   "PROCESSING",
   "SHIPPING",
   "DELIVERED",
+  "COMPLETED",
   "CANCELLED",
 ];
 

@@ -11,6 +11,9 @@ public interface UserService {
     UserResponse updateProfile(Long userId, UpdateProfileRequest request);
     UserResponse toResponse(User user);
     Page<UserResponse> getAllUsers(Pageable pageable);
+    Page<UserResponse> getStaffUsers(Pageable pageable);
+    UserResponse createStaff(String fullName, String email, String rawPassword, String phone);
+    UserResponse updateUserRole(Long actorId, String actorEmail, Long targetId, String newRole, String note);
     void toggleUserStatus(Long userId);
     void deleteUser(Long userId);
     void approvePasswordReset(Long userId);

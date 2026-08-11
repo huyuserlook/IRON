@@ -116,7 +116,7 @@ const AccountSettingsPage = () => {
           <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
             Tài khoản
           </p>
-          <h1 className="mt-2 font-teko text-[clamp(2.4rem,5vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
+          <h1 className="mt-2 font-heading text-[clamp(2.4rem,5vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
             Cài đặt tài khoản
           </h1>
           <p className="mt-3 text-sm leading-7 text-[#7A6E71]">
@@ -145,12 +145,12 @@ const AccountSettingsPage = () => {
                 )}
               </div>
               <div className="space-y-2">
-                <h2 className="font-teko text-2xl font-bold leading-none">
+                <h2 className="font-heading text-2xl font-bold leading-none">
                   {displayUser?.fullName || "Người dùng"}
                 </h2>
                 {displayUser?.role && (
                   <span className="inline-flex rounded-full bg-[#BC000A]/10 px-3 py-1 text-xs font-semibold text-[#BC000A]">
-                    {displayUser.role === "ADMIN" ? "Quản trị viên" : "Khách hàng"}
+                    {displayUser.role === "ROLE_ADMIN" ? "Quản trị viên" : displayUser.role === "ROLE_STAFF" ? "Nhân viên" : "Khách hàng"}
                   </span>
                 )}
                 <p className="text-xs text-[#7A6E71]">
@@ -170,7 +170,7 @@ const AccountSettingsPage = () => {
             style={{ animationDelay: "120ms" }}
           >
             <div className="border-b border-[#EEEAF1] px-6 py-4 sm:px-8">
-              <h3 className="font-teko text-xl font-bold">Thông tin cá nhân</h3>
+              <h3 className="font-heading text-xl font-bold">Thông tin cá nhân</h3>
               <p className="mt-1 text-xs text-[#7A6E71]">
                 Các thay đổi sẽ được lưu ngay lập tức.
               </p>

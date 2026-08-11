@@ -67,7 +67,7 @@ const MotorcycleCard = ({
           <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[#7A6E71]">
             {moto.category?.name || moto.categoryName || "Dòng xe"}
           </p>
-          <h3 className="mt-2 line-clamp-2 font-teko text-[1.45rem] font-bold leading-[0.95] tracking-[-0.03em] text-[#1A1B1F]">
+          <h3 className="mt-2 line-clamp-2 font-heading text-[1.45rem] font-bold leading-[0.95] tracking-[-0.03em] text-[#1A1B1F]">
             {moto.name || "IRON"}
           </h3>
         </div>

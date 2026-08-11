@@ -236,7 +236,7 @@ const BookingPage = () => {
               ĐĂNG KÝ LÁI THỬ
             </p>
             <h1
-              className="booking-rise mt-4 font-teko text-[clamp(3.5rem,8vw,5.8rem)] font-bold leading-[0.88] tracking-[-0.03em] text-white"
+              className="booking-rise mt-4 font-heading text-[clamp(3.5rem,8vw,5.8rem)] font-bold leading-[0.95] tracking-[-0.01em] text-white"
               style={{ animationDelay: "90ms" }}
             >
               <span className="block">TRẢI NGHIỆM SỨC</span>
@@ -333,7 +333,7 @@ const BookingPage = () => {
                           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#BC000A]">
                             Bước 1
                           </p>
-                          <h2 className="mt-2 font-teko text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
+                          <h2 className="mt-2 font-heading text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
                             Bạn muốn lái thử dòng xe nào?
                           </h2>
                           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#5E3F3B]">
@@ -375,7 +375,7 @@ const BookingPage = () => {
                                   {selectedMotorcycle.category?.name ||
                                     "Dòng xe"}
                                 </p>
-                                <h3 className="mt-2 font-teko text-4xl font-semibold leading-none text-[#1A1B1F]">
+                                <h3 className="mt-2 font-heading text-4xl font-semibold leading-none text-[#1A1B1F]">
                                   {selectedMotorcycle.name}
                                 </h3>
                                 <p className="mt-3 text-sm leading-6 text-[#5E3F3B]">
@@ -419,7 +419,7 @@ const BookingPage = () => {
                             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#BC000A]">
                               Chưa có mẫu xe
                             </p>
-                            <h3 className="mt-3 font-teko text-3xl font-semibold text-[#1A1B1F]">
+                              <h3 className="mt-3 font-heading text-3xl font-semibold text-[#1A1B1F]">
                               Hãy chọn xe trước khi đặt lịch
                             </h3>
                             <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-[#5E3F3B]">
@@ -429,7 +429,7 @@ const BookingPage = () => {
                             </p>
                             <Link
                               to="/motorcycles"
-                              className="mt-6 inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-inter text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)]"
+                              className="mt-6 inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-body text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)]"
                             >
                               Chọn xe ngay
                               <ArrowRight size={16} />
@@ -448,7 +448,7 @@ const BookingPage = () => {
                             }
                             setStep(2);
                           }}
-                          className="inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-inter text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)]"
+                          className="inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-body text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)]"
                         >
                           TIẾP TỤC
                           <ArrowRight size={16} />
@@ -461,7 +461,7 @@ const BookingPage = () => {
                     <div className={stepTransitionClass}>
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h2 className="font-teko text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
+                          <h2 className="font-heading text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
                             Chọn thời gian bạn mong muốn
                           </h2>
                           <p className="mt-2 max-w-xl text-sm leading-6 text-[#5E3F3B]">
@@ -571,7 +571,7 @@ const BookingPage = () => {
                             }
                             setStep(3);
                           }}
-                          className="inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-inter text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)]"
+                          className="inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-body text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)]"
                         >
                           TIẾP TỤC
                           <ArrowRight size={16} />
@@ -587,7 +587,7 @@ const BookingPage = () => {
                     >
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <h2 className="font-teko text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
+                          <h2 className="font-heading text-[clamp(1.9rem,3vw,2.55rem)] font-semibold leading-[1.05] text-[#1A1B1F]">
                             Nhập thông tin liên hệ
                           </h2>
                           <p className="mt-2 max-w-xl text-sm leading-6 text-[#5E3F3B]">
@@ -700,7 +700,7 @@ const BookingPage = () => {
                         <button
                           type="submit"
                           disabled={loading}
-                          className="inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-inter text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex items-center gap-2 rounded-[6px] bg-[#BC000A] px-6 py-4 font-body text-base font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_32px_-18px_rgba(188,0,10,0.55)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {loading ? "ĐANG XỬ LÝ..." : "XÁC NHẬN ĐẶT LỊCH"}
                           <ArrowRight size={16} />
@@ -712,7 +712,7 @@ const BookingPage = () => {
               </div>
 
               <aside className="border-t border-[#E3E2E7] bg-white px-6 py-8 lg:border-l lg:border-t-0 lg:px-8 lg:py-12">
-                <h3 className="font-teko text-2xl font-bold leading-none text-[#1A1B1F]">
+                <h3 className="font-heading text-2xl font-bold leading-none text-[#1A1B1F]">
                   ĐẶC QUYỀN LÁI THỬ
                 </h3>
 

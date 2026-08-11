@@ -8,7 +8,6 @@ import {
   Loader2,
   AlertTriangle,
 } from "lucide-react";
-import html2canvas from "html2canvas";
 import ExcelJS from "exceljs";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -17,21 +16,6 @@ import toast from "react-hot-toast";
 const currentYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: currentYear - 2020 + 1 }, (_, i) => currentYear - i);
 const monthOptions = Array.from({ length: 12 }, (_, i) => i + 1);
-
-const dataUrlToBuffer = (dataUrl) => {
-  try {
-    const base64 = dataUrl.replace(/^data:image\/\w+;base64,/, "");
-    const binary = atob(base64);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) {
-      bytes[i] = binary.charCodeAt(i);
-    }
-    return bytes.buffer;
-  } catch (e) {
-    console.error("Failed to convert data URL to buffer:", e);
-    return null;
-  }
-};
 
 const captureChartImages = async (chartRefs) => {
   const images = {};
@@ -197,7 +181,7 @@ const StatisticsPage = () => {
     try {
       const chartImages = await captureChartImages(chartRefs);
       if (type === "excel") {
-        await exportExcel(chartData, topMotorcycles, summary, filterLabel, chartImages);
+        await exportExcel(chartData, topMotorcycles, summary, filterLabel);
       } else {
         await exportPDF(chartData, topMotorcycles, summary, filterLabel, chartImages);
       }
@@ -210,7 +194,7 @@ const StatisticsPage = () => {
     }
   };
 
-  const exportExcel = async (chartData, topMotorcycles, summary, filterLabel, chartImages) => {
+  const exportExcel = async (chartData, topMotorcycles, summary, filterLabel) => {
     try {
       const workbook = new ExcelJS.Workbook();
       workbook.creator = "IRON Admin";

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   CalendarClock,
@@ -7,10 +7,13 @@ import {
   Receipt,
   ShoppingBag,
   CheckCircle,
+  Wallet,
+  Clock,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import orderApi from "../../api/orderApi";
 import paymentApi from "../../api/paymentApi";
+import depositApi from "../../api/depositApi";
 import { ORDER_STATUS, PAYMENT_METHOD } from "../../utils/constants";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDateTime } from "../../utils/formatDate";
@@ -23,27 +26,53 @@ const STATUS_STYLES = {
   DELIVERED: "bg-emerald-50 text-emerald-700 border-emerald-200",
   CANCELLED: "bg-red-50 text-red-700 border-red-200",
   REFUNDED: "bg-gray-100 text-gray-600 border-gray-200",
+  DEPOSITED: "bg-yellow-50 text-yellow-700 border-yellow-200",
+  AWAITING_FINAL_PAYMENT: "bg-amber-50 text-amber-700 border-amber-200",
+  COMPLETED: "bg-emerald-50 text-emerald-700 border-emerald-200",
 };
 
 const OrderHistoryPage = () => {
   const [data, setData] = useState({ content: [] });
   const [loading, setLoading] = useState(true);
   const [paymentMap, setPaymentMap] = useState({});
+  const [depositMap, setDepositMap] = useState({});
+  const navigate = useNavigate();
 
   const load = () => {
     setLoading(true);
     return orderApi
       .getMyOrders({ page: 0, size: 20 })
       .then((res) => {
-        const payload = res?.data ?? res;
-        setData(payload || { content: [] });
+        const payload = res?.data?.data ?? res?.data ?? res;
+        let content = [];
+        if (payload && typeof payload === "object") {
+          content = Array.isArray(payload.content) ? payload.content : (Array.isArray(payload) ? payload : []);
+        }
+        setData({ ...(payload || {}), content });
       })
+      .catch(() => setData({ content: [] }))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
     load();
   }, []);
+
+  useEffect(() => {
+    if (!Array.isArray(data.content)) return;
+    data.content.forEach((order) => {
+      if ((order.status === "DEPOSITED" || order.status === "AWAITING_FINAL_PAYMENT") && !depositMap[order.id]) {
+        depositApi.getDepositByOrderId(order.id)
+          .then((res) => {
+            const deposit = res?.data?.data || res?.data;
+            if (deposit && typeof deposit === "object") {
+              setDepositMap((prev) => ({ ...prev, [order.id]: deposit }));
+            }
+          })
+          .catch(() => {});
+      }
+    });
+  }, [data.content, depositMap]);
 
   const handleCancel = async (id) => {
     if (!confirm("Bạn có chắc muốn hủy đơn hàng này?")) return;
@@ -53,6 +82,17 @@ const OrderHistoryPage = () => {
       load();
     } catch {
       toast.error("Không thể hủy đơn hàng này");
+    }
+  };
+
+  const handlePayRemaining = async (orderId, deposit) => {
+    if (!deposit) return;
+    try {
+      await depositApi.payRemaining(deposit.id);
+      toast.success("Đã tạo yêu cầu thanh toán phần còn lại");
+      navigate(`/payment?orderId=${orderId}&amount=${deposit.remainingAmount}`);
+    } catch {
+      toast.error("Không thể thanh toán phần còn lại");
     }
   };
 
@@ -67,12 +107,13 @@ const OrderHistoryPage = () => {
   };
 
   useEffect(() => {
-    data.content?.forEach((order) => {
+    if (!Array.isArray(data.content)) return;
+    data.content.forEach((order) => {
       if (order.paymentMethod && !paymentMap[order.id]) {
         loadPayment(order.id);
       }
     });
-  }, [data.content]);
+  }, [data.content, paymentMap]);
 
   return (
     <div className="min-h-screen bg-[#F7F5FA] pb-16 text-[#1A1B1F]">
@@ -94,7 +135,7 @@ const OrderHistoryPage = () => {
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-[#BC000A]">
             Tài khoản
           </p>
-          <h1 className="mt-2 font-teko text-[clamp(2.4rem,5vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
+          <h1 className="mt-2 font-heading text-[clamp(2.4rem,5vw,3.4rem)] font-bold leading-none tracking-[-0.03em]">
             Đơn hàng của tôi
           </h1>
           <p className="mt-3 text-sm leading-7 text-[#7A6E71]">
@@ -116,7 +157,7 @@ const OrderHistoryPage = () => {
             <div className="flex h-20 w-20 items-center justify-center rounded-full bg-[#FAF8FC] text-[#BC000A]">
               <Receipt size={34} strokeWidth={1.6} />
             </div>
-            <h2 className="mt-6 font-teko text-4xl font-bold leading-none">
+            <h2 className="mt-6 font-heading text-4xl font-bold leading-none">
               Chưa có đơn hàng
             </h2>
             <p className="mt-3 max-w-sm text-sm leading-7 text-[#7A6E71]">
@@ -133,69 +174,108 @@ const OrderHistoryPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {data.content.map((order, index) => {
-              const status = ORDER_STATUS[order.status] || {
-                label: order.status,
-                color: "gray",
-              };
-              const badgeClass =
-                STATUS_STYLES[order.status] || STATUS_STYLES.REFUNDED;
+            {(Array.isArray(data.content) ? data.content : []).map((order, index) => {
+              try {
+                const status = ORDER_STATUS[order.status] || {
+                  label: order.status,
+                  color: "gray",
+                };
+                const badgeClass =
+                  STATUS_STYLES[order.status] || STATUS_STYLES.REFUNDED;
 
-              return (
-                <article
-                  key={order.id}
-                  className="order-rise overflow-hidden rounded-[20px] border border-[#E3DEE6] bg-white shadow-[0_16px_40px_-32px_rgba(0,0,0,0.14)] transition-all duration-300 hover:shadow-[0_22px_48px_-30px_rgba(0,0,0,0.18)]"
-                  style={{ animationDelay: `${index * 80}ms` }}
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#EEEAF1] px-5 py-4 sm:px-6">
-                    <div>
-                      <p className="font-mono text-sm font-bold text-[#BC000A]">
-                        {order.orderCode}
-                      </p>
-                      <p className="mt-1 flex items-center gap-1.5 text-xs text-[#7A6E71]">
-                        <CalendarClock size={13} />
-                        {formatDateTime(order.createdAt)}
-                      </p>
-                    </div>
-                    <span
-                      className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}
-                    >
-                      {status.label}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3 px-5 py-4 sm:px-6">
-                    {order.items?.map((item, itemIndex) => (
-                      <div
-                        key={itemIndex}
-                        className="flex items-start justify-between gap-4 rounded-[12px] bg-[#FAF8FC] px-4 py-3"
+                return (
+                  <article
+                    key={order.id}
+                    className="order-rise overflow-hidden rounded-[20px] border border-[#E3DEE6] bg-white shadow-[0_16px_40px_-32px_rgba(0,0,0,0.14)] transition-all duration-300 hover:shadow-[0_22px_48px_-30px_rgba(0,0,0,0.18)]"
+                    style={{ animationDelay: `${index * 80}ms` }}
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-4 border-b border-[#EEEAF1] px-5 py-4 sm:px-6">
+                      <div>
+                        <p className="font-mono text-sm font-bold text-[#BC000A]">
+                          {order.orderCode || "---"}
+                        </p>
+                        <p className="mt-1 flex items-center gap-1.5 text-xs text-[#7A6E71]">
+                          <CalendarClock size={13} />
+                          {formatDateTime(order.createdAt)}
+                        </p>
+                      </div>
+                      <span
+                        className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}
                       >
-                        <div className="flex min-w-0 items-start gap-3">
-                          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#BC000A]">
-                            <ShoppingBag size={14} />
+                        {status?.label || order.status || "---"}
+                      </span>
+                    </div>
+
+                    <div className="space-y-3 px-5 py-4 sm:px-6">
+                      {(order.items || []).map((item, itemIndex) => (
+                        <div
+                          key={itemIndex}
+                          className="flex items-start justify-between gap-4 rounded-[12px] bg-[#FAF8FC] px-4 py-3"
+                        >
+                          <div className="flex min-w-0 items-start gap-3">
+                            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-[#BC000A]">
+                              <ShoppingBag size={14} />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-[#1A1B1F]">
+                                {item?.motorcycleName || "Xe"}
+                              </p>
+                              <p className="mt-0.5 text-xs text-[#7A6E71]">
+                                x{item?.quantity || 1}
+                                {item?.colorName ? ` · Màu ${item.colorName}` : ""}
+                              </p>
+                            </div>
                           </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-[#1A1B1F]">
-                              {item.motorcycleName}
+                          <p className="shrink-0 text-sm font-bold text-[#1A1B1F]">
+                            {formatCurrency(item?.subtotal)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+
+                    {depositMap[order.id] && (
+                      <div className="border-t border-[#EEEAF1] px-5 py-4 sm:px-6 space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-[#1A1B1F]">
+                          <Wallet size={16} className="text-orange-500" />
+                          Thông tin đặt cọc
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="rounded-lg bg-green-50 p-3">
+                            <p className="text-xs text-gray-500">Đã đặt cọc</p>
+                            <p className="text-sm font-bold text-green-700">
+                              {formatCurrency(depositMap[order.id]?.depositAmount)}
                             </p>
-                            <p className="mt-0.5 text-xs text-[#7A6E71]">
-                              x{item.quantity}
-                              {item.colorName ? ` · Màu ${item.colorName}` : ""}
+                          </div>
+                          <div className="rounded-lg bg-orange-50 p-3">
+                            <p className="text-xs text-gray-500">Còn lại</p>
+                            <p className="text-sm font-bold text-orange-700">
+                              {formatCurrency(depositMap[order.id]?.remainingAmount)}
                             </p>
                           </div>
                         </div>
-                        <p className="shrink-0 text-sm font-bold text-[#1A1B1F]">
-                          {formatCurrency(item.subtotal)}
-                        </p>
+                        {depositMap[order.id]?.deadlineDate && (
+                          <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                            <Clock size={13} />
+                            Hạn thanh toán nốt: {formatDateTime(depositMap[order.id].deadlineDate)}
+                          </div>
+                        )}
+                        {order.status === "DEPOSITED" && depositMap[order.id] && (
+                          <button
+                            type="button"
+                            onClick={() => handlePayRemaining(order.id, depositMap[order.id])}
+                            className="mt-2 w-full rounded-[8px] bg-[#BC000A] px-4 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:brightness-110 active:scale-[0.98]"
+                          >
+                            Thanh toán phần còn lại
+                          </button>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    )}
 
                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#EEEAF1] bg-[#FAFAFB] px-5 py-4 sm:px-6">
                      <div className="flex items-center gap-2">
                        <Package size={16} className="text-[#7A6E71]" />
                        <span className="text-sm text-[#7A6E71]">Tổng thanh toán</span>
-                       <span className="font-teko text-2xl font-bold text-[#BC000A]">
+                        <span className="font-heading text-2xl font-bold text-[#BC000A]">
                          {formatCurrency(order.totalAmount)}
                        </span>
                      </div>
@@ -235,8 +315,19 @@ const OrderHistoryPage = () => {
                            )}
                         </div>
                     )}
-                </article>
-              );
+                 </article>
+                );
+              } catch (e) {
+                console.error("[OrderHistoryPage] render order error", order.id, e);
+                return (
+                  <article
+                    key={order.id}
+                    className="order-rise overflow-hidden rounded-[20px] border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+                  >
+                    Lỗi hiển thị đơn hàng #{order.id}
+                  </article>
+                );
+              }
             })}
           </div>
         )}

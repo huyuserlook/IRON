@@ -8,6 +8,11 @@ const userApi = {
   delete: (id) => axiosClient.delete(`/admin/users/${id}`),
   approvePasswordReset: (id) => axiosClient.post(`/admin/users/${id}/approve-password-reset`),
   getPasswordResetRequests: (params) => axiosClient.get("/admin/users/password-reset-requests", { params }),
+  updateRole: (id, role, note = "") => axiosClient.patch(`/admin/users/${id}/role`, null, { params: { role, note } }),
+  getStaff: (params) => axiosClient.get("/admin/users/staff", { params }),
+  createStaff: (data) => axiosClient.post("/admin/users/staff", data),
+  toggleStaffStatus: (id) => axiosClient.patch(`/admin/users/staff/${id}/toggle-status`),
+  deleteStaff: (id) => axiosClient.delete(`/admin/users/staff/${id}`),
 };
 
 export default userApi;

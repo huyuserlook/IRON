@@ -1,20 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { toast } from "react-hot-toast";
 import Button from "../../components/common/Button";
 import Input from "../../components/common/Input";
-import { Phone, ArrowLeft, ShieldCheck, Lock } from "lucide-react";
+import { Phone, ArrowLeft, ShieldCheck, Lock, Check, X, Eye, EyeOff } from "lucide-react";
 
 const phoneRegex = /^[0-9]{9,11}$/;
+
+const PASSWORD_RULES = [
+  { key: "length", label: "Tối thiểu 8 ký tự", test: (p) => p.length >= 8 },
+  { key: "upper", label: "Ít nhất 1 chữ hoa (A-Z)", test: (p) => /[A-Z]/.test(p) },
+  { key: "lower", label: "Ít nhất 1 chữ thường (a-z)", test: (p) => /[a-z]/.test(p) },
+  { key: "digit", label: "Ít nhất 1 chữ số (0-9)", test: (p) => /\d/.test(p) },
+  { key: "special", label: "Ít nhất 1 ký tự đặc biệt (@#$%^&*!)", test: (p) => /[@#$%^&*!]/.test(p) },
+];
+
+const getStrength = (password) => {
+  if (!password) return { level: 0, label: "", color: "" };
+  const passed = PASSWORD_RULES.filter((r) => r.test(password)).length;
+  if (passed <= 2) return { level: 1, label: "Yếu", color: "bg-red-500" };
+  if (passed <= 4) return { level: 2, label: "Trung bình", color: "bg-yellow-500" };
+  return { level: 3, label: "Mạnh", color: "bg-green-500" };
+};
 
 const ForgotPasswordPage = () => {
   const [phone, setPhone] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [checking, setChecking] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [approved, setApproved] = useState(null);
   const [polling, setPolling] = useState(false);
@@ -22,7 +38,24 @@ const ForgotPasswordPage = () => {
   const location = useLocation();
 
   const phoneValid = phoneRegex.test(phone);
-  const passwordValid = newPassword.length >= 6 && newPassword === confirmPassword;
+
+  const passwordChecks = useMemo(() => {
+    const results = {};
+    PASSWORD_RULES.forEach((rule) => {
+      results[rule.key] = rule.test(newPassword);
+    });
+    return results;
+  }, [newPassword]);
+
+  const allPasswordRulesMet = useMemo(
+    () => PASSWORD_RULES.every((rule) => rule.test(newPassword)),
+    [newPassword]
+  );
+
+  const passwordsMatch = newPassword === confirmPassword && confirmPassword.length > 0;
+  const canReset = allPasswordRulesMet && passwordsMatch;
+
+  const strength = getStrength(newPassword);
 
   useEffect(() => {
     if (!polling) return;
@@ -64,8 +97,8 @@ const ForgotPasswordPage = () => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (!passwordValid) {
-      toast.error("Mật khẩu phải có ít nhất 6 ký tự và khớp nhau");
+    if (!canReset) {
+      toast.error("Vui lòng đảm bảo mật khẩu hợp lệ và khớp nhau");
       return;
     }
     setLoading(true);
@@ -164,34 +197,98 @@ const ForgotPasswordPage = () => {
               Yêu cầu đặt lại mật khẩu đã được admin duyệt. Vui lòng nhập mật khẩu mới.
             </div>
 
-            <Input
-              label="Mật khẩu mới"
-              type="password"
-              placeholder="••••••••"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-              icon={<Lock className="text-gray-400" size={18} />}
-              helperText={newPassword ? (newPassword.length >= 6 ? "" : "Mật khẩu phải có ít nhất 6 ký tự") : ""}
-            />
+            <div>
+              <Input
+                label="Mật khẩu mới"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                required
+                icon={<Lock className="text-gray-400" size={18} />}
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                }
+              />
 
-            <Input
-              label="Xác nhận mật khẩu"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-              icon={<Lock className="text-gray-400" size={18} />}
-              helperText={confirmPassword ? (confirmPassword === newPassword ? "" : "Mật khẩu không khớp") : ""}
-            />
+              {newPassword && (
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div className="h-1.5 flex-1 rounded-full bg-gray-200 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${strength.color}`}
+                        style={{ width: `${(strength.level / 3) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-600 min-w-[70px] text-right">
+                      {strength.label}
+                    </span>
+                  </div>
+
+                  <div className="grid gap-1.5">
+                    {PASSWORD_RULES.map((rule) => {
+                      const passed = passwordChecks[rule.key];
+                      return (
+                        <div
+                          key={rule.key}
+                          className={`flex items-center gap-2 text-[11px] transition-colors ${
+                            passed ? "text-green-700" : "text-gray-500"
+                          }`}
+                        >
+                          {passed ? (
+                            <Check size={12} className="text-green-600" />
+                          ) : (
+                            <X size={12} className="text-gray-400" />
+                          )}
+                          <span>{rule.label}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Input
+                label="Xác nhận mật khẩu"
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                icon={<Lock className="text-gray-400" size={18} />}
+                suffix={
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600"
+                    aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                }
+                error={
+                  confirmPassword && !passwordsMatch
+                    ? "Mật khẩu không khớp"
+                    : ""
+                }
+              />
+            </div>
 
             <div>
               <Button
                 type="submit"
                 className="w-full rounded-full bg-iron-yellow text-black font-semibold py-3 hover:brightness-95"
                 isLoading={loading}
-                disabled={!passwordValid || loading}
+                disabled={!canReset || loading}
               >
                 Đặt lại mật khẩu
               </Button>

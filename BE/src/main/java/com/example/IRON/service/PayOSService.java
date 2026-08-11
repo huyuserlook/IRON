@@ -4,6 +4,7 @@ import com.example.IRON.config.PayOSProperties;
 import com.example.IRON.entity.Order;
 import com.example.IRON.entity.Payment;
 import com.example.IRON.exception.ResourceNotFoundException;
+import com.example.IRON.repository.DepositRepository;
 import com.example.IRON.repository.OrderRepository;
 import com.example.IRON.repository.PaymentRepository;
 import com.example.IRON.service.interfaces.OrderService;
@@ -37,6 +38,7 @@ public class PayOSService {
     private final PayOSProperties payOSProperties;
     private final OrderRepository orderRepository;
     private final PaymentRepository paymentRepository;
+    private final DepositRepository depositRepository;
     private final OrderService orderService;
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -310,10 +312,21 @@ public class PayOSService {
         }
 
         if (order.getStatus() == Order.OrderStatus.PENDING) {
-            log.warn("[PayOS webhook] Order update via OrderService to CONFIRMED. orderId={}", order.getId());
-            orderService.updateStatus(order.getId(), Order.OrderStatus.CONFIRMED);
+            log.warn("[PayOS webhook] Order update via OrderService to COMPLETED. orderId={}", order.getId());
+            orderService.updateStatus(order.getId(), Order.OrderStatus.COMPLETED);
+        } else if (order.getStatus() == Order.OrderStatus.DEPOSITED) {
+            log.warn("[PayOS webhook] Deposit payment confirmed. orderId={}", order.getId());
+            depositRepository.findByOrderId(order.getId()).ifPresent(deposit -> {
+                if (deposit.getStatus() != com.example.IRON.entity.Deposit.DepositStatus.DEPOSITED) {
+                    deposit.setStatus(com.example.IRON.entity.Deposit.DepositStatus.DEPOSITED);
+                    depositRepository.save(deposit);
+                    log.warn("[PayOS webhook] Deposit UPDATED to DEPOSITED. depositId={}", deposit.getId());
+                } else {
+                    log.warn("[PayOS webhook] Deposit already DEPOSITED, skipping. depositId={}", deposit.getId());
+                }
+            });
         } else {
-            log.warn("[PayOS webhook] Order status={}, skipping order update", order.getStatus());
+            log.warn("[PayOS webhook] Order status={}, skipping order/deposit update", order.getStatus());
         }
 
         log.warn("[PayOS webhook] ========== PROCESSING COMPLETE ==========");

@@ -13,9 +13,11 @@ import {
   Home,
   MessageSquare,
   ShieldCheck,
+  Wallet,
 } from "lucide-react";
+import { useAuth } from "../../hooks/useAuth";
 
-const navItems = [
+const ADMIN_NAV_ITEMS = [
   { path: "/", label: "Trang chủ", icon: Home, exact: true },
   { path: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { path: "/admin/motorcycles", label: "Quản lý xe", icon: Bike },
@@ -24,14 +26,28 @@ const navItems = [
   { path: "/admin/orders", label: "Đơn hàng", icon: ShoppingBag },
   { path: "/admin/bookings", label: "Lịch lái thử", icon: Calendar },
   { path: "/admin/users", label: "Người dùng", icon: Users },
+  { path: "/admin/deposits", label: "Đặt cọc", icon: Wallet },
   { path: "/admin/password-reset-requests", label: "Yêu cầu đổi MK", icon: ShieldCheck },
   { path: "/admin/reviews", label: "Đánh giá", icon: Star },
   { path: "/admin/contacts", label: "Liên hệ", icon: MessageSquare },
   { path: "/admin/statistics", label: "Thống kê", icon: BarChart2 },
 ];
 
+const STAFF_NAV_ITEMS = [
+  { path: "/", label: "Trang chủ", icon: Home, exact: true },
+  { path: "/staff/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/staff/orders", label: "Đơn hàng", icon: ShoppingBag },
+  { path: "/staff/bookings", label: "Lịch lái thử", icon: Calendar },
+  { path: "/staff/motorcycles", label: "Xe máy", icon: Bike },
+];
+
 const AdminSidebar = ({ open }) => {
+  const { user } = useAuth();
   const { pathname } = useLocation();
+
+  const isAdmin = user?.role === "ROLE_ADMIN";
+  const isStaff = user?.role === "ROLE_STAFF";
+  const navItems = isAdmin ? ADMIN_NAV_ITEMS : isStaff ? STAFF_NAV_ITEMS : [];
 
   return (
     <aside
@@ -49,9 +65,11 @@ const AdminSidebar = ({ open }) => {
           {open && (
             <div className="hidden sm:flex flex-col space-y-1">
               <p className="text-lg font-semibold tracking-wide text-white">
-                IRON ADMIN
+                {isAdmin ? "IRON ADMIN" : "IRON STAFF"}
               </p>
-              <p className="text-xs text-slate-400">Quản lý showroom</p>
+              <p className="text-xs text-slate-400">
+                {isAdmin ? "Quản lý showroom" : "Khu vực nhân viên"}
+              </p>
             </div>
           )}
         </div>

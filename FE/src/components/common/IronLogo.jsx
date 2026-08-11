@@ -38,7 +38,7 @@ const IronLogo = ({
       />
       {!hideText && (
         <span
-          className={`font-teko font-semibold leading-none tracking-wide text-iron-yellow ${s.text}`}
+          className={`font-heading font-semibold leading-none tracking-wide text-iron-yellow ${s.text}`}
         >
           IRON
         </span>

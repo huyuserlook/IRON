@@ -178,7 +178,7 @@ const CheckoutPage = () => {
             <ArrowLeft size={16} />
             Quay lại giỏ hàng
           </Link>
-          <h1 className="font-teko text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-none tracking-[-0.03em]">
+          <h1 className="font-heading text-[clamp(2.4rem,5vw,3.6rem)] font-bold leading-none tracking-[-0.03em]">
             Thanh toán
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-[#7A6E71] sm:text-[15px]">
@@ -376,7 +376,7 @@ const CheckoutPage = () => {
 
               <div className="mt-5 flex items-end justify-between border-t border-[#EEEAF1] pt-5">
                 <p className="text-sm font-semibold">Tổng cộng</p>
-                <p className="font-teko text-[2rem] font-bold leading-none text-[#BC000A]">
+                <p className="font-heading text-[2rem] font-bold leading-none text-[#BC000A]">
                   {formatCurrency(grandTotal)}
                 </p>
               </div>

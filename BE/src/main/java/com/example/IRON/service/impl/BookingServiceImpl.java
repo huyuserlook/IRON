@@ -92,7 +92,7 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.save(booking);
     }
 
-    private BookingResponse toResponse(Booking b) {
+    public BookingResponse toResponse(Booking b) {
         return BookingResponse.builder()
                 .id(b.getId())
                 .motorcycleId(b.getMotorcycle().getId())

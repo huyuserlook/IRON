@@ -164,7 +164,7 @@ const MotorcycleForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { status, ...payload } = {
+      const { ...payload } = {
         ...form,
         price: Number(form.price),
         costPrice: form.costPrice ? Number(form.costPrice) : null,

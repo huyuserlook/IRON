@@ -9,6 +9,9 @@ export const ORDER_STATUS = {
   DELIVERED: { label: "Đã giao", color: "green" },
   CANCELLED: { label: "Đã hủy", color: "red" },
   REFUNDED: { label: "Hoàn tiền", color: "gray" },
+  DEPOSITED: { label: "Đã đặt cọc", color: "orange" },
+  AWAITING_FINAL_PAYMENT: { label: "Chờ thanh toán nốt", color: "amber" },
+  COMPLETED: { label: "Hoàn thành", color: "green" },
 };
 
 export const BOOKING_STATUS = {
