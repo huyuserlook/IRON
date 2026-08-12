@@ -40,6 +40,7 @@ import ContactManagement from "../pages/Admin/Contact/ContactManagement";
 import StatisticsPage from "../pages/Admin/Statistics/StatisticsPage";
 import StaffManagement from "../pages/Admin/Staff/StaffManagement";
 import DepositManagement from "../pages/Admin/Deposit/DepositManagement";
+import InstallmentManagement from "../pages/Admin/Installment/InstallmentManagement";
 
 // Staff pages
 import StaffLayout from "../layouts/StaffLayout";
@@ -142,6 +143,7 @@ const AppRoutes = () => {
         <Route path="orders" element={<OrderManagement />} />
         <Route path="bookings" element={<BookingManagement />} />
         <Route path="motorcycles" element={<MotorcycleManagement />} />
+        <Route path="installment-requests" element={<InstallmentManagement />} />
       </Route>
 
       {/* Admin routes */}
@@ -169,6 +171,7 @@ const AppRoutes = () => {
         <Route path="users" element={<UserManagement />} />
         <Route path="staff" element={<StaffManagement />} />
         <Route path="deposits" element={<DepositManagement />} />
+        <Route path="installment-requests" element={<InstallmentManagement />} />
         <Route path="password-reset-requests" element={<PasswordResetManagement />} />
         <Route path="reviews" element={<ReviewManagement />} />
         <Route path="contacts" element={<ContactManagement />} />

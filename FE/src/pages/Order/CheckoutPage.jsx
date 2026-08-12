@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   Banknote,
   CreditCard,
+  FileText,
   Lock,
   MapPin,
   MessageSquare,
@@ -13,6 +14,7 @@ import {
 import toast from "react-hot-toast";
 import orderApi from "../../api/orderApi";
 import motorcycleApi from "../../api/motorcycleApi";
+import installmentApi from "../../api/installmentApi";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { formatCurrency } from "../../utils/formatCurrency";
@@ -51,6 +53,12 @@ const PAYMENT_OPTIONS = [
     description: "Thanh toan qua PayOS — quet ma QR hoac mo link",
     icon: CreditCard,
   },
+  {
+    value: "INSTALLMENT",
+    label: "Tra gop",
+    description: "Dang ky tu van tra gop voi nhan vien",
+    icon: FileText,
+  },
 ];
 
 const CheckoutPage = () => {
@@ -61,6 +69,16 @@ const CheckoutPage = () => {
   const [form, setForm] = useState({
     shippingAddress: user?.address || "",
     paymentMethod: "CASH",
+    customerNote: "",
+  });
+  const [installmentForm, setInstallmentForm] = useState({
+    fullName: user?.fullName || "",
+    phone: user?.phone || "",
+    email: user?.email || "",
+    idCardNumber: "",
+    monthlyIncome: "",
+    downPayment: "",
+    installmentMonths: 12,
     customerNote: "",
   });
   const [skipCartRedirect, setSkipCartRedirect] = useState(false);
@@ -139,6 +157,26 @@ const CheckoutPage = () => {
         setSkipCartRedirect(true);
         clear();
         navigate(`/payment?orderId=${newOrderId}&amount=${grandTotal}`);
+        return;
+      }
+
+      if (form.paymentMethod === "INSTALLMENT") {
+        const installmentData = {
+          orderId: newOrderId,
+          fullName: installmentForm.fullName,
+          phone: installmentForm.phone,
+          email: installmentForm.email,
+          idCardNumber: installmentForm.idCardNumber,
+          monthlyIncome: installmentForm.monthlyIncome,
+          downPayment: Number(installmentForm.downPayment),
+          installmentMonths: Number(installmentForm.installmentMonths),
+          customerNote: installmentForm.customerNote,
+        };
+        await installmentApi.create(installmentData);
+        setSkipCartRedirect(true);
+        clear();
+        toast.success("Đăng ký trả góp thành công! Chúng tôi sẽ liên hệ tư vấn trong 24h.");
+        navigate("/my-orders");
         return;
       }
 
@@ -277,6 +315,107 @@ const CheckoutPage = () => {
                 })}
               </div>
             </section>
+
+            {form.paymentMethod === "INSTALLMENT" && (
+              <section
+                className="checkout-rise rounded-[20px] border border-blue-200 bg-blue-50/50 p-6 shadow-[0_16px_40px_-32px_rgba(0,0,0,0.16)]"
+                style={{ animationDelay: "200ms" }}
+              >
+                <div className="mb-5 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-700">
+                    <FileText size={18} />
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-bold">Thông tin đăng ký trả góp</h2>
+                    <p className="text-sm text-blue-600">Nhân viên sẽ liên hệ tư vấn trong 24h</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Họ tên *</label>
+                    <input
+                      type="text"
+                      value={installmentForm.fullName}
+                      onChange={(e) => setInstallmentForm({ ...installmentForm, fullName: e.target.value })}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại *</label>
+                    <input
+                      type="tel"
+                      value={installmentForm.phone}
+                      onChange={(e) => setInstallmentForm({ ...installmentForm, phone: e.target.value })}
+                      placeholder="0912345678"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input
+                      type="email"
+                      value={installmentForm.email}
+                      onChange={(e) => setInstallmentForm({ ...installmentForm, email: e.target.value })}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">CMND/CCCD *</label>
+                    <input
+                      type="text"
+                      value={installmentForm.idCardNumber}
+                      onChange={(e) => setInstallmentForm({ ...installmentForm, idCardNumber: e.target.value })}
+                      placeholder="Nhập 9 hoặc 12 số"
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Thu nhập hàng tháng *</label>
+                    <select
+                      value={installmentForm.monthlyIncome}
+                      onChange={(e) => setInstallmentForm({ ...installmentForm, monthlyIncome: e.target.value })}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    >
+                      <option value="">-- Chọn mức thu nhập --</option>
+                      <option value="UNDER_5M">Dưới 5 triệu</option>
+                      <option value="BETWEEN_5M_10M">5 - 10 triệu</option>
+                      <option value="BETWEEN_10M_20M">10 - 20 triệu</option>
+                      <option value="ABOVE_20M">Trên 20 triệu</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Số tiền trả trước (VND) *</label>
+                    <input
+                      type="number"
+                      value={installmentForm.downPayment}
+                      onChange={(e) => setInstallmentForm({ ...installmentForm, downPayment: e.target.value })}
+                      min={0}
+                      className="w-full rounded-xl border border-gray-200 px-4 py-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Số tháng trả góp *</label>
+                    <div className="flex gap-3">
+                      {[6, 12, 18, 24].map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setInstallmentForm({ ...installmentForm, installmentMonths: m })}
+                          className={`flex-1 rounded-xl border px-4 py-2.5 text-sm font-semibold transition ${
+                            installmentForm.installmentMonths === m
+                              ? "border-blue-500 bg-blue-50 text-blue-700"
+                              : "border-gray-200 text-gray-600 hover:border-blue-300"
+                          }`}
+                        >
+                          {m} tháng
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            )}
 
             <section
               className="checkout-rise rounded-[20px] border border-[#E3DEE6] bg-white p-6 shadow-[0_16px_40px_-32px_rgba(0,0,0,0.16)]"

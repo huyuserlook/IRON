@@ -14,6 +14,7 @@ import {
   MessageSquare,
   ShieldCheck,
   Wallet,
+  FileText,
 } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 
@@ -27,6 +28,7 @@ const ADMIN_NAV_ITEMS = [
   { path: "/admin/bookings", label: "Lịch lái thử", icon: Calendar },
   { path: "/admin/users", label: "Người dùng", icon: Users },
   { path: "/admin/deposits", label: "Đặt cọc", icon: Wallet },
+  { path: "/admin/installment-requests", label: "Trả góp", icon: FileText },
   { path: "/admin/password-reset-requests", label: "Yêu cầu đổi MK", icon: ShieldCheck },
   { path: "/admin/reviews", label: "Đánh giá", icon: Star },
   { path: "/admin/contacts", label: "Liên hệ", icon: MessageSquare },
@@ -39,6 +41,7 @@ const STAFF_NAV_ITEMS = [
   { path: "/staff/orders", label: "Đơn hàng", icon: ShoppingBag },
   { path: "/staff/bookings", label: "Lịch lái thử", icon: Calendar },
   { path: "/staff/motorcycles", label: "Xe máy", icon: Bike },
+  { path: "/staff/installment-requests", label: "Trả góp", icon: FileText },
 ];
 
 const AdminSidebar = ({ open }) => {

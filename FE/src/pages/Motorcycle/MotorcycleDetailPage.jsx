@@ -8,6 +8,7 @@ import {
   CheckCircle,
   ChevronLeft,
   ChevronRight,
+  FileText,
   Gauge,
   ShoppingCart,
   Sparkles,
@@ -26,6 +27,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { formatCurrency } from "../../utils/formatCurrency";
 import DepositModal from "../../components/deposit/DepositModal";
+import InstallmentModal from "../../components/installment/InstallmentModal";
 
 const API_ROOT = (
   import.meta.env.VITE_API_URL || "http://localhost:8080/api"
@@ -185,6 +187,7 @@ const MotorcycleDetailPage = () => {
   const [showDepositModal, setShowDepositModal] = useState(false);
   const [depositOrderId, setDepositOrderId] = useState(null);
   const [creatingDepositOrder, setCreatingDepositOrder] = useState(false);
+  const [showInstallmentModal, setShowInstallmentModal] = useState(false);
 
   const galleryImages = useMemo(() => buildGallery(moto), [moto]);
   const activeImage = galleryImages[selectedIndex] || null;
@@ -380,6 +383,15 @@ const MotorcycleDetailPage = () => {
     } finally {
       setCreatingDepositOrder(false);
     }
+  };
+
+  const handleInstallmentClick = () => {
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để đăng ký trả góp");
+      navigate("/login");
+      return;
+    }
+    setShowInstallmentModal(true);
   };
 
   const handleReviewChange = (field) => (e) => {
@@ -826,6 +838,15 @@ const MotorcycleDetailPage = () => {
                 <ShieldCheck size={18} />
                 {creatingDepositOrder ? "Đang xử lý..." : "Đặt cọc giữ xe"}
               </button>
+              <button
+                type="button"
+                onClick={handleInstallmentClick}
+                disabled={stock <= 0}
+                className="inline-flex flex-1 items-center justify-center gap-2 rounded-[12px] border-2 border-blue-500 bg-blue-50 px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-blue-700 transition-all duration-300 hover:-translate-y-0.5 hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <FileText size={18} />
+                Đăng ký trả góp
+              </button>
               <Link
                 to={`/booking?motorcycleId=${moto.id}`}
                 className="inline-flex flex-1 items-center justify-center gap-2 rounded-[12px] border-2 border-[#1A1B1F] px-6 py-4 text-sm font-bold uppercase tracking-[0.12em] text-[#1A1B1F] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#1A1B1F] hover:text-white"
@@ -1204,6 +1225,15 @@ const MotorcycleDetailPage = () => {
           onClose={() => setShowDepositModal(false)}
           motorcycle={moto}
           orderId={depositOrderId}
+        />
+      )}
+
+      {showInstallmentModal && (
+        <InstallmentModal
+          isOpen={showInstallmentModal}
+          onClose={() => setShowInstallmentModal(false)}
+          motorcycle={moto}
+          onSuccess={() => {}}
         />
       )}
     </div>
