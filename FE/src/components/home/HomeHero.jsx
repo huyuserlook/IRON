@@ -303,7 +303,10 @@ const HomeHero = ({ resetTrigger }) => {
           className="font-heading group text-right"
           aria-label="Slide tiếp"
         >
-          <span key={`counter-${animKey}`} className="animate-hero-counter-fade inline-flex items-baseline will-change-transform">
+          <span
+            key={`counter-${animKey}`}
+            className="animate-hero-counter-fade inline-flex items-baseline will-change-transform"
+          >
             <span
               className={`text-5xl sm:text-[88px] leading-none transition-transform group-hover:scale-105 ${ink}`}
             >

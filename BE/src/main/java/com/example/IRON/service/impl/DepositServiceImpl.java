@@ -157,7 +157,7 @@ public class DepositServiceImpl implements DepositService {
                 "DEPOSIT",
                 "Đặt cọc mới",
                 "Bạn đã đặt cọc " + depositAmount + " VND cho đơn hàng " + order.getOrderCode(),
-                "/my-deposits",
+                "/admin/deposits",
                 savedDeposit.getId()
         );
 

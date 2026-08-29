@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/payos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/webhook/momo").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/admin/installment-requests/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/staff/**").hasAnyRole("STAFF", "ADMIN")
                         .anyRequest().authenticated()
