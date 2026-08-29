@@ -1,6 +1,7 @@
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { login, logout, register, socialLogin } from "../store/authSlice";
+import { login, logout, register, socialLogin, updateProfile } from "../store/authSlice";
+import { clearCart } from "../store/cartSlice";
 import authApi from "../api/authApi";
 
 export const useAuth = () => {
@@ -8,11 +9,15 @@ export const useAuth = () => {
   const navigate = useNavigate();
   const { user, token, loading, error } = useSelector((state) => state.auth);
 
+  const effectiveToken = token || localStorage.getItem("token");
+
   const handleLogin = async (data, redirectTo = "/") => {
     const result = await dispatch(login(data));
     if (login.fulfilled.match(result)) {
       const role = result.payload.role;
-      navigate(role === "ROLE_ADMIN" ? "/admin/dashboard" : redirectTo);
+      if (role === "ROLE_ADMIN") navigate("/admin/dashboard");
+      else if (role === "ROLE_STAFF") navigate("/staff/dashboard");
+      else navigate(redirectTo);
       return true;
     }
     return false;
@@ -31,7 +36,9 @@ export const useAuth = () => {
     const result = await dispatch(socialLogin(data));
     if (socialLogin.fulfilled.match(result)) {
       const role = result.payload.role;
-      navigate(role === "ROLE_ADMIN" ? "/admin/dashboard" : redirectTo);
+      if (role === "ROLE_ADMIN") navigate("/admin/dashboard");
+      else if (role === "ROLE_STAFF") navigate("/staff/dashboard");
+      else navigate(redirectTo);
       return true;
     }
     return false;
@@ -39,6 +46,7 @@ export const useAuth = () => {
 
   const handleLogout = () => {
     dispatch(logout());
+    dispatch(clearCart());
     navigate("/");
   };
 
@@ -60,18 +68,41 @@ export const useAuth = () => {
     }
   };
 
+  const forgotPasswordByPhone = async (data) => {
+    await authApi.forgotPasswordByPhone(data);
+  };
+
+  const checkPasswordResetStatus = async (phone) => {
+    const response = await authApi.checkPasswordResetStatus(phone);
+    return response?.data ?? response;
+  };
+
+  const resetPasswordByPhone = async (data) => {
+    await authApi.resetPasswordByPhone(data);
+  };
+
+  const updateUser = async (data) => {
+    const result = await dispatch(updateProfile(data));
+    return updateProfile.fulfilled.match(result);
+  };
+
   return {
     user,
-    token,
+    token: effectiveToken,
     loading,
     error,
-    isAuthenticated: !!token,
+    isAuthenticated: !!effectiveToken,
     isAdmin: user?.role === "ROLE_ADMIN",
+    isStaff: user?.role === "ROLE_STAFF",
     handleLogin,
     handleRegister,
     handleSocialLogin,
     handleLogout,
     handleForgotPassword,
     handleResetPassword,
+    forgotPasswordByPhone,
+    checkPasswordResetStatus,
+    resetPasswordByPhone,
+    updateUser,
   };
 };

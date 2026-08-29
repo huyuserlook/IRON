@@ -42,8 +42,20 @@ public class MotorcycleController {
         return ResponseEntity.ok(ApiResponse.success(motorcycleService.getFeatured()));
     }
 
+    @GetMapping("/suggested/{id}")
+    public ResponseEntity<ApiResponse<?>> getSuggested(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success(motorcycleService.getSuggested(id)));
+    }
+
     @GetMapping("/{slug}")
     public ResponseEntity<ApiResponse<?>> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(ApiResponse.success(motorcycleService.getBySlug(slug)));
+    }
+
+    @GetMapping("/id/{id}")
+    public ResponseEntity<ApiResponse<?>> getByIdPublic(@PathVariable Long id) {
+        org.slf4j.LoggerFactory.getLogger(MotorcycleController.class)
+                .warn("[STOCK_API] getByIdPublic called id={}", id);
+        return ResponseEntity.ok(ApiResponse.success(motorcycleService.getById(id)));
     }
 }

@@ -36,6 +36,12 @@ public class User {
     @Column(name = "reset_token_expiry")
     private LocalDateTime resetTokenExpiry;
 
+    @Column(name = "reset_token_approved")
+    private Boolean resetTokenApproved = false;
+
+    @Column(name = "password_reset_requested_at")
+    private LocalDateTime passwordResetRequestedAt;
+
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
@@ -50,6 +56,9 @@ public class User {
 
     @Column(nullable = false)
     private Boolean enabled = true;
+
+    @Column(nullable = false)
+    private Boolean deleted = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

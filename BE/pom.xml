@@ -103,6 +103,31 @@
 			<version>1.36.0</version>
 		</dependency>
 
+		<!-- ===== EMAIL ===== -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+
+		<!-- ===== TWILIO SMS ===== -->
+		<dependency>
+			<groupId>com.twilio.sdk</groupId>
+			<artifactId>twilio</artifactId>
+			<version>10.4.0</version>
+		</dependency>
+
+		<!-- ===== ZXING QR CODE ===== -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.5.2</version>
+		</dependency>
+
 		<!-- ===== TEST ===== -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

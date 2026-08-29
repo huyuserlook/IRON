@@ -7,14 +7,14 @@ import java.util.List;
 @Data @Builder @NoArgsConstructor @AllArgsConstructor
 public class StatisticsResponse {
     private BigDecimal totalRevenue;
+    private BigDecimal totalProfit;
     private long totalOrders;
     private long totalCustomers;
     private long totalMotorcycles;
 
-    // Doanh thu theo tháng
     private List<MonthlyRevenue> monthlyRevenues;
-
-    // Top xe bán chạy
+    private List<DailyRevenue> dailyRevenues;
+    private List<YearlyRevenue> yearlyRevenues;
     private List<TopMotorcycle> topMotorcycles;
 
     @Data @Builder @NoArgsConstructor @AllArgsConstructor
@@ -22,6 +22,25 @@ public class StatisticsResponse {
         private int month;
         private int year;
         private BigDecimal revenue;
+        private BigDecimal profit;
+        private long orderCount;
+    }
+
+    @Data @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class DailyRevenue {
+        private int day;
+        private int month;
+        private int year;
+        private BigDecimal revenue;
+        private BigDecimal profit;
+        private long orderCount;
+    }
+
+    @Data @Builder @NoArgsConstructor @AllArgsConstructor
+    public static class YearlyRevenue {
+        private int year;
+        private BigDecimal revenue;
+        private BigDecimal profit;
         private long orderCount;
     }
 
@@ -32,5 +51,6 @@ public class StatisticsResponse {
         private String thumbnailUrl;
         private long soldCount;
         private BigDecimal revenue;
+        private BigDecimal profit;
     }
 }

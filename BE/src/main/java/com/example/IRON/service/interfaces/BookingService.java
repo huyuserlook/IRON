@@ -12,4 +12,5 @@ public interface BookingService {
     Page<BookingResponse> getAllBookings(Booking.BookingStatus status, Pageable pageable);
     BookingResponse updateStatus(Long id, Booking.BookingStatus status);
     void cancel(Long id, Long userId);
+    BookingResponse toResponse(Booking booking);
 }

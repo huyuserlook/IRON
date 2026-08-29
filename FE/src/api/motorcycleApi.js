@@ -5,6 +5,8 @@ const motorcycleApi = {
   search: (params) => axiosClient.get("/motorcycles", { params }),
   getFeatured: () => axiosClient.get("/motorcycles/featured"),
   getBySlug: (slug) => axiosClient.get(`/motorcycles/${slug}`),
+  getByIdPublic: (id) => axiosClient.get(`/motorcycles/id/${id}`),
+  getSuggested: (id) => axiosClient.get(`/motorcycles/suggested/${id}`),
 
   // Admin
   getById: (id) => axiosClient.get(`/admin/motorcycles/${id}`),

@@ -6,8 +6,11 @@ import com.example.IRON.entity.*;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.exception.UnauthorizedException;
 import com.example.IRON.repository.*;
+import com.example.IRON.service.interfaces.NotificationService;
 import com.example.IRON.service.interfaces.OrderService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,12 +24,15 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final MotorcycleRepository motorcycleRepository;
     private final PaymentRepository paymentRepository;
+    private final NotificationService notificationService;
+    private final InventoryRepository inventoryRepository;
 
     @Override
     @Transactional
@@ -38,7 +44,6 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal total = BigDecimal.ZERO;
 
         Order order = new Order();
-        order.setOrderCode(generateOrderCode());
         order.setUser(user);
         order.setShippingAddress(request.getShippingAddress());
         order.setCustomerNote(request.getCustomerNote());
@@ -47,6 +52,12 @@ public class OrderServiceImpl implements OrderService {
         for (OrderRequest.OrderItemRequest item : request.getItems()) {
             Motorcycle motorcycle = motorcycleRepository.findById(item.getMotorcycleId())
                     .orElseThrow(() -> new ResourceNotFoundException("Xe máy", "id", item.getMotorcycleId()));
+            if (motorcycle.getStock() == null || motorcycle.getStock() < item.getQuantity()) {
+                log.warn("[STOCK][CREATE_ORDER] Insufficient stock. orderId=pre-create, motorcycleId={}, requested={}, available={}",
+                        item.getMotorcycleId(), item.getQuantity(), motorcycle.getStock());
+                throw new RuntimeException("Số lượng tồn kho không đủ cho xe: " + motorcycle.getName() +
+                        " (còn " + (motorcycle.getStock() != null ? motorcycle.getStock() : 0) + ", cần " + item.getQuantity() + ")");
+            }
             BigDecimal subtotal = motorcycle.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             total = total.add(subtotal);
 
@@ -65,13 +76,54 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderDetails(details);
         Order saved = orderRepository.save(order);
 
-        // Tạo payment
+        String orderCode = String.format("ORD-%s-%04d",
+                saved.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyyMMdd")),
+                saved.getId());
+        log.warn("[ORDER_CODE_GEN] orderId={}, orderCode length={}, orderCode={}", saved.getId(), orderCode.length(), orderCode);
+        saved.setOrderCode(orderCode);
+        orderRepository.save(saved);
+
         Payment payment = new Payment();
         payment.setOrder(saved);
         payment.setAmount(total);
         payment.setPaymentMethod(request.getPaymentMethod());
-        payment.setStatus(Payment.PaymentStatus.PENDING);
+        if (request.getPaymentMethod() == Payment.PaymentMethod.CASH) {
+            payment.setStatus(Payment.PaymentStatus.PAID);
+            payment.setPaidAt(LocalDateTime.now());
+        } else {
+            payment.setStatus(Payment.PaymentStatus.PENDING);
+        }
         paymentRepository.save(payment);
+
+        log.info("[STOCK][CREATE_ORDER] orderId={}, orderCode={}, userId={}", saved.getId(), saved.getOrderCode(), userId);
+        for (OrderDetail detail : saved.getOrderDetails()) {
+            Long productId = detail.getMotorcycle().getId();
+            int qty = detail.getQuantity();
+            log.info("[STOCK][DEDUCT] orderId={}, productId={}, qty={}", saved.getId(), productId, qty);
+            int updated = motorcycleRepository.deductStock(productId, qty);
+            log.info("[STOCK][DEDUCT_RESULT] orderId={}, productId={}, qty={}, rowsAffected={}", saved.getId(), productId, qty, updated);
+            if (updated == 0) {
+                throw new RuntimeException("Số lượng tồn kho không đủ để tạo đơn hàng: " + detail.getMotorcycleName());
+            }
+            if (detail.getColorName() != null && !detail.getColorName().isBlank()) {
+                inventoryRepository.findByMotorcycleIdAndColorName(productId, detail.getColorName())
+                        .ifPresent(inv -> {
+                            int newQty = Math.max((inv.getQuantity() != null ? inv.getQuantity() : 0) - qty, 0);
+                            inv.setQuantity(newQty);
+                            inventoryRepository.save(inv);
+                            log.info("[STOCK][INVENTORY] orderId={}, productId={}, colorName={}, newQty={}", saved.getId(), productId, detail.getColorName(), newQty);
+                        });
+            }
+        }
+
+        String customerName = user.getFullName() != null ? user.getFullName() : user.getEmail();
+        notificationService.createNotification(
+                "ORDER",
+                "Đơn hàng mới",
+                "Đơn hàng " + saved.getOrderCode() + " từ " + customerName + " - " + total + " VND",
+                "/admin/orders",
+                saved.getId()
+        );
 
         return toResponse(saved);
     }
@@ -104,6 +156,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse updateStatus(Long id, Order.OrderStatus status) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", id));
+        Order.OrderStatus oldStatus = order.getStatus();
         order.setStatus(status);
         if (status == Order.OrderStatus.DELIVERED) {
             paymentRepository.findByOrderId(id).ifPresent(p -> {
@@ -112,7 +165,24 @@ public class OrderServiceImpl implements OrderService {
                 paymentRepository.save(p);
             });
         }
-        return toResponse(orderRepository.save(order));
+        OrderResponse response = toResponse(orderRepository.save(order));
+        log.info("[STOCK][UPDATE_STATUS] orderId={}, oldStatus={}, newStatus={}", id, oldStatus, status);
+
+        if ((oldStatus == Order.OrderStatus.CONFIRMED || oldStatus == Order.OrderStatus.COMPLETED) && status == Order.OrderStatus.CANCELLED) {
+            for (OrderResponse.OrderItemResponse item : response.getItems()) {
+                log.info("[STOCK][RESTORE] orderId={}, productId={}, qty={}", id, item.getMotorcycleId(), item.getQuantity());
+                motorcycleRepository.restoreStock(item.getMotorcycleId(), item.getQuantity());
+                if (item.getColorName() != null && !item.getColorName().isBlank()) {
+                    inventoryRepository.findByMotorcycleIdAndColorName(item.getMotorcycleId(), item.getColorName())
+                            .ifPresent(inv -> {
+                                inv.setQuantity((inv.getQuantity() != null ? inv.getQuantity() : 0) + item.getQuantity());
+                                inventoryRepository.save(inv);
+                                log.info("[STOCK][INVENTORY_RESTORE] orderId={}, productId={}, colorName={}, newQty={}", id, item.getMotorcycleId(), item.getColorName(), inv.getQuantity());
+                            });
+                }
+            }
+        }
+        return response;
     }
 
     @Override
@@ -122,19 +192,36 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", id));
         if (!order.getUser().getId().equals(userId))
             throw new UnauthorizedException("Bạn không có quyền hủy đơn hàng này");
-        if (order.getStatus() != Order.OrderStatus.PENDING)
-            throw new RuntimeException("Chỉ có thể hủy đơn hàng đang chờ xác nhận");
+        if (order.getStatus() != Order.OrderStatus.PENDING && order.getStatus() != Order.OrderStatus.CONFIRMED)
+            throw new RuntimeException("Chỉ có thể hủy đơn hàng đang chờ xác nhận hoặc đã xác nhận");
+        List<OrderDetail> details = new ArrayList<>(order.getOrderDetails());
+        Order.OrderStatus oldStatus = order.getStatus();
         order.setStatus(Order.OrderStatus.CANCELLED);
         orderRepository.save(order);
+        log.info("[STOCK][CANCEL_ORDER] orderId={}, oldStatus={}", id, oldStatus);
+        for (OrderDetail detail : details) {
+            log.info("[STOCK][RESTORE] orderId={}, productId={}, qty={}", id, detail.getMotorcycle().getId(), detail.getQuantity());
+            motorcycleRepository.restoreStock(detail.getMotorcycle().getId(), detail.getQuantity());
+            if (detail.getColorName() != null && !detail.getColorName().isBlank()) {
+                inventoryRepository.findByMotorcycleIdAndColorName(detail.getMotorcycle().getId(), detail.getColorName())
+                        .ifPresent(inv -> {
+                            inv.setQuantity((inv.getQuantity() != null ? inv.getQuantity() : 0) + detail.getQuantity());
+                            inventoryRepository.save(inv);
+                            log.info("[STOCK][INVENTORY_RESTORE] orderId={}, productId={}, colorName={}, newQty={}", id, detail.getMotorcycle().getId(), detail.getColorName(), inv.getQuantity());
+                        });
+            }
+        }
     }
 
-    private String generateOrderCode() {
-        String date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-        long count = orderRepository.count() + 1;
-        return String.format("ORD-%s-%04d", date, count);
+    @Override
+    @Transactional
+    public void deleteOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", id));
+        orderRepository.deleteById(id);
     }
 
-    private OrderResponse toResponse(Order order) {
+    public OrderResponse toResponse(Order order) {
         List<OrderResponse.OrderItemResponse> items = order.getOrderDetails().stream()
                 .map(d -> OrderResponse.OrderItemResponse.builder()
                         .motorcycleId(d.getMotorcycle().getId())

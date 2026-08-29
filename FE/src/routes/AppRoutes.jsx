@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import AdminLayout from "../layouts/AdminLayout";
 import PrivateRoute from "./PrivateRoute";
@@ -9,8 +9,15 @@ import MotorcyclePage from "../pages/Motorcycle/MotorcyclePage";
 import MotorcycleDetailPage from "../pages/Motorcycle/MotorcycleDetailPage";
 import CartPage from "../pages/Cart/CartPage";
 import CheckoutPage from "../pages/Order/CheckoutPage";
+import PaymentPage from "../pages/Order/PaymentPage";
+import PaymentReturnPage from "../pages/Order/PaymentReturnPage";
 import OrderHistoryPage from "../pages/Order/OrderHistoryPage";
+import UserProfilePage from "../pages/User/UserProfilePage";
+import AccountSettingsPage from "../pages/User/AccountSettingsPage";
 import BookingPage from "../pages/Booking/BookingPage";
+import BookingHistoryPage from "../pages/Booking/BookingHistoryPage";
+import ContactPage from "../pages/Contact/ContactPage";
+import AboutPage from "../pages/About/AboutPage";
 import LoginPage from "../pages/Auth/LoginPage";
 import RegisterPage from "../pages/Auth/RegisterPage";
 import ForgotPasswordPage from "../pages/Auth/ForgotPasswordPage";
@@ -27,7 +34,17 @@ import CategoryForm from "../pages/Admin/Category/CategoryForm";
 import OrderManagement from "../pages/Admin/Order/OrderManagement";
 import BookingManagement from "../pages/Admin/Booking/BookingManagement";
 import UserManagement from "../pages/Admin/User/UserManagement";
+import PasswordResetManagement from "../pages/Admin/User/PasswordResetManagement";
+import ReviewManagement from "../pages/Admin/Review/ReviewManagement";
+import ContactManagement from "../pages/Admin/Contact/ContactManagement";
 import StatisticsPage from "../pages/Admin/Statistics/StatisticsPage";
+import StaffManagement from "../pages/Admin/Staff/StaffManagement";
+import DepositManagement from "../pages/Admin/Deposit/DepositManagement";
+import InstallmentManagement from "../pages/Admin/Installment/InstallmentManagement";
+
+// Staff pages
+import StaffLayout from "../layouts/StaffLayout";
+import StaffDashboard from "../pages/Staff/StaffDashboard";
 
 const AppRoutes = () => {
   return (
@@ -37,6 +54,8 @@ const AppRoutes = () => {
         <Route path="/" element={<HomePage />} />
         <Route path="/motorcycles" element={<MotorcyclePage />} />
         <Route path="/motorcycles/:slug" element={<MotorcycleDetailPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="/cart" element={<CartPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -53,10 +72,42 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <UserProfilePage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile/settings"
+          element={
+            <PrivateRoute>
+              <AccountSettingsPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
           path="/my-orders"
           element={
             <PrivateRoute>
               <OrderHistoryPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payment"
+          element={
+            <PrivateRoute>
+              <PaymentPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/payment-return"
+          element={
+            <PrivateRoute>
+              <PaymentReturnPage />
             </PrivateRoute>
           }
         />
@@ -68,6 +119,31 @@ const AppRoutes = () => {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/my-bookings"
+          element={
+            <PrivateRoute>
+              <BookingHistoryPage />
+            </PrivateRoute>
+          }
+        />
+      </Route>
+
+      {/* Staff routes */}
+      <Route
+        path="/staff"
+        element={
+          <PrivateRoute staffOnly>
+            <StaffLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<StaffDashboard />} />
+        <Route path="orders" element={<OrderManagement />} />
+        <Route path="bookings" element={<BookingManagement />} />
+        <Route path="motorcycles" element={<MotorcycleManagement />} />
+        <Route path="installment-requests" element={<InstallmentManagement />} />
       </Route>
 
       {/* Admin routes */}
@@ -79,6 +155,7 @@ const AppRoutes = () => {
           </PrivateRoute>
         }
       >
+        <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="motorcycles" element={<MotorcycleManagement />} />
         <Route path="motorcycles/add" element={<MotorcycleForm />} />
@@ -92,6 +169,12 @@ const AppRoutes = () => {
         <Route path="orders" element={<OrderManagement />} />
         <Route path="bookings" element={<BookingManagement />} />
         <Route path="users" element={<UserManagement />} />
+        <Route path="staff" element={<StaffManagement />} />
+        <Route path="deposits" element={<DepositManagement />} />
+        <Route path="installment-requests" element={<InstallmentManagement />} />
+        <Route path="password-reset-requests" element={<PasswordResetManagement />} />
+        <Route path="reviews" element={<ReviewManagement />} />
+        <Route path="contacts" element={<ContactManagement />} />
         <Route path="statistics" element={<StatisticsPage />} />
       </Route>
     </Routes>

@@ -4,7 +4,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        teko: ["Teko", "Inter", "sans-serif"],
+        heading: ['"Barlow Condensed"', 'sans-serif'],
+        body: ['Barlow', 'sans-serif'],
       },
       colors: {
         iron: {
@@ -43,6 +44,22 @@ export default {
           "0%, 100%": { transform: "translateY(0)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "hero-slide-in-right": {
+          "0%": { opacity: "0", transform: "translateX(80px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "hero-slide-in-left": {
+          "0%": { opacity: "0", transform: "translateX(-80px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "hero-fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "hero-counter-fade": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
       },
       animation: {
         "fade-up": "fade-up 0.7s ease-out both",
@@ -50,6 +67,10 @@ export default {
         "slide-bike": "slide-bike 0.75s cubic-bezier(0.22, 1, 0.36, 1) both",
         "brand-in": "brand-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both",
         float: "float 4s ease-in-out infinite",
+        "hero-slide-in-right": "hero-slide-in-right 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) both",
+        "hero-slide-in-left": "hero-slide-in-left 0.6s cubic-bezier(0.25, 0.1, 0.25, 1) both",
+        "hero-fade-in": "hero-fade-in 0.55s ease-out both",
+        "hero-counter-fade": "hero-counter-fade 0.5s ease-out both",
       },
     },
   },

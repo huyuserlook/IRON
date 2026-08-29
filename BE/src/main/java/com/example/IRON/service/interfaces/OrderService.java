@@ -14,4 +14,6 @@ public interface OrderService {
     Page<OrderResponse> getAllOrders(Order.OrderStatus status, Pageable pageable);
     OrderResponse updateStatus(Long id, Order.OrderStatus status);
     void cancelOrder(Long id, Long userId);
+    void deleteOrder(Long id);
+    OrderResponse toResponse(Order order);
 }

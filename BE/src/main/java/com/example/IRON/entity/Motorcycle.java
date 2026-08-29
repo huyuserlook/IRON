@@ -31,6 +31,9 @@ public class Motorcycle {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal price;
 
+    @Column(name = "cost_price", precision = 15, scale = 2)
+    private BigDecimal costPrice;
+
     @Column(name = "engine_cc")
     private Integer engineCc;
 
@@ -43,8 +46,11 @@ public class Motorcycle {
     @Column(name = "year_model")
     private Integer yearModel;
 
-    @Column(name = "thumbnail_url")
+    @Column(name = "thumbnail_url", columnDefinition = "LONGTEXT")
     private String thumbnailUrl;
+
+    @Column(nullable = false)
+    private Integer stock = 0;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -62,7 +68,7 @@ public class Motorcycle {
     @OneToMany(mappedBy = "motorcycle", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MotorcycleImage> images = new ArrayList<>();
 
-    @OneToMany(mappedBy = "motorcycle", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "motorcycle", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Inventory> inventories = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
@@ -94,6 +100,8 @@ public class Motorcycle {
     public void setCategory(Category category) { this.category = category; }
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+    public BigDecimal getCostPrice() { return costPrice; }
+    public void setCostPrice(BigDecimal costPrice) { this.costPrice = costPrice; }
     public Integer getEngineCc() { return engineCc; }
     public void setEngineCc(Integer engineCc) { this.engineCc = engineCc; }
     public Double getHorsepower() { return horsepower; }
@@ -104,6 +112,8 @@ public class Motorcycle {
     public void setYearModel(Integer yearModel) { this.yearModel = yearModel; }
     public String getThumbnailUrl() { return thumbnailUrl; }
     public void setThumbnailUrl(String thumbnailUrl) { this.thumbnailUrl = thumbnailUrl; }
+    public Integer getStock() { return stock; }
+    public void setStock(Integer stock) { this.stock = stock; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
     public String getSpecifications() { return specifications; }

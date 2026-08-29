@@ -4,6 +4,7 @@ import com.example.IRON.entity.Motorcycle;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -23,13 +24,21 @@ public interface MotorcycleRepository extends JpaRepository<Motorcycle, Long> {
 
     long countByCategoryId(Long categoryId);
 
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Motorcycle m SET m.stock = m.stock - :qty WHERE m.id = :id AND m.stock >= :qty")
+    int deductStock(@Param("id") Long id, @Param("qty") int qty);
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Motorcycle m SET m.stock = m.stock + :qty WHERE m.id = :id")
+    int restoreStock(@Param("id") Long id, @Param("qty") int qty);
+
     @Query("""
         SELECT m FROM Motorcycle m
         WHERE (:brandId IS NULL OR m.brand.id = :brandId)
           AND (:categoryId IS NULL OR m.category.id = :categoryId)
           AND (:minPrice IS NULL OR m.price >= :minPrice)
           AND (:maxPrice IS NULL OR m.price <= :maxPrice)
-          AND (:keyword IS NULL OR LOWER(m.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+          AND (:keywordPattern IS NULL OR LOWER(m.name) LIKE LOWER(:keywordPattern))
           AND (:status IS NULL OR m.status = :status)
     """)
     Page<Motorcycle> searchMotorcycles(
@@ -37,8 +46,42 @@ public interface MotorcycleRepository extends JpaRepository<Motorcycle, Long> {
             @Param("categoryId") Long categoryId,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
-            @Param("keyword") String keyword,
+            @Param("keywordPattern") String keywordPattern,
             @Param("status") Motorcycle.MotorcycleStatus status,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT m FROM Motorcycle m
+        WHERE m.id != :excludeId
+          AND m.status = 'AVAILABLE'
+          AND (
+            m.category.id = :categoryId
+            OR m.brand.id = :brandId
+          )
+        ORDER BY
+          CASE
+            WHEN m.category.id = :categoryId AND m.brand.id = :brandId THEN 1
+            WHEN m.category.id = :categoryId THEN 2
+            ELSE 3
+          END,
+          m.createdAt DESC
+    """)
+    List<Motorcycle> findSuggestedByCategoryOrBrand(
+            @Param("excludeId") Long excludeId,
+            @Param("categoryId") Long categoryId,
+            @Param("brandId") Long brandId,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT m FROM Motorcycle m
+        WHERE m.id != :excludeId
+          AND m.status = 'AVAILABLE'
+        ORDER BY m.createdAt DESC
+    """)
+    List<Motorcycle> findRecentExcluding(
+            @Param("excludeId") Long excludeId,
             Pageable pageable
     );
 }

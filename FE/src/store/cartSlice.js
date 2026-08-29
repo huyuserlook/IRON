@@ -20,7 +20,7 @@ const cartSlice = createSlice({
   },
   reducers: {
     addToCart: (state, action) => {
-      const { motorcycleId, name, price, thumbnailUrl, colorName } =
+      const { motorcycleId, name, price, thumbnailUrl, colorName, stock = 0 } =
         action.payload;
       const existing = state.items.find(
         (i) => i.motorcycleId === motorcycleId && i.colorName === colorName,
@@ -35,6 +35,7 @@ const cartSlice = createSlice({
           thumbnailUrl,
           colorName,
           quantity: 1,
+          stock: stock || 0,
         });
       }
       saveCart(state.items);

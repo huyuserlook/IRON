@@ -4,14 +4,8 @@ import motorcycleApi from "../../api/motorcycleApi";
 import brandApi from "../../api/brandApi";
 import { formatCurrency } from "../../utils/formatCurrency";
 import HomeHero from "../../components/home/HomeHero";
-import {
-  ShieldCheck,
-  ChevronRight,
-  Zap,
-  Award,
-  Users,
-  ArrowRight,
-} from "lucide-react";
+import showImage from "../../assets/img/show.png";
+import { ShieldCheck, Zap, Award, Users, ArrowRight } from "lucide-react";
 
 const HomePage = () => {
   const location = useLocation();
@@ -19,13 +13,17 @@ const HomePage = () => {
   const [brands, setBrands] = useState([]);
 
   useEffect(() => {
-    motorcycleApi.getFeatured().then((res) => {
-      const items = Array.isArray(res) ? res : res || [];
-      setFeatured(items);
-    });
+    motorcycleApi
+      .search({ page: 0, size: 8, sortBy: "createdAt", sortDir: "desc" })
+      .then((res) => {
+        const payload = res?.data ?? res;
+        const items = Array.isArray(payload) ? payload : payload?.content || [];
+        setFeatured(items);
+      });
 
     brandApi.getAll().then((res) => {
-      const items = Array.isArray(res) ? res : res || [];
+      const payload = res?.data ?? res;
+      const items = Array.isArray(payload) ? payload : payload || [];
       setBrands(items);
     });
   }, []);
@@ -48,26 +46,26 @@ const HomePage = () => {
   return (
     <div className="bg-white">
       <HomeHero resetTrigger={location.state?.reset} />
-      {/* Brands */}
+      {/* Motorcycle Lines */}
       <section className="py-16 bg-gray-50 border-y border-gray-100">
         <div className="container mx-auto px-4">
-          <p className="text-center text-gray-400 text-sm font-bold uppercase tracking-[0.2em] mb-10">
-            Đối tác chiến lược
+          <p className="text-center text-[#BC000A] text-sm font-bold uppercase tracking-[0.24em] mb-10">
+            Hãng xe
           </p>
-          <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-60 grayscale hover:grayscale-0 transition-all">
-            {brands.slice(0, 6).map((brand) => (
-              <Link key={brand.id} to={`/motorcycles?brandId=${brand.id}`}>
-                {brand.logoUrl ? (
-                  <img
-                    src={brand.logoUrl}
-                    alt={brand.name}
-                    className="h-8 md:h-12 object-contain"
-                  />
-                ) : (
-                  <span className="font-bold text-2xl text-gray-400">
-                    {brand.name}
-                  </span>
-                )}
+          <div className="flex flex-wrap justify-center gap-4 xl:gap-6">
+            {brands.map((brand, index) => (
+              <Link
+                key={brand.id}
+                to={`/motorcycles?brandId=${brand.id}`}
+                className="group inline-flex min-h-[120px] min-w-[160px] items-center justify-center rounded-[32px] bg-white px-6 py-5 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:bg-[#FFF8E6] hover:shadow-[0_16px_40px_-24px_rgba(188,0,10,0.35)]"
+                style={{
+                  animation: "fadeInUp 0.8s ease-out both",
+                  animationDelay: `${index * 80}ms`,
+                }}
+              >
+                <span className="text-lg font-semibold uppercase tracking-[0.2em] text-[#6B6B6B] transition-all duration-300 group-hover:text-[#BC000A]">
+                  {(brand.name || "").trim()}
+                </span>
               </Link>
             ))}
           </div>
@@ -75,82 +73,82 @@ const HomePage = () => {
       </section>
 
       {/* Featured */}
-      <section className="py-24">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div>
-              <h2 className="font-teko text-xl text-iron-accent uppercase tracking-widest mb-2">
-                Sản phẩm nổi bật
-              </h2>
-              <h3 className="font-teko text-5xl md:text-6xl font-semibold text-gray-900 leading-none">
-                Siêu Phẩm Đang Chờ Bạn
-              </h3>
-            </div>
-            <Link
-              to="/motorcycles"
-              className="inline-flex items-center gap-2 font-teko text-2xl text-gray-900 hover:text-iron-accent transition-colors group"
-            >
-              Xem tất cả bộ sưu tập
-              <ChevronRight
-                size={20}
-                className="group-hover:translate-x-1 transition-transform"
-              />
-            </Link>
+      <section className="py-16 md:py-24 bg-white">
+        <div className="mx-auto max-w-[1200px] px-4">
+          <div className="mb-12 text-center">
+            <p className="text-[#BC000A] font-jetBrainsMono text-xs font-semibold uppercase tracking-[0.3em] mb-4">
+              LATEST ARRIVALS
+            </p>
+            <h2 className="text-4xl md:text-[4.5rem] font-archivoNarrow font-bold tracking-[-0.03em] text-[#1A1B1F] leading-[1.05]">
+              MẪU XE MỚI NHẤT
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featured.slice(0, 8).map((moto) => (
-              <div
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {featured.slice(0, 3).map((moto, index) => (
+              <article
                 key={moto.id}
-                className="group relative bg-white rounded-2xl overflow-hidden border border-gray-100 hover:border-iron-accent/30 hover:shadow-2xl hover:shadow-iron-accent/10 transition-all duration-500"
+                className="group relative overflow-hidden rounded-[24px] border border-[#E8BCB6] bg-[#FAF9FE] shadow-[0_30px_80px_-55px_rgba(0,0,0,0.25)] transition-all duration-700 ease-out hover:-translate-y-3 hover:shadow-[0_40px_90px_-45px_rgba(188,0,10,0.18)]"
+                style={{
+                  animation: "fadeInUp 0.8s ease-out both",
+                  animationDelay: `${index * 120}ms`,
+                }}
               >
-                <Link
-                  to={`/motorcycles/${moto.slug}`}
-                  className="block overflow-hidden h-64"
-                >
-                  {moto.thumbnailUrl ? (
+                <Link to={`/motorcycles/${moto.slug}`} className="block no-underline">
+                  <div className="relative h-44 overflow-hidden">
                     <img
-                      src={moto.thumbnailUrl}
+                      src={moto.thumbnailUrl || "/placeholder-bike.jpg"}
                       alt={moto.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="absolute inset-0 h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-0"
                     />
-                  ) : (
-                    <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-                      No Image
+                    <img
+                      src={moto.imageUrl || moto.thumbnailUrl || "/placeholder-bike.jpg"}
+                      alt={moto.name}
+                      className="absolute inset-0 h-full w-full object-cover opacity-0 transition-all duration-700 ease-out group-hover:scale-105 group-hover:opacity-100"
+                    />
+                    <div className="absolute left-4 top-4 rounded-full bg-[#BC000A] px-3 py-1">
+                      <p className="text-[10px] uppercase tracking-[0.12em] text-white font-jetBrainsMono font-semibold">
+                        MỚI VỀ
+                      </p>
                     </div>
-                  )}
+                  </div>
 
-                  <div className="absolute top-4 left-4 bg-black/80 backdrop-blur-md text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">
-                    {moto.categoryName || "Mới về"}
+                  <div className="p-6 flex flex-col gap-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-lg font-bold text-[#1A1B1F] tracking-[-0.01em] truncate">
+                          {moto.name}
+                        </h3>
+                        <p className="mt-1.5 text-[11px] uppercase tracking-[0.2em] text-[#5F5E5E] font-jetBrainsMono truncate">
+                          {moto.brandName}
+                        </p>
+                      </div>
+                      <p className="text-base font-bold text-[#BC000A] whitespace-nowrap">
+                        {formatCurrency(moto.price)}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 border-t border-[#E8BCB6] pt-3 text-[10px] text-[#5F5E5E] font-jetBrainsMono uppercase tracking-[0.1em]">
+                      <span className="flex items-center gap-1.5">
+                        <Zap size={12} className="text-[#BC000A]" />
+                        {moto.horsepower ? `${moto.horsepower} HP` : "—"}
+                      </span>
+                      <span className="h-3 w-px bg-[#E8BCB6]" />
+                      <span className="flex items-center gap-1.5">
+                        <Award size={12} className="text-[#BC000A]" />
+                        {moto.engineCc ? `${moto.engineCc} CC` : "—"}
+                      </span>
+                    </div>
+
+                    <div className="mt-auto pt-2">
+                      <span className="inline-flex items-center gap-2 rounded-[14px] bg-[#1A1B1F] px-5 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-white transition-all duration-300 group-hover:bg-[#2b2c31]">
+                        XEM CHI TIẾT
+                        <ArrowRight size={14} />
+                      </span>
+                    </div>
                   </div>
                 </Link>
-
-                <div className="p-6">
-                  <div className="flex justify-between items-start mb-2">
-                    <p className="text-xs font-bold text-iron-accent uppercase tracking-wider">
-                      {moto.brandName}
-                    </p>
-                    <div className="flex items-center gap-1 text-gray-400 text-xs">
-                      <Zap size={12} className="text-yellow-500" />
-                      {moto.engineCc}cc
-                    </div>
-                  </div>
-                  <h4 className="font-bold text-gray-900 text-lg mb-4 line-clamp-1 group-hover:text-iron-accent transition-colors">
-                    {moto.name}
-                  </h4>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                    <span className="text-xl font-black text-gray-900">
-                      {formatCurrency(moto.price)}
-                    </span>
-                    <Link
-                      to={`/motorcycles/${moto.slug}`}
-                      className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-900 group-hover:bg-iron-accent group-hover:text-white transition-all"
-                    >
-                      <ArrowRight size={18} />
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              </article>
             ))}
           </div>
         </div>
@@ -159,93 +157,133 @@ const HomePage = () => {
       {/* Why Us*/}
       <section
         id="about"
-        className="py-24 bg-gray-900 text-white overflow-hidden relative"
+        className="py-24 bg-[#F2E3D2] text-[#1A1B1F] overflow-hidden relative"
       >
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-iron-accent/10 skew-x-12 transform translate-x-1/2" />
+        <div className="absolute -right-[160px] top-12 h-[420px] w-[420px] rounded-full bg-[#FCD3D8] blur-3xl opacity-70" />
+        <div className="absolute left-0 bottom-0 h-[320px] w-[320px] rounded-full bg-[#EEEDF3] blur-3xl opacity-80" />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="max-w-3xl mb-16">
-            <h2 className="font-teko text-xl text-iron-yellow uppercase tracking-widest mb-3">
-              Tại sao chọn chúng tôi
-            </h2>
-            <h3 className="font-teko text-5xl md:text-6xl font-semibold mb-6 leading-none">
-              Trải Nghiệm Mua Sắm Xe Phân Khối Lớn Chuyên Nghiệp
-            </h3>
-            <p className="text-gray-400 text-lg">
-              Chúng tôi không chỉ bán xe, chúng tôi mang đến một phong cách sống
-              và sự an tâm tuyệt đối trên mỗi hành trình.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: ShieldCheck,
-                title: "Bảo Hành Vàng",
-                desc: "Chế độ bảo hành chính hãng lên đến 3 năm hoặc 30,000km, hỗ trợ cứu hộ 24/7.",
-                color: "bg-blue-500/10 text-blue-400",
-              },
-              {
-                icon: Award,
-                title: "Chứng Nhận Quốc Tế",
-                desc: "Mọi sản phẩm đều được kiểm định nghiêm ngặt theo tiêu chuẩn Euro 5 và khí thải Việt Nam.",
-                color: "bg-iron-accent/20 text-iron-yellow",
-              },
-              {
-                icon: Users,
-                title: "Cộng Đồng Rider",
-                desc: "Tham gia các tour xuyên Việt và quốc tế dành riêng cho khách hàng của Iron Moto.",
-                color: "bg-green-500/10 text-green-400",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-sm hover:bg-white/10 transition-all group"
-              >
-                <div
-                  className={`w-14 h-14 rounded-2xl ${item.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}
-                >
-                  <item.icon size={30} />
-                </div>
-                <h4 className="font-teko text-3xl mb-3">{item.title}</h4>
-                <p className="text-gray-400 leading-relaxed">{item.desc}</p>
+          <div className="grid gap-10 xl:grid-cols-[1fr_1fr] items-center">
+            <div className="space-y-8">
+              <div className="flex items-center gap-3">
+                <span className="inline-flex h-0.5 w-16 rounded bg-[#BC000A]" />
+                <p className="bg-[#F3E3D0]/60 text-[#8A5D3F] font-jetBrainsMono text-xs font-semibold uppercase tracking-[0.3em] rounded-full px-3 py-2">
+                  Tiêu chuẩn 5 sao
+                </p>
               </div>
-            ))}
+              <div className="space-y-4">
+                <h2 className="text-4xl md:text-5xl font-archivoNarrow font-bold tracking-[-0.03em]">
+                  Dịch vụ & showroom đẳng cấp
+                </h2>
+                <p className="max-w-2xl text-lg leading-8 text-[#5F5E5E]">
+                  IRON mang đến trải nghiệm mua sắm và dịch vụ xe phân khối lớn
+                  hiện đại, chuyên nghiệp và chuẩn quốc tế.
+                </p>
+              </div>
+
+              <div className="grid gap-5 xl:grid-cols-1">
+                {[
+                  {
+                    icon: ShieldCheck,
+                    title: "Bảo hành 5 năm chính hãng",
+                    desc: "An tâm tuyệt đối với gói bảo hành mở rộng toàn diện cho mọi dòng xe mới mua tại IRON Showroom.",
+                    bg: "bg-[#BC000A]",
+                  },
+                  {
+                    icon: Award,
+                    title: "Kỹ thuật chuyên nghiệp",
+                    desc: "Kỹ thuật viên được đào tạo định kỳ, sử dụng trang thiết bị chẩn đoán hiện đại nhất hiện nay.",
+                    bg: "bg-[#1A1B1F]",
+                  },
+                  {
+                    icon: Users,
+                    title: "Showroom trải nghiệm",
+                    desc: "Không gian trưng bày chuẩn quốc tế cùng quầy lounge đẳng cấp phục vụ khách tham quan.",
+                    bg: "bg-[#E3E2E7]",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.title}
+                    className="group flex gap-5 rounded-[32px] bg-white p-6 shadow-[0_22px_45px_-28px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_55px_-30px_rgba(0,0,0,0.2)]"
+                  >
+                    <div
+                      className={`flex h-14 w-14 items-center justify-center rounded-3xl ${item.bg} text-white transition-all duration-300 group-hover:scale-105`}
+                    >
+                      <item.icon size={22} />
+                    </div>
+                    <div>
+                      <h4 className="text-xl font-semibold text-[#1A1B1F] mb-2">
+                        {item.title}
+                      </h4>
+                      <p className="text-[#5F5E5E] leading-7">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative overflow-hidden rounded-[40px] bg-white shadow-[0_35px_90px_-40px_rgba(0,0,0,0.2)]">
+              <div className="absolute -left-[60px] top-12 h-48 w-48 rounded-full bg-[#FCD3D8]/70 blur-3xl" />
+              <div className="absolute -right-[80px] bottom-10 h-40 w-40 rounded-full bg-[#EEEDF3]/90 blur-3xl" />
+              <img
+                src={showImage}
+                alt="Showroom"
+                className="h-[520px] w-full object-cover"
+              />
+              <div className="absolute left-6 bottom-6 w-[calc(100%-3rem)] rounded-[32px] bg-white/90 p-6 shadow-[0_24px_70px_-36px_rgba(0,0,0,0.25)] backdrop-blur-md">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[#BC000A] font-jetBrainsMono text-[10px] uppercase tracking-[0.24em] mb-2">
+                      Flagship Store
+                    </p>
+                    <h3 className="text-2xl font-semibold text-[#1A1B1F]">
+                      IRON Showroom
+                    </h3>
+                    <p className="text-[#5F5E5E] text-sm leading-6 mt-2">
+                      Giờ mở cửa: 08:00 - 20:00 (Hàng ngày)
+                    </p>
+                  </div>
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#BC000A] text-white shadow-lg">
+                    <span className="text-xl font-bold">i</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section id="contact" className="py-24 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="bg-gradient-to-r from-iron-red to-iron-accent rounded-[3rem] p-12 md:p-20 relative overflow-hidden shadow-2xl shadow-iron-red/25">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-40 h-40 bg-black/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+      <section
+        id="contact"
+        className="relative overflow-hidden bg-[#121212] py-32 text-white"
+      >
+        <div className="absolute inset-y-0 right-0 hidden w-1/2 overflow-hidden lg:block">
+          <p className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2 text-[180px] font-heading uppercase tracking-[-0.03em] text-white/10 leading-[0.9] select-none">
+            IRON
+          </p>
+        </div>
+        <div className="relative mx-auto max-w-5xl px-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="font-heading text-5xl md:text-[5.5rem] font-semibold tracking-[-0.03em] leading-tight">
+              Hành trình bắt đầu tại đây
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-base text-white/70 leading-7">
+              Đăng ký nhận thông tin về các mẫu xe phiên bản giới hạn và các
+              chương trình ưu đãi đặc quyền từ IRON Motor.
+            </p>
+          </div>
 
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
-              <div className="text-center md:text-left text-white max-w-xl">
-                <h2 className="font-teko text-5xl md:text-6xl font-semibold mb-4 leading-none">
-                  Bạn Đã Sẵn Sàng Chinh Phục?
-                </h2>
-                <p className="text-white/85 text-lg">
-                  Hãy để chúng tôi tư vấn mẫu xe phù hợp nhất với phong cách và
-                  cá tính của bạn
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link
-                  to="/booking"
-                  className="bg-iron-yellow text-black font-teko text-2xl px-10 py-4 rounded-2xl hover:brightness-95 transition-all text-center"
-                >
-                  Đăng Ký Tư Vấn
-                </Link>
-                <Link
-                  to="/motorcycles"
-                  className="bg-black/20 text-white font-teko text-2xl px-10 py-4 rounded-2xl border border-white/20 hover:bg-black/30 transition-all text-center"
-                >
-                  Xem Bảng Giá
-                </Link>
-              </div>
+          <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
+            <div className="flex w-full max-w-[520px] items-center rounded-[24px] border border-white/10 bg-white/5 px-5 py-4 backdrop-blur-xl">
+              <input
+                type="email"
+                placeholder="Nhập email của bạn"
+                className="w-full bg-transparent text-white placeholder:text-white/50 outline-none"
+              />
             </div>
+            <button className="inline-flex min-w-[220px] items-center justify-center rounded-[24px] bg-[#BC000A] px-8 py-4 text-base font-semibold uppercase tracking-[0.16em] text-white shadow-[0_25px_60px_-30px_rgba(188,0,10,0.65)] transition hover:brightness-110">
+              Đăng ký ngay
+            </button>
           </div>
         </div>
       </section>

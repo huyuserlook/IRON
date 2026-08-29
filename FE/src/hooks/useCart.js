@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   addToCart,
@@ -15,15 +16,26 @@ export const useCart = () => {
   const total = useSelector(selectCartTotal);
   const count = useSelector(selectCartCount);
 
+  const updateQty = useCallback((motorcycleId, colorName, quantity) => {
+    dispatch(updateQuantity({ motorcycleId, colorName, quantity }));
+  }, [dispatch]);
+
   return {
     items,
     total,
     count,
-    addItem: (item) => dispatch(addToCart(item)),
+    addItem: (item) => {
+      try {
+        console.log("useCart.addItem dispatch", item);
+        return dispatch(addToCart(item));
+      } catch (err) {
+        console.error("Failed to dispatch addToCart", err);
+        throw err;
+      }
+    },
     removeItem: (motorcycleId, colorName) =>
       dispatch(removeFromCart({ motorcycleId, colorName })),
-    updateQty: (motorcycleId, colorName, quantity) =>
-      dispatch(updateQuantity({ motorcycleId, colorName, quantity })),
+    updateQty,
     clear: () => dispatch(clearCart()),
   };
 };

@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import authApi from "../api/authApi";
+import userApi from "../api/userApi";
 
 // Thunks
 export const login = createAsyncThunk(
@@ -7,8 +8,9 @@ export const login = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await authApi.login(data);
-      localStorage.setItem("token", res.data.accessToken);
-      return res.data;
+      const payload = res?.data ?? res;
+      localStorage.setItem("token", payload.accessToken);
+      return payload;
     } catch (err) {
       return rejectWithValue(err.message || "Đăng nhập thất bại");
     }
@@ -20,7 +22,8 @@ export const register = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await authApi.register(data);
-      return res.data;
+      const payload = res?.data ?? res;
+      return payload;
     } catch (err) {
       return rejectWithValue(err.message || "Đăng ký thất bại");
     }
@@ -32,26 +35,44 @@ export const socialLogin = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await authApi.socialLogin(data);
-      localStorage.setItem("token", res.data.accessToken);
-      return res.data;
+      const payload = res?.data ?? res;
+      localStorage.setItem("token", payload.accessToken);
+      return payload;
     } catch (err) {
       return rejectWithValue(err.message || "Đăng nhập xã hội thất bại");
     }
   },
 );
 
+export const updateProfile = createAsyncThunk(
+  "auth/updateProfile",
+  async (data, { rejectWithValue }) => {
+    try {
+      const res = await userApi.updateProfile(data);
+      const payload = res?.data ?? res;
+      return payload?.data || payload;
+    } catch (err) {
+      return rejectWithValue(err.message || "Cập nhật thất bại");
+    }
+  },
+);
+
 // Đọc user từ localStorage khi khởi động
 const getInitialUser = () => {
-  const token = localStorage.getItem("token");
-  const user = localStorage.getItem("user");
-  if (token && user) {
-    try {
-      return JSON.parse(user);
-    } catch {
-      return null;
+  try {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    if (token && user) {
+      try {
+        return JSON.parse(user);
+      } catch {
+        return null;
+      }
     }
+    return null;
+  } catch {
+    return null;
   }
-  return null;
 };
 
 const authSlice = createSlice({
@@ -112,6 +133,13 @@ const authSlice = createSlice({
       })
       .addCase(socialLogin.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.user = action.payload;
+        localStorage.setItem("user", JSON.stringify(action.payload));
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
         state.error = action.payload;
       });
   },

@@ -18,6 +18,7 @@ public interface MotorcycleService {
     MotorcycleDetailResponse getBySlug(String slug);
     MotorcycleDetailResponse getById(Long id);
     List<MotorcycleResponse> getFeatured();
+    List<MotorcycleResponse> getSuggested(Long motorcycleId);
     MotorcycleDetailResponse create(MotorcycleRequest request);
     MotorcycleDetailResponse update(Long id, MotorcycleRequest request);
     void delete(Long id);

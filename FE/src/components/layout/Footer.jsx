@@ -1,152 +1,151 @@
-import { Link } from "react-router-dom";
-import {
-  Facebook,
-  Instagram,
-  Twitter,
-  Youtube,
-  MapPin,
-  Phone,
-  Mail,
-} from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Globe, Mail, Phone } from "lucide-react";
+import IronLogo from "../common/IronLogo";
 
-const Footer = () => (
-  <footer className="bg-gray-950 text-gray-400 pt-20 pb-10">
-    <div className="container mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
-        {/* Brand Column */}
-        <div className="space-y-6">
-          <Link
-            to="/"
-            className="text-2xl font-black text-orange-500 tracking-tighter"
-          >
-            IRON MOTO
-          </Link>
-          <p className="text-sm leading-relaxed max-w-xs">
-            Hệ thống Showroom mô tô phân khối lớn hàng đầu Việt Nam. Nơi hội tụ
-            những thương hiệu xe danh tiếng thế giới và cộng đồng Rider chuyên
-            nghiệp.
-          </p>
-          <div className="flex gap-4">
-            {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
+const Footer = () => {
+  const navigate = useNavigate();
+
+  const resetHome = () => {
+    navigate("/", { state: { reset: Date.now() } });
+  };
+
+  return (
+    <footer className="border-t border-[#F1D98A] bg-[#FFF8DC] text-[#5F5E5E]">
+      <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-20 px-6 py-20 md:px-12 lg:px-16">
+        <div className="grid gap-12 xl:grid-cols-[1.5fr_1fr_1fr_1fr] xl:items-start">
+          <div className="flex flex-col gap-6">
+            <button
+              type="button"
+              onClick={resetHome}
+              className="inline-flex items-center justify-center rounded-[2rem] bg-[#FFF8DC] p-6 shadow-sm shadow-black/5 w-max animate-brand-in"
+              aria-label="Về trang chủ"
+            >
+              <IronLogo size="lg" className="animate-float" asLink={false} />
+            </button>
+            <p className="max-w-md text-base leading-7 font-body text-[#5F5E5E]">
+              Showroom phân phối mô tô phân khối lớn cao cấp hàng đầu Việt Nam.
+              Nơi niềm đam mê và kỹ thuật hội tụ.
+            </p>
+            <div className="flex items-center gap-3">
               <a
-                key={i}
-                href="#"
-                className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-orange-500 hover:text-white transition-all"
+                href="mailto:contact@ironmotors.vn"
+                aria-label="Email"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#E8BCB6] text-[#5F5E5E] transition hover:border-iron-yellow hover:text-iron-yellow"
               >
-                <Icon size={18} />
+                <Mail size={20} strokeWidth={1.5} />
               </a>
-            ))}
+              <a
+                href="tel:+84123456789"
+                aria-label="Phone"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#E8BCB6] text-[#5F5E5E] transition hover:border-iron-yellow hover:text-iron-yellow"
+              >
+                <Phone size={20} strokeWidth={1.5} />
+              </a>
+              <a
+                href="#"
+                aria-label="Website"
+                className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#E8BCB6] text-[#5F5E5E] transition hover:border-iron-yellow hover:text-iron-yellow"
+              >
+                <Globe size={20} strokeWidth={1.5} />
+              </a>
+            </div>
+          </div>
+
+          <div className="grid gap-8">
+            <p className="text-[#1A1B1F] font-jetBrainsMono text-xs font-bold uppercase tracking-[0.1em]">
+              LIÊN KẾT NHANH
+            </p>
+            <div className="grid gap-4 text-base font-body">
+              <Link
+                to="/motorcycles"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Dòng xe mới
+              </Link>
+              <Link
+                to="/accessories"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Phụ kiện chính hãng
+              </Link>
+              <Link
+                to="/booking"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Lịch lái thử
+              </Link>
+              <Link
+                to="/news"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Tin tức &amp; Sự kiện
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-8">
+            <p className="text-[#1A1B1F] font-jetBrainsMono text-xs font-bold uppercase tracking-[0.1em]">
+              HỖ TRỢ
+            </p>
+            <div className="grid gap-4 text-base font-body">
+              <Link
+                to="/warranty"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Chính sách bảo hành
+              </Link>
+              <Link
+                to="/installment"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Dịch vụ trả góp
+              </Link>
+              <Link
+                to="/faq"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Câu hỏi thường gặp
+              </Link>
+              <Link
+                to="/contact"
+                className="transition-colors hover:text-[#BC000A]"
+              >
+                Liên hệ showroom
+              </Link>
+            </div>
+          </div>
+
+          <div className="grid gap-8">
+            <p className="text-[#1A1B1F] font-jetBrainsMono text-xs font-bold uppercase tracking-[0.1em]">
+              ĐỊA CHỈ SHOWROOM
+            </p>
+            <div className="grid gap-4 text-base font-body">
+              <p className="text-[#5F5E5E] leading-6">
+                123 Racing District, Hanoi, VN
+              </p>
+              <p className="text-[#1A1B1F] font-bold leading-6">
+                +84 123 456 789
+              </p>
+              <p className="text-[#5F5E5E] leading-6">contact@ironmotors.vn</p>
+            </div>
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div>
-          <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-sm">
-            Khám phá
-          </h4>
-          <ul className="space-y-4 text-sm">
-            <li>
-              <Link
-                to="/motorcycles"
-                className="hover:text-orange-500 transition-colors"
-              >
-                Bộ sưu tập xe
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/booking"
-                className="hover:text-orange-500 transition-colors"
-              >
-                Đăng ký lái thử
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/motorcycles?featured=true"
-                className="hover:text-orange-500 transition-colors"
-              >
-                Siêu phẩm nổi bật
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/cart"
-                className="hover:text-orange-500 transition-colors"
-              >
-                Giỏ hàng
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Support */}
-        <div>
-          <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-sm">
-            Hỗ trợ
-          </h4>
-          <ul className="space-y-4 text-sm">
-            <li>
-              <Link
-                to="/my-orders"
-                className="hover:text-orange-500 transition-colors"
-              >
-                Theo dõi đơn hàng
-              </Link>
-            </li>
-            <li>
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                Chính sách bảo hành
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                Dịch vụ sửa chữa
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:text-orange-500 transition-colors">
-                Câu hỏi thường gặp
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {/* Contact Info */}
-        <div>
-          <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-sm">
-            Liên hệ
-          </h4>
-          <ul className="space-y-4 text-sm">
-            <li className="flex gap-3">
-              <MapPin size={18} className="text-orange-500 shrink-0" />
-              <span>123 Đường Nguyễn Huệ, TP. Huế, Việt Nam</span>
-            </li>
-            <li className="flex gap-3">
-              <Phone size={18} className="text-orange-500 shrink-0" />
-              <span>0905 123 456 (Zalo)</span>
-            </li>
-            <li className="flex gap-3">
-              <Mail size={18} className="text-orange-500 shrink-0" />
-              <span>ironmoto@showroom.vn</span>
-            </li>
-          </ul>
+        <div className="border-t border-[#F1D98A] pt-12">
+          <div className="flex flex-col items-center justify-between gap-4 text-sm font-body text-[#5F5E5E] sm:flex-row">
+            <p className="text-center sm:text-left">
+              © 2024 IRON MOTORCYCLES. ALL RIGHTS RESERVED.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 text-center sm:justify-end">
+              <span className="hidden sm:inline">contact@ironmotors.vn</span>
+              <span className="text-[#A9A8A8]">|</span>
+              <span>Thiết kế đồng bộ với Iron Moto</span>
+            </div>
+          </div>
         </div>
       </div>
-
-      <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
-        <p>© 2024 Iron Moto Showroom. Tất cả các quyền được bảo lưu.</p>
-        <div className="flex gap-6">
-          <a href="#" className="hover:text-white">
-            Điều khoản sử dụng
-          </a>
-          <a href="#" className="hover:text-white">
-            Chính sách bảo mật
-          </a>
-        </div>
-      </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 export default Footer;

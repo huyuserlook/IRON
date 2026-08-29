@@ -8,7 +8,10 @@ const CategoryManagement = () => {
   const [items, setItems] = useState([]);
 
   const load = () =>
-    categoryApi.getAllAdmin().then((res) => setItems(res.data || []));
+    categoryApi.getAllAdmin().then((res) => {
+      const payload = res?.data ?? res;
+      setItems(payload || []);
+    });
 
   useEffect(() => {
     load();

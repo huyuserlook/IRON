@@ -5,19 +5,23 @@ import com.example.IRON.dto.response.BrandResponse;
 import com.example.IRON.dto.response.CategoryResponse;
 import com.example.IRON.dto.response.MotorcycleDetailResponse;
 import com.example.IRON.dto.response.MotorcycleResponse;
+import com.example.IRON.dto.response.ReviewResponse;
 import com.example.IRON.entity.Brand;
 import com.example.IRON.entity.Category;
+import com.example.IRON.entity.Inventory;
 import com.example.IRON.entity.Motorcycle;
 import com.example.IRON.entity.MotorcycleImage;
-import com.example.IRON.entity.Inventory;
+import com.example.IRON.entity.Review;
 import com.example.IRON.exception.ResourceNotFoundException;
 import com.example.IRON.repository.BrandRepository;
 import com.example.IRON.repository.CategoryRepository;
 import com.example.IRON.repository.MotorcycleRepository;
+import com.example.IRON.repository.ReviewRepository;
 import com.example.IRON.service.interfaces.MotorcycleService;
 import com.example.IRON.utils.SlugUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,23 +35,30 @@ public class MotorcycleServiceImpl implements MotorcycleService {
     private final MotorcycleRepository motorcycleRepository;
     private final BrandRepository brandRepository;
     private final CategoryRepository categoryRepository;
+    private final ReviewRepository reviewRepository;
 
     public MotorcycleServiceImpl(MotorcycleRepository motorcycleRepository,
                                  BrandRepository brandRepository,
-                                 CategoryRepository categoryRepository) {
+                                 CategoryRepository categoryRepository,
+                                 ReviewRepository reviewRepository) {
         this.motorcycleRepository = motorcycleRepository;
         this.brandRepository = brandRepository;
         this.categoryRepository = categoryRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @Override
+    @Transactional
     public Page<MotorcycleResponse> search(Long brandId, Long categoryId,
                                            BigDecimal minPrice, BigDecimal maxPrice,
                                            String keyword,
                                            Motorcycle.MotorcycleStatus status,
                                            Pageable pageable) {
+        String keywordPattern = (keyword == null || keyword.isBlank())
+                ? null
+                : "%" + keyword.toLowerCase() + "%";
         return motorcycleRepository
-                .searchMotorcycles(brandId, categoryId, minPrice, maxPrice, keyword, status, pageable)
+                .searchMotorcycles(brandId, categoryId, minPrice, maxPrice, keywordPattern, status, pageable)
                 .map(this::toResponse);
     }
 
@@ -64,12 +75,35 @@ public class MotorcycleServiceImpl implements MotorcycleService {
     }
 
     @Override
+    @Transactional
     public List<MotorcycleResponse> getFeatured() {
         List<MotorcycleResponse> result = new ArrayList<>();
         for (Motorcycle m : motorcycleRepository.findByFeaturedTrue()) {
             result.add(toResponse(m));
         }
         return result;
+    }
+
+    @Override
+    @Transactional
+    public List<MotorcycleResponse> getSuggested(Long motorcycleId) {
+        Motorcycle current = motorcycleRepository.findById(motorcycleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Xe máy", "id", motorcycleId));
+
+        Long categoryId = current.getCategory() != null ? current.getCategory().getId() : null;
+        Long brandId = current.getBrand() != null ? current.getBrand().getId() : null;
+
+        List<Motorcycle> candidates = motorcycleRepository.findSuggestedByCategoryOrBrand(
+                motorcycleId, categoryId, brandId, Pageable.ofSize(20));
+
+        if (candidates.isEmpty() && (categoryId != null || brandId != null)) {
+            candidates = motorcycleRepository.findRecentExcluding(motorcycleId, Pageable.ofSize(20));
+        }
+
+        return candidates.stream()
+                .limit(4)
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
@@ -86,15 +120,20 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         motorcycle.setBrand(brand);
         motorcycle.setCategory(category);
         motorcycle.setPrice(request.getPrice());
+        motorcycle.setCostPrice(request.getCostPrice());
         motorcycle.setEngineCc(request.getEngineCc());
         motorcycle.setHorsepower(request.getHorsepower());
         motorcycle.setTorque(request.getTorque());
         motorcycle.setYearModel(request.getYearModel());
         motorcycle.setThumbnailUrl(request.getThumbnailUrl());
+        motorcycle.setStock(request.getStock() != null ? request.getStock() : 0);
         motorcycle.setDescription(request.getDescription());
         motorcycle.setSpecifications(request.getSpecifications());
-        motorcycle.setStatus(request.getStatus() != null ? request.getStatus() : Motorcycle.MotorcycleStatus.AVAILABLE);
         motorcycle.setFeatured(request.getFeatured() != null ? request.getFeatured() : Boolean.FALSE);
+        syncStatusWithStock(motorcycle);
+
+        attachImages(motorcycle, request);
+        attachInventories(motorcycle, request);
 
         return toDetailResponse(motorcycleRepository.save(motorcycle));
     }
@@ -113,15 +152,23 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         motorcycle.setBrand(brand);
         motorcycle.setCategory(category);
         motorcycle.setPrice(request.getPrice());
+        if (request.getCostPrice() != null) motorcycle.setCostPrice(request.getCostPrice());
         if (request.getEngineCc() != null) motorcycle.setEngineCc(request.getEngineCc());
         if (request.getHorsepower() != null) motorcycle.setHorsepower(request.getHorsepower());
         if (request.getTorque() != null) motorcycle.setTorque(request.getTorque());
         if (request.getYearModel() != null) motorcycle.setYearModel(request.getYearModel());
         if (request.getThumbnailUrl() != null) motorcycle.setThumbnailUrl(request.getThumbnailUrl());
+        if (request.getStock() != null) motorcycle.setStock(request.getStock());
         if (request.getDescription() != null) motorcycle.setDescription(request.getDescription());
         if (request.getSpecifications() != null) motorcycle.setSpecifications(request.getSpecifications());
-        if (request.getStatus() != null) motorcycle.setStatus(request.getStatus());
         if (request.getFeatured() != null) motorcycle.setFeatured(request.getFeatured());
+        syncStatusWithStock(motorcycle);
+
+        // Cập nhật lại danh sách ảnh & tồn kho
+        motorcycle.getImages().clear();
+        motorcycle.getInventories().clear();
+        attachImages(motorcycle, request);
+        attachInventories(motorcycle, request);
 
         return toDetailResponse(motorcycleRepository.save(motorcycle));
     }
@@ -132,9 +179,81 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         motorcycleRepository.delete(findById(id));
     }
 
+    /**
+     * Gắn danh sách ảnh cho xe.
+     * Ảnh đầu tiên sẽ là ảnh chính (isPrimary = true).
+     * Nếu xe chưa có thumbnail thì tự lấy ảnh đầu tiên làm thumbnail.
+     */
+    private void attachImages(Motorcycle motorcycle, MotorcycleRequest request) {
+        List<String> rawImages = request.getImages();
+        if (rawImages == null || rawImages.isEmpty()) {
+            return;
+        }
+
+        for (int i = 0; i < rawImages.size(); i++) {
+            String url = rawImages.get(i);
+            if (url == null || url.isBlank()) {
+                continue;
+            }
+            MotorcycleImage image = new MotorcycleImage();
+            image.setMotorcycle(motorcycle);
+            image.setImageUrl(url.trim());
+            image.setSortOrder(i);
+            image.setIsPrimary(i == 0);
+            motorcycle.getImages().add(image);
+        }
+
+        String firstValid = rawImages.stream()
+                .filter(u -> u != null && !u.isBlank())
+                .findFirst()
+                .orElse(null);
+        if (firstValid != null && (motorcycle.getThumbnailUrl() == null || motorcycle.getThumbnailUrl().isBlank())) {
+            motorcycle.setThumbnailUrl(firstValid.trim());
+        }
+    }
+
+    /**
+     * Gắn danh sách tồn kho theo màu cho xe.
+     */
+    private void attachInventories(Motorcycle motorcycle, MotorcycleRequest request) {
+        List<MotorcycleRequest.InventoryItem> items = request.getInventories();
+        if (items == null || items.isEmpty()) {
+            return;
+        }
+
+        for (MotorcycleRequest.InventoryItem item : items) {
+            if (item.getColorName() == null || item.getColorName().isBlank()) {
+                continue;
+            }
+            Inventory inventory = new Inventory();
+            inventory.setMotorcycle(motorcycle);
+            inventory.setColorName(item.getColorName().trim());
+            inventory.setColorCode(item.getColorCode() != null ? item.getColorCode().trim() : null);
+            inventory.setQuantity(item.getQuantity() != null ? item.getQuantity() : 0);
+            motorcycle.getInventories().add(inventory);
+        }
+    }
+
     private Motorcycle findById(Long id) {
         return motorcycleRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Xe máy", "id", id));
+    }
+
+    private void syncStatusWithStock(Motorcycle motorcycle) {
+        Integer stock = motorcycle.getStock();
+        if (stock == null || stock <= 0) {
+            motorcycle.setStatus(Motorcycle.MotorcycleStatus.OUT_OF_STOCK);
+        } else {
+            motorcycle.setStatus(Motorcycle.MotorcycleStatus.AVAILABLE);
+        }
+    }
+
+    private Motorcycle.MotorcycleStatus computeStatus(Motorcycle m) {
+        Integer stock = m.getStock();
+        if (stock == null || stock <= 0) {
+            return Motorcycle.MotorcycleStatus.OUT_OF_STOCK;
+        }
+        return Motorcycle.MotorcycleStatus.AVAILABLE;
     }
 
     private MotorcycleResponse toResponse(Motorcycle m) {
@@ -145,11 +264,42 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         res.setBrandName(m.getBrand().getName());
         res.setCategoryName(m.getCategory().getName());
         res.setPrice(m.getPrice());
+        res.setCostPrice(m.getCostPrice());
         res.setEngineCc(m.getEngineCc());
         res.setThumbnailUrl(m.getThumbnailUrl());
-        res.setStatus(m.getStatus());
+        res.setStock(m.getStock());
+        res.setStatus(computeStatus(m));
         res.setFeatured(m.getFeatured());
+        String secondary = m.getImages().stream()
+                .filter(img -> img.getImageUrl() != null && !img.getImageUrl().isBlank())
+                .findFirst()
+                .map(MotorcycleImage::getImageUrl)
+                .orElse(m.getThumbnailUrl());
+        res.setImageUrl(secondary);
+        int total = 0;
+        for (Inventory inv : m.getInventories()) {
+            total += (inv.getQuantity() != null ? inv.getQuantity() : 0);
+        }
+        res.setTotalInventory(total);
         return res;
+    }
+
+    private ReviewResponse toResponse(Review r) {
+        ReviewResponse rr = new ReviewResponse();
+        rr.setId(r.getId());
+        if (r.getMotorcycle() != null) {
+            rr.setMotorcycleId(r.getMotorcycle().getId());
+            rr.setMotorcycleName(r.getMotorcycle().getName());
+        }
+        rr.setCustomerName(r.getCustomerName());
+        rr.setCustomerEmail(r.getCustomerEmail());
+        rr.setTitle(r.getTitle());
+        rr.setRating(r.getRating());
+        rr.setComment(r.getComment());
+        rr.setImageUrl(r.getImageUrl());
+        rr.setStatus(r.getStatus());
+        rr.setCreatedAt(r.getCreatedAt());
+        return rr;
     }
 
     private MotorcycleDetailResponse toDetailResponse(Motorcycle m) {
@@ -191,17 +341,24 @@ public class MotorcycleServiceImpl implements MotorcycleService {
         res.setBrand(brandRes);
         res.setCategory(catRes);
         res.setPrice(m.getPrice());
+        res.setCostPrice(m.getCostPrice());
         res.setEngineCc(m.getEngineCc());
         res.setHorsepower(m.getHorsepower());
         res.setTorque(m.getTorque());
         res.setYearModel(m.getYearModel());
         res.setThumbnailUrl(m.getThumbnailUrl());
+        res.setStock(m.getStock());
         res.setDescription(m.getDescription());
         res.setSpecifications(m.getSpecifications());
-        res.setStatus(m.getStatus());
+        res.setStatus(computeStatus(m));
         res.setFeatured(m.getFeatured());
         res.setImages(images);
         res.setInventories(inventories);
+        res.setReviews(reviewRepository
+                .findByMotorcycleIdAndStatusOrderByCreatedAtDesc(m.getId(), Review.ReviewStatus.APPROVED)
+                .stream()
+                .map(this::toResponse)
+                .toList());
         res.setCreatedAt(m.getCreatedAt());
         return res;
     }

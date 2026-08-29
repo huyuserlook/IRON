@@ -2,7 +2,12 @@ package com.example.IRON.controller;
 
 import com.example.IRON.dto.request.OrderRequest;
 import com.example.IRON.dto.response.ApiResponse;
+import com.example.IRON.entity.Order;
+import com.example.IRON.entity.Payment;
 import com.example.IRON.entity.User;
+import com.example.IRON.exception.ResourceNotFoundException;
+import com.example.IRON.repository.OrderRepository;
+import com.example.IRON.repository.PaymentRepository;
 import com.example.IRON.security.CustomUserDetailsService;
 import com.example.IRON.service.interfaces.OrderService;
 import jakarta.validation.Valid;
@@ -11,14 +16,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -26,11 +27,17 @@ public class OrderController {
 
     private final OrderService orderService;
     private final CustomUserDetailsService userDetailsService;
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
 
     public OrderController(OrderService orderService,
-                           CustomUserDetailsService userDetailsService) {
+                           CustomUserDetailsService userDetailsService,
+                           OrderRepository orderRepository,
+                           PaymentRepository paymentRepository) {
         this.orderService = orderService;
         this.userDetailsService = userDetailsService;
+        this.orderRepository = orderRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @PostMapping
@@ -65,5 +72,25 @@ public class OrderController {
         User user = userDetailsService.loadUserEntityByEmail(userDetails.getUsername());
         orderService.cancelOrder(id, user.getId());
         return ResponseEntity.ok(ApiResponse.success(null, "Hủy đơn hàng thành công"));
+    }
+
+    @GetMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getStatus(@PathVariable Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", id));
+
+        Map<String, Object> status = new LinkedHashMap<>();
+        status.put("orderId", order.getId());
+        status.put("orderCode", order.getOrderCode());
+        status.put("status", order.getStatus().name());
+
+        Payment payment = paymentRepository.findByOrderId(id).orElse(null);
+        if (payment != null) {
+            status.put("paymentStatus", payment.getStatus().name());
+            status.put("paymentMethod", payment.getPaymentMethod().name());
+            status.put("paidAt", payment.getPaidAt());
+        }
+
+        return ResponseEntity.ok(ApiResponse.success(status));
     }
 }

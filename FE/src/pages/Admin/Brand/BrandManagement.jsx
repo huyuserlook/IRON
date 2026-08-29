@@ -8,7 +8,10 @@ const BrandManagement = () => {
   const [items, setItems] = useState([]);
 
   const load = () =>
-    brandApi.getAllAdmin().then((res) => setItems(res.data || []));
+    brandApi.getAllAdmin().then((res) => {
+      const payload = res?.data ?? res;
+      setItems(payload || []);
+    });
   useEffect(() => {
     load();
   }, []);

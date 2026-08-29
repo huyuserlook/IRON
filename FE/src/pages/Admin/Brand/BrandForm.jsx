@@ -19,12 +19,13 @@ const BrandForm = () => {
   useEffect(() => {
     if (isEdit) {
       brandApi.getById(id).then((res) => {
-        const d = res.data;
+        const payload = res?.data ?? res;
+        const d = payload || {};
         setForm({
-          name: d.name,
+          name: d.name || "",
           logoUrl: d.logoUrl || "",
           description: d.description || "",
-          active: d.active,
+          active: d.active ?? true,
         });
       });
     }

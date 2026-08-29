@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import motorcycleApi from "../../../api/motorcycleApi";
 import { formatCurrency } from "../../../utils/formatCurrency";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Plus, Pencil, Star, Trash2, Search } from "lucide-react";
 import toast from "react-hot-toast";
 
 const MotorcycleManagement = () => {
@@ -15,7 +15,10 @@ const MotorcycleManagement = () => {
     setLoading(true);
     motorcycleApi
       .search({ keyword, page, size: 10 })
-      .then((res) => setData(res.data || {}))
+      .then((res) => {
+        const payload = res?.data ?? res;
+        setData(payload || { content: [], totalPages: 0 });
+      })
       .finally(() => setLoading(false));
   }, [keyword, page]);
 
@@ -37,13 +40,29 @@ const MotorcycleManagement = () => {
   const statusBadge = {
     AVAILABLE: "bg-green-100 text-green-700",
     OUT_OF_STOCK: "bg-red-100 text-red-600",
-    COMING_SOON: "bg-blue-100 text-blue-600",
   };
   const statusLabel = {
     AVAILABLE: "Còn hàng",
     OUT_OF_STOCK: "Hết hàng",
-    COMING_SOON: "Sắp ra mắt",
   };
+
+  const getStatus = (moto) => {
+    const stock = moto.stock ?? 0;
+    return stock > 0 ? "AVAILABLE" : "OUT_OF_STOCK";
+  };
+
+  const renderRatingStars = (rating) =>
+    Array.from({ length: 5 }, (_, index) => (
+      <Star
+        key={index}
+        size={14}
+        className={
+          index < Math.round(Number(rating) || 0)
+            ? "text-orange-500"
+            : "text-gray-200"
+        }
+      />
+    ));
 
   return (
     <div>
@@ -84,8 +103,11 @@ const MotorcycleManagement = () => {
             <tr>
               <th className="px-4 py-3 text-left">Xe</th>
               <th className="px-4 py-3 text-left">Hãng / Dòng</th>
-              <th className="px-4 py-3 text-right">Giá</th>
+              <th className="px-4 py-3 text-right">Giá bán</th>
+              <th className="px-4 py-3 text-right">Giá vốn</th>
+              <th className="px-4 py-3 text-center">Tồn kho</th>
               <th className="px-4 py-3 text-center">Trạng thái</th>
+              <th className="px-4 py-3 text-center">Đánh giá</th>
               <th className="px-4 py-3 text-center">Thao tác</th>
             </tr>
           </thead>
@@ -95,7 +117,7 @@ const MotorcycleManagement = () => {
                   .fill(0)
                   .map((_, i) => (
                     <tr key={i}>
-                      <td colSpan={5} className="px-4 py-4">
+                      <td colSpan={7} className="px-4 py-4">
                         <div className="h-4 bg-gray-100 rounded animate-pulse" />
                       </td>
                     </tr>
@@ -132,12 +154,38 @@ const MotorcycleManagement = () => {
                     <td className="px-4 py-3 text-right font-semibold text-orange-600">
                       {formatCurrency(moto.price)}
                     </td>
+                    <td className="px-4 py-3 text-right text-gray-500">
+                      {moto.costPrice ? formatCurrency(moto.costPrice) : "-"}
+                    </td>
+                    <td className="px-4 py-3 text-center font-semibold">
+                      {moto.stock ?? 0}
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge[moto.status] || "bg-gray-100 text-gray-600"}`}
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${statusBadge[getStatus(moto)] || "bg-gray-100 text-gray-600"}`}
                       >
-                        {statusLabel[moto.status] || moto.status}
+                        {statusLabel[getStatus(moto)] || getStatus(moto)}
                       </span>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {moto.averageRating || moto.rating ? (
+                        <div className="inline-flex items-center gap-2 justify-center">
+                          <div className="flex items-center gap-0.5">
+                            {renderRatingStars(
+                              moto.averageRating ?? moto.rating,
+                            )}
+                          </div>
+                          {moto.reviewCount ? (
+                            <span className="text-xs text-gray-500">
+                              ({moto.reviewCount})
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <span className="text-xs uppercase tracking-[0.14em] text-gray-400">
+                          Chưa
+                        </span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2">

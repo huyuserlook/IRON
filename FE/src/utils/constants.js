@@ -9,6 +9,9 @@ export const ORDER_STATUS = {
   DELIVERED: { label: "Đã giao", color: "green" },
   CANCELLED: { label: "Đã hủy", color: "red" },
   REFUNDED: { label: "Hoàn tiền", color: "gray" },
+  DEPOSITED: { label: "Đã đặt cọc", color: "orange" },
+  AWAITING_FINAL_PAYMENT: { label: "Chờ thanh toán nốt", color: "amber" },
+  COMPLETED: { label: "Hoàn thành", color: "green" },
 };
 
 export const BOOKING_STATUS = {
@@ -27,10 +30,14 @@ export const MOTORCYCLE_STATUS = {
 
 export const PAYMENT_METHOD = {
   CASH: "Tiền mặt",
-  BANK_TRANSFER: "Chuyển khoản",
-  CREDIT_CARD: "Thẻ tín dụng",
-  MOMO: "MoMo",
-  VNPAY: "VNPay",
+  PAYOS: "PayOS",
+};
+
+export const PAYMENT_STATUS = {
+  PAID: { label: "Đã thanh toán", color: "green" },
+  PENDING: { label: "Chưa thanh toán", color: "orange" },
+  FAILED: { label: "Thanh toán thất bại", color: "red" },
+  REFUNDED: { label: "Đã hoàn tiền", color: "gray" },
 };
 
 export const PAGE_SIZE = 12;

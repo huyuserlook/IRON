@@ -68,6 +68,7 @@ CREATE TABLE motorcycles (
     torque DOUBLE,
     year_model INT,
     thumbnail_url VARCHAR(255),
+    stock INT DEFAULT 0 NOT NULL,
     description TEXT,
     specifications TEXT,
     status ENUM('AVAILABLE', 'OUT_OF_STOCK', 'DISCONTINUED', 'COMING_SOON') DEFAULT 'AVAILABLE' NOT NULL,
@@ -186,3 +187,57 @@ INSERT INTO categories (name, slug, active) VALUES
 ('Naked Bike', 'naked-bike', TRUE),
 ('Adventure', 'adventure', TRUE),
 ('Cruiser', 'cruiser', TRUE);
+
+-- 14. Bảng Reviews (Đánh giá sản phẩm)
+CREATE TABLE reviews (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    motorcycle_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    order_id BIGINT,                      -- xác định đã mua hàng thật (verified purchase), có thể để NULL nếu cho phép đánh giá tự do
+    rating TINYINT NOT NULL,               -- 1 đến 5 sao
+    title VARCHAR(150),
+    comment TEXT,
+    status ENUM('PENDING', 'APPROVED', 'REJECTED') DEFAULT 'PENDING' NOT NULL,  -- admin duyệt review trước khi hiển thị
+    admin_reply TEXT,                      -- admin có thể phản hồi review
+    replied_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT chk_rating CHECK (rating BETWEEN 1 AND 5),
+    UNIQUE KEY uq_user_motorcycle_order (user_id, motorcycle_id, order_id),  -- 1 user chỉ review 1 lần / 1 xe / 1 đơn hàng
+    FOREIGN KEY (motorcycle_id) REFERENCES motorcycles(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Index hỗ trợ truy vấn thống kê rating theo xe
+CREATE INDEX idx_reviews_motorcycle ON reviews(motorcycle_id, status);
+
+-- 15. Bảng Review_Images (Ảnh đính kèm đánh giá)
+CREATE TABLE review_images (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    review_id BIGINT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    sort_order INT DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (review_id) REFERENCES reviews(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- 16. Bảng Contacts (Liên hệ khách hàng)
+CREATE TABLE contacts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT,                        -- NULL nếu khách chưa đăng nhập vẫn gửi được liên hệ
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(15),
+    subject VARCHAR(200),
+    message TEXT NOT NULL,
+    status ENUM('NEW', 'IN_PROGRESS', 'RESOLVED', 'SPAM') DEFAULT 'NEW' NOT NULL,
+    admin_reply TEXT,
+    replied_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+) ENGINE=InnoDB;
+
+-- Index hỗ trợ admin lọc theo trạng thái, sắp xếp theo thời gian
+CREATE INDEX idx_contacts_status ON contacts(status, created_at);

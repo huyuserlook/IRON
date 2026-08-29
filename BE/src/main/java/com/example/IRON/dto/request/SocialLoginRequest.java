@@ -10,7 +10,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class SocialLoginRequest {
-    @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không hợp lệ")
     private String email;
 
@@ -24,4 +23,6 @@ public class SocialLoginRequest {
 
     @NotNull(message = "Provider không được để trống")
     private AuthProvider provider;
+
+    private String accessToken;
 }
